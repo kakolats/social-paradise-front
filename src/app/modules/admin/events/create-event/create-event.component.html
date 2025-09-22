@@ -1,0 +1,105 @@
+<section class="mx-auto my-auto w-2/3 px-6 py-8">
+    <div class="rounded-2xl border border-slate-200 bg-white/80 p-8 shadow-lg backdrop-blur">
+        <h2 class="mb-6 text-3xl font-bold tracking-tight text-slate-900">Créer un événement</h2>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8">
+            <!-- Event infos -->
+            <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-base font-medium text-slate-700">Nom de l'événement</label>
+                    <input type="text" formControlName="name"
+                           class="w-full rounded-xl border border-slate-300 px-4 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                    <p *ngIf="invalid('name')" class="mt-1 text-sm text-red-600">Nom requis (3+ caractères).</p>
+                </div>
+                <div>
+                    <label class="mb-1 block text-base font-medium text-slate-700">Date de l'événement</label>
+                    <input type="date" formControlName="date"
+                           class="w-full rounded-xl border border-slate-300 px-4 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                    <p *ngIf="invalid('date')" class="mt-1 text-sm text-red-600">Date requise.</p>
+                </div>
+            </div>
+
+            <!-- Prices -->
+            <div>
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-slate-900">Plages de prix</h3>
+                    <div class="flex gap-2">
+                        <button type="button" (click)="addPrice()"
+                                class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">+ Ajouter un prix</button>
+                    </div>
+                </div>
+
+                <div *ngIf="prices().length === 0" class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+                    Aucun prix ajouté
+                </div>
+
+                <div *ngIf="prices().length > 0" class="overflow-hidden rounded-2xl border border-slate-200">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Nom</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Montant (XOF)</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Début</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Fin</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                        <tr *ngFor="let p of prices().controls; let i = index; trackBy: trackByIndex" [formGroup]="p">
+                            <td class="px-4 py-3">
+                                <input type="text" formControlName="name"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <p *ngIf="p.controls.name.touched && p.controls.name.invalid" class="mt-1 text-xs text-red-600">
+                                    Nom requis
+                                </p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <input type="number" formControlName="amount" min="0"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <p *ngIf="p.controls.amount.touched && p.controls.amount.invalid" class="mt-1 text-xs text-red-600">
+                                    Montant requis (>= 0)
+                                </p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <input type="date" formControlName="startDate"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                            </td>
+                            <td class="px-4 py-3">
+                                <input type="date" formControlName="endDate"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <p *ngIf="p.touched && !rangeValid(p)" class="mt-1 text-xs text-red-600">Fin doit être ≥ début</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <button type="button" (click)="removePrice(i)"
+                                        class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3">
+                <button type="button" (click)="reset()"
+                        class="rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    Réinitialiser
+                </button>
+                <button type="submit" [disabled]="submitting || form.invalid || !allRangesValid()"
+                        class="rounded-xl bg-slate-900 px-6 py-2 text-sm font-semibold text-white shadow hover:opacity-90 disabled:opacity-50">
+                    Créer
+                </button>
+            </div>
+
+            <!-- Feedback -->
+            <div *ngIf="createdMessage()" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-800">
+                ✅ {{ createdMessage() }}
+            </div>
+            <div *ngIf="errorMessage()" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800">
+                ❌ {{ errorMessage() }}
+            </div>
+        </form>
+    </div>
+</section>
