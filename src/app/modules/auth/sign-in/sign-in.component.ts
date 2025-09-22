@@ -16,7 +16,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
-import { AuthService } from 'app/core/auth/auth.service';
+import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { NgIf } from '@angular/common';
 
 @Component({
     selector: 'auth-sign-in',
@@ -35,6 +36,7 @@ import { AuthService } from 'app/core/auth/auth.service';
         MatIconModule,
         MatCheckboxModule,
         MatProgressSpinnerModule,
+        NgIf,
     ],
 })
 export class AuthSignInComponent implements OnInit {
@@ -67,11 +69,8 @@ export class AuthSignInComponent implements OnInit {
     ngOnInit(): void {
         // Create the form
         this.signInForm = this._formBuilder.group({
-            email: [
-                'hughes.brian@company.com',
-                [Validators.required, Validators.email],
-            ],
-            password: ['admin', Validators.required],
+            email: ['', [Validators.required, Validators.email]],
+            password: ['', Validators.required],
             rememberMe: [''],
         });
     }
@@ -95,8 +94,12 @@ export class AuthSignInComponent implements OnInit {
         // Hide the alert
         this.showAlert = false;
 
+        let credentials = {
+            email: this.signInForm.value.email,
+            password: this.signInForm.value.password,
+        };
         // Sign in
-        this._authService.signIn(this.signInForm.value).subscribe(
+        this._authService.login(credentials).subscribe(
             () => {
                 // Set the redirect url.
                 // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user

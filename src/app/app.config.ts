@@ -5,7 +5,7 @@ import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
     PreloadAllModules,
-    provideRouter,
+    provideRouter, Router,
     withInMemoryScrolling,
     withPreloading,
 } from '@angular/router';
@@ -17,6 +17,8 @@ import { provideIcons } from 'app/core/icons/icons.provider';
 import { mockApiServices } from 'app/mock-api';
 import { firstValueFrom } from 'rxjs';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
+import { AuthService } from '../shared/services/auth/auth.service';
+import {AuthGuard} from "../shared/guards/auth/auth.guard";
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -27,6 +29,11 @@ export const appConfig: ApplicationConfig = {
             withPreloading(PreloadAllModules),
             withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })
         ),
+        {
+            provide: AuthGuard,
+            useFactory: (authService: AuthService, router: Router) => AuthGuard(authService, router),
+            deps: [AuthService, Router]
+        },
 
         // Material Date Adapter
         {

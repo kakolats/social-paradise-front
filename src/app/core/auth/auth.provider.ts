@@ -5,12 +5,12 @@ import {
     Provider,
     inject,
 } from '@angular/core';
-import { authInterceptor } from 'app/core/auth/auth.interceptor';
-import { AuthService } from 'app/core/auth/auth.service';
+import { AuthService } from '../../../shared/services/auth/auth.service';
+import { jwtInterceptor} from '../../../shared/interceptors/jwt/jwt.interceptor';
 
 export const provideAuth = (): Array<Provider | EnvironmentProviders> => {
     return [
-        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClient(withInterceptors([jwtInterceptor])),
         {
             provide: ENVIRONMENT_INITIALIZER,
             useValue: () => inject(AuthService),
