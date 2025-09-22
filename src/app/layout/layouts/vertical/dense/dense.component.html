@@ -14,7 +14,7 @@
     <ng-container fuseVerticalNavigationContentHeader>
         <!-- Logo -->
         <div class="flex h-20 items-center justify-center">
-            <img class="w-8" src="images/logo/logo.svg" alt="Logo image" />
+            <img class="w-64" src="images/logo/logo.svg" alt="Logo image" />
         </div>
     </ng-container>
 </fuse-vertical-navigation>
@@ -46,13 +46,13 @@
         </div>
         <!-- Components -->
         <div class="ml-auto flex items-center space-x-0.5 pl-2 sm:space-x-2">
-            <languages></languages>
+<!--            <languages></languages>-->
             <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
-            <search [appearance]="'bar'"></search>
-            <shortcuts></shortcuts>
-            <messages></messages>
-            <notifications></notifications>
-            <button
+<!--            <search [appearance]="'bar'"></search>-->
+<!--            <shortcuts></shortcuts>-->
+<!--            <messages></messages>-->
+<!--            <notifications></notifications>-->
+            <!--<button
                 class="lg:hidden"
                 mat-icon-button
                 (click)="quickChat.toggle()"
@@ -60,7 +60,7 @@
                 <mat-icon
                     [svgIcon]="'heroicons_outline:chat-bubble-left-right'"
                 ></mat-icon>
-            </button>
+            </button>-->
             <user></user>
         </div>
     </div>
@@ -79,10 +79,10 @@
         class="bg-card relative z-49 flex h-14 w-full flex-0 items-center justify-start border-t px-4 dark:bg-transparent md:px-6 print:hidden"
     >
         <span class="text-secondary font-medium"
-            >Fuse &copy; {{ currentYear }}</span
+            >Social paradise &copy; {{ currentYear }}</span
         >
     </div>
 </div>
 
 <!-- Quick chat -->
-<quick-chat #quickChat="quickChat"></quick-chat>
+<!--<quick-chat #quickChat="quickChat"></quick-chat>-->
