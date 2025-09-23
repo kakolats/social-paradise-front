@@ -82,7 +82,7 @@ export class EventService {
     }
 
     getBySlug(slug: string): Observable<Event> {
-        return this.http.get<ApiResponse<any>>(`${this.base}/slug/${slug}`).pipe(
+        return this.http.get<ApiResponse<any>>(`${this.base}/${slug}`).pipe(
             map(res => this.parseEvent(res.data))
         );
     }

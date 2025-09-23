@@ -62,6 +62,7 @@ export const appRoutes: Route[] = [
         },
         children: [
             {path: 'home', loadChildren: () => import('app/modules/landing/home/home.routes')},
+            {path: 'public-event',loadChildren: () =>import('app/modules/landing/public-event/public-event.routes')},
         ]
     },
 

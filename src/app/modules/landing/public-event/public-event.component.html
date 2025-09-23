@@ -1,0 +1,195 @@
+<section class="relative isolate w-full mx-auto my-auto py-6">
+    <!-- Hero -->
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow">
+            <div class="grid gap-0 md:grid-cols-2">
+                <div class="relative h-64 w-full md:h-full">
+                    <img
+                        [ngSrc]="placeholder"
+                        width="1600" height="900" alt="cover"
+                        class="h-full w-full object-cover"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0"></div>
+                </div>
+                <div class="p-6 md:p-10 flex flex-col justify-center">
+                    <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+                        {{ event()?.name || event()?.name || 'Évènement' }}
+                    </h1>
+                    <p class="mt-2 text-slate-600">
+                        {{ (event()?.date) | date:'fullDate' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prices -->
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <h2 class="mt-10 mb-4 text-xl font-semibold text-slate-900">Tarifs</h2>
+
+        <div *ngIf="!event()?.prices?.length" class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+            Aucun tarif défini pour cet évènement.
+        </div>
+
+        <div *ngIf="event()?.prices?.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+                *ngFor="let p of event()!.prices!"
+                class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                [class.ring-2]="isActivePrice(p)"
+                [class.ring-slate-900]="isActivePrice(p)"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-lg font-semibold text-slate-900">{{ p.name || 'Tarif' }}</h3>
+                    <span class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-sm font-semibold text-white">
+                {{ p.amount }} FCFA
+              </span>
+                </div>
+                <p class="mt-2 text-sm text-slate-600">
+                    Du {{ p.startDate | date:'mediumDate' }} au {{ p.endDate | date:'mediumDate' }}
+                </p>
+                <p *ngIf="isActivePrice(p)" class="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                    Tarif en cours
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demand form -->
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="text-xl font-semibold text-slate-900">Demande de participation</h2>
+            <p class="mt-1 text-sm text-slate-500">Inscrivez-vous seul(e) ou ajoutez une liste de participants.</p>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 space-y-6">
+                <!-- Mode -->
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Type d'inscription</label>
+                        <select formControlName="mode" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                            <option value="single">Seul(e)</option>
+                            <option value="group">Groupe</option>
+                        </select>
+                    </div>
+                    <div *ngIf="activePrice() as tier" class="flex items-end">
+                        <div class="text-sm text-slate-600">
+                            Prix unitaire aujourd'hui :
+                            <span class="font-semibold text-slate-900">
+                    {{ tier.amount }} FCFA
+                  </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SINGLE -->
+                <div *ngIf="form.controls['mode'].value === 'single'" class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Prénom</label>
+                        <input type="text" formControlName="s_firstName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                        <p *ngIf="invalid('s_firstName')" class="mt-1 text-xs text-rose-600">Requis</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Nom</label>
+                        <input type="text" formControlName="s_lastName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                        <p *ngIf="invalid('s_lastName')" class="mt-1 text-xs text-rose-600">Requis</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                        <input type="email" formControlName="s_email" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                        <p *ngIf="invalid('s_email')" class="mt-1 text-xs text-rose-600">Email valide requis</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
+                        <input type="tel" formControlName="s_phoneNumber" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                        <p *ngIf="invalid('s_phoneNumber')" class="mt-1 text-xs text-rose-600">Requis</p>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Âge</label>
+                        <input type="number" min="0" formControlName="s_age" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                        <p *ngIf="invalid('s_age')" class="mt-1 text-xs text-rose-600">Requis</p>
+                    </div>
+                </div>
+
+                <!-- GROUP -->
+                <div *ngIf="form.controls['mode'].value === 'group'">
+                    <div class="mb-3 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-slate-900">Participants</h3>
+                        <div class="flex gap-2">
+                            <button type="button" (click)="addParticipant()" class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:opacity-90">+ Ajouter</button>
+                            <button type="button" (click)="addMany(2)" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">+2</button>
+                        </div>
+                    </div>
+
+                    <div formArrayName="participants" class="space-y-3">
+                        <div *ngFor="let g of participants().controls; let i = index" [formGroupName]="i"
+                             class="rounded-2xl border border-slate-200 p-4">
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Prénom</label>
+                                    <input type="text" formControlName="firstName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Nom</label>
+                                    <input type="text" formControlName="lastName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                                    <input type="email" formControlName="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
+                                    <input type="tel" formControlName="phoneNumber" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Âge</label>
+                                    <input type="number" min="0" formControlName="age" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                </div>
+                                <div class="flex items-end justify-between gap-2">
+                                    <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                                        <input type="radio" name="mainGuest" [checked]="g.controls.isMainGuest.value === true" (change)="markAsMainGuest(i)" class="h-4 w-4 border-slate-300 text-slate-900 focus:ring-slate-900/20" />
+                                        Invité principal
+                                    </label>
+                                    <button type="button" (click)="removeParticipant(i)" class="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:opacity-90">Supprimer</button>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-xs text-rose-600" *ngIf="g.invalid && g.touched">Tous les champs sont requis et l'email doit être valide.</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-2 text-xs text-rose-600" *ngIf="!hasExactlyOneMainGuest() && participants().length > 0">
+                        Il doit y avoir exactement <strong>un</strong> invité principal.
+                    </p>
+                </div>
+
+                <!-- Footer -->
+                <div class="flex items-center justify-between gap-4">
+                    <div class="text-sm text-slate-600">
+                        Nombre de personnes :
+                        <span class="font-semibold text-slate-900">{{ peopleCount() }}</span>
+                        <ng-container *ngIf="activePrice() as tier">
+                            · Total indicatif :
+                            <span class="font-semibold text-slate-900">
+                    {{ tier.amount * peopleCount() }} FCFA
+                  </span>
+                        </ng-container>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" (click)="resetForm()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                            Réinitialiser
+                        </button>
+                        <button type="submit" [disabled]="submitDisabled()" class="rounded-xl bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50">
+                            Soumettre la demande
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- feedback -->
+            <div *ngIf="successMsg()" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-800">
+                ✅ {{ successMsg() }}
+            </div>
+            <div *ngIf="errorMsg()" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800">
+                ❌ {{ errorMsg() }}
+            </div>
+        </div>
+    </div>
+</section>
