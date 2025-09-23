@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core'
 import { EventService } from '../../../../../shared/services/event/event.service';
 import { Event } from '../../../../../shared/models/event';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-event-list',
@@ -12,6 +13,7 @@ import { Event } from '../../../../../shared/models/event';
 })
 export class EventListComponent {
     private eventService = inject(EventService);
+    private router = inject(Router);
 
     events: Event[] = [];
     loading = false;
@@ -41,8 +43,7 @@ export class EventListComponent {
     }
 
     onDetails(event: Event) {
-        console.log('Détails de l’événement:', event);
-        // ici tu pourras router vers une page détail: this.router.navigate(['/events', event.id])
+        this.router.navigate(['/events/event-detail', event.slug])
     }
 
     onEdit(event: Event) {

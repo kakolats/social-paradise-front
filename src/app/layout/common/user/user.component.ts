@@ -16,7 +16,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { User } from 'app/core/user/user.types';
 import { Subject, takeUntil } from 'rxjs';
-import { UserService } from '../../../../shared/services/user/user.service';
+import { UserService } from 'shared/services/user/user.service';
 
 @Component({
     selector: 'user',
@@ -61,11 +61,12 @@ export class UserComponent implements OnInit, OnDestroy {
      */
     ngOnInit(): void {
         // Subscribe to user changes
+        console.log("User component",this._userService.user)
         this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user: User) => {
                 this.user = user;
-
+                console.log("User component",user)
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });

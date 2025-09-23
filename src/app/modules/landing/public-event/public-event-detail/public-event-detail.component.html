@@ -1,0 +1,171 @@
+<section class="w-full mx-auto my-auto py-6">
+    <!-- Header -->
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+        <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Détails de la demande</h1>
+                    <p class="text-slate-600" *ngIf="demand() as d">
+                        Créée le {{ d.date | date:'fullDate' }}
+                    </p>
+                    <p class="text-xs text-slate-400" *ngIf="demand()?.slug">Slug : {{ demand()?.slug }}</p>
+                </div>
+
+                <!-- Statut mis en avant -->
+                <div class="flex flex-col items-start sm:items-end gap-2">
+              <span
+                  class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold"
+                  [ngClass]="statusClass(demand()?.demandStatus)"
+              >
+                {{ demand()?.demandStatus }}
+              </span>
+                    <span *ngIf="demand()?.type"
+                          class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                {{ demand()?.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
+              </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event recap & pricing -->
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-sm font-semibold text-slate-900">Évènement</div>
+                <ng-container *ngIf="demand()?.event as ev">
+                    <div class="mt-1 text-slate-700">{{ ev.name }}</div>
+                    <div class="text-sm text-slate-600">{{ ev.date | date:'fullDate' }}</div>
+                    <div class="text-xs text-slate-400">Slug: {{ ev.slug }}</div>
+                </ng-container>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-sm font-semibold text-slate-900">Tarif & Montant</div>
+                <div class="mt-2 text-sm text-slate-700" *ngIf="activePrice() as ap; else noPrice">
+                    <div class="flex items-center justify-between">
+                        <span>Tarif actif (par personne)</span>
+                        <span class="font-semibold text-slate-900">{{ ap.amount }} FCFA</span>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        Valable du {{ ap.startDate | date:'mediumDate' }} au {{ ap.endDate | date:'mediumDate' }}
+                    </div>
+                    <div class="mt-3 flex items-center justify-between">
+                        <span>Participants</span>
+                        <span class="font-semibold text-slate-900">{{ peopleCount() }}</span>
+                    </div>
+                    <div class="mt-1 flex items-center justify-between">
+                        <span>Total indicatif</span>
+                        <span class="font-semibold text-slate-900">{{ totalAmount() }} FCFA</span>
+                    </div>
+                </div>
+                <ng-template #noPrice>
+                    <div class="mt-2 text-sm text-rose-700">
+                        Aucun tarif actif à cette date.
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guests -->
+    <div class="mx-auto max-w-4xl px-4 sm:px-6" *ngIf="demand()?.guests?.length">
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="mb-3 text-sm font-semibold text-slate-900">Participants ({{ peopleCount() }})</div>
+            <div class="grid gap-3 md:grid-cols-2">
+                <div *ngFor="let g of demand()!.guests!"
+                     class="rounded-xl border border-slate-200 p-3"
+                     [class:ring-2]="g.isMainGuest" [class:ring-emerald-500]="g.isMainGuest">
+                    <div class="flex items-start justify-between">
+                        <div class="font-medium text-slate-900">{{ g.firstName }} {{ g.lastName }}</div>
+                        <span *ngIf="g.isMainGuest" class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Principal</span>
+                    </div>
+                    <div class="mt-1 text-xs text-slate-600">
+                        <div>Email : {{ g.email }}</div>
+                        <div>Téléphone : {{ g.phoneNumber }}</div>
+                        <div>Âge : {{ g.age }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paiement en ligne : infos -->
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="mb-2 text-sm font-semibold text-slate-900">Moyens de paiement en ligne</div>
+            <ul class="list-disc space-y-1 pl-6 text-sm text-slate-700">
+                <li><strong>Wave</strong> — Paiement via mobile, numéro associé requis.</li>
+                <li><strong>Orange Money</strong> — Paiement via mobile, numéro associé requis.</li>
+            </ul>
+            <p class="mt-2 text-xs text-slate-500">
+                Après notification, l’équipe vérifiera votre paiement. Vous recevrez un email lorsque la demande passera à l’état <strong>PAYEE</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Formulaire de notification de paiement -->
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-semibold text-slate-900">Notifier un paiement</h2>
+
+            <!-- Si statut déjà PAYEE, on bloque le formulaire -->
+            <div *ngIf="isPaid()" class="mt-3 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-800">
+                ✅ Cette demande est déjà marquée comme <strong>PAYEE</strong>. Aucune action n’est requise.
+            </div>
+
+            <form *ngIf="!isPaid()" [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-4 grid gap-4 md:grid-cols-3">
+                <div class="md:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Montant</label>
+                    <input type="number" formControlName="amount" readonly
+                           class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-slate-900 shadow-sm"/>
+                    <p class="mt-1 text-xs text-slate-500">Calculé automatiquement.</p>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
+                    <input type="tel" formControlName="phoneNumber" placeholder="ex: 77 00 00 00"
+                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"/>
+                    <p *ngIf="form.controls.phoneNumber.touched && form.controls.phoneNumber.invalid"
+                       class="mt-1 text-xs text-rose-600">Téléphone requis.</p>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Canal de paiement</label>
+                    <select formControlName="paymentCanal"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                        <option value="WAVE">Wave</option>
+                        <option value="ORANGE_MONEY">Orange Money</option>
+                    </select>
+                    <p *ngIf="form.controls.paymentCanal.touched && form.controls.paymentCanal.invalid"
+                       class="mt-1 text-xs text-rose-600">Choix requis.</p>
+                </div>
+
+                <div class="md:col-span-3 flex items-center justify-end gap-2">
+                    <button type="button" (click)="resetForm()"
+                            class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                        Réinitialiser
+                    </button>
+                    <button type="submit" [disabled]="submitting() || form.invalid || !canNotify()"
+                            class="rounded-xl bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50">
+                        Notifier le paiement
+                    </button>
+                </div>
+            </form>
+
+            <!-- Feedback -->
+            <div *ngIf="successMsg()" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-800">
+                ✅ {{ successMsg() }}
+            </div>
+            <div *ngIf="errorMsg()" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800">
+                ❌ {{ errorMsg() }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading / Error globaux -->
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+        <div *ngIf="loading()" class="mt-6 text-center text-slate-500">Chargement…</div>
+        <div *ngIf="globalError()" class="mt-6 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ globalError() }}</div>
+    </div>
+</section>

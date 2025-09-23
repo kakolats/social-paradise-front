@@ -1,0 +1,208 @@
+<section class="w-full mx-6 py-6">
+    <!-- Header / Hero -->
+    <div class="mx-auto px-4 sm:px-6">
+        <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">{{ event()?.name || 'Évènement' }}</h1>
+                    <p class="text-slate-600">{{ event()?.date | date:'fullDate' }}</p>
+                    <p class="text-xs text-slate-400" *ngIf="event()?.slug">Slug: {{ event()?.slug }}</p>
+                </div>
+                <div class="text-sm text-slate-600">
+                    Total demandes (filtrées) :
+                    <span class="font-semibold text-slate-900">{{ filteredCount() }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mx-auto px-4 sm:px-6">
+        <div class="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5 items-end">
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Statut</label>
+                <select [ngModel]="filterStatus()" (ngModelChange)="setFilterStatus($event)"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                    <option [ngValue]="null">Tous</option>
+                    <option *ngFor="let s of allStatuses" [ngValue]="s">{{ s }}</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Type</label>
+                <select [ngModel]="filterType()" (ngModelChange)="setFilterType($event)"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                    <option [ngValue]="null">Tous</option>
+                    <option *ngFor="let t of allTypes" [ngValue]="t">{{ t }}</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-600">Taille de page</label>
+                <select [ngModel]="pageSize()" (ngModelChange)="changePageSize($event)"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                    <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-2 lg:col-span-2 flex items-end justify-end gap-2">
+                <button (click)="reload()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    Recharger
+                </button>
+                <button (click)="resetFilters()" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90">
+                    Réinitialiser les filtres
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demands list -->
+    <div class="mx-auto px-4 sm:px-6">
+        <!-- Empty / Loading / Error -->
+        <div *ngIf="loading()" class="mt-6 text-center text-slate-500">Chargement…</div>
+        <div *ngIf="error()" class="mt-6 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ error() }}</div>
+        <div *ngIf="!loading() && !error() && pagedDemands().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+            Aucune demande pour ces filtres.
+        </div>
+
+        <!-- Cards -->
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" *ngIf="!loading() && pagedDemands().length > 0">
+            <div *ngFor="let d of pagedDemands(); trackBy: trackBySlug" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-2">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                      [ngClass]="d.type === DemandType.GROUP ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'">
+                  <span class="text-lg">{{ d.type === DemandType.GROUP ? '👥' : '👤' }}</span>
+                </span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-900">
+                                {{ d.mainGuest.firstName }} {{ d.mainGuest.lastName }}
+                            </div>
+                            <div class="text-xs text-slate-500">{{ d.mainGuest.email }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Status select (VALIDEE / REFUSEE / PAYEE) -->
+                    <div class="text-right">
+                        <label class="block text-xs text-slate-500 mb-1">Statut</label>
+                        <select [ngModel]="d.status" (ngModelChange)="onChangeStatus(d, $event)"
+                                class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                            <option *ngFor="let s of updatableStatuses" [ngValue]="s">{{ s }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-3 text-xs text-slate-500">
+                    Créée le <span class="font-medium text-slate-800">{{ d.createdAt | date:'medium' }}</span> <br>
+                    Participants : <span class="font-medium text-slate-800">{{ d.numberOfGuests }}</span> <br>
+<!--                    · Slug : <span class="font-mono">{{ d.slug }}</span>-->
+                </div>
+
+                <div class="mt-4 flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                {{ d.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
+              </span>
+                    <button (click)="openDemandModal(d.slug)"
+                            class="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                        Voir détails
+                    </button>
+                </div>
+
+                <div *ngIf="savingSlug() === d.slug" class="mt-3 text-xs text-slate-500">Mise à jour du statut…</div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!loading() && totalPages() > 1" class="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="text-sm text-slate-600">
+                Page <span class="font-semibold text-slate-900">{{ page() }}</span> / {{ totalPages() }}
+                · {{ filteredCount() }} demande(s)
+            </div>
+            <div class="flex items-center gap-2">
+                <button (click)="prevPage()" [disabled]="page() === 1"
+                        class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm disabled:opacity-50">
+                    Précédent
+                </button>
+
+                <ng-container *ngFor="let p of pageNumbers()">
+                    <button (click)="goToPage(p)"
+                            [class.bg-slate-900]="p === page()" [class.text-white]="p === page()"
+                            class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                        {{ p }}
+                    </button>
+                </ng-container>
+
+                <button (click)="nextPage()" [disabled]="page() === totalPages()"
+                        class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm disabled:opacity-50">
+                    Suivant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL (inchangée fonctionnellement) -->
+    <div *ngIf="isModalOpen()" class="fixed inset-0 z-50">
+        <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
+        <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-3xl items-center justify-center px-4" role="dialog" aria-modal="true">
+            <div class="max-h-[90vh] w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+                    <h3 class="text-lg font-semibold text-slate-900">Détails de la demande</h3>
+                    <button (click)="closeModal()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm hover:bg-slate-50">Fermer</button>
+                </div>
+                <div class="max-h-[70vh] overflow-y-auto p-5">
+                    <div *ngIf="modalLoading()" class="py-10 text-center text-slate-500">Chargement des détails…</div>
+                    <div *ngIf="modalError()" class="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ modalError() }}</div>
+
+                    <ng-container *ngIf="!modalLoading() && selectedDemand() as dd">
+                        <div class="mb-4 grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <div class="text-xs text-slate-500">Slug</div>
+                                <div class="font-mono text-sm text-slate-800">{{ dd.slug }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500">Créée le</div>
+                                <div class="text-sm text-slate-800">{{ dd.date | date:'medium' }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500">Statut</div>
+                                <div class="text-sm font-medium text-slate-900">{{ dd.demandStatus }}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500">Type</div>
+                                <div class="text-sm font-medium text-slate-900">{{ dd.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 text-sm font-semibold text-slate-900">Participants ({{ dd.guests?.length || 0 }})</div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div *ngFor="let g of dd.guests" class="rounded-xl border border-slate-200 p-3" [class:ring-2]="g.isMainGuest" [class:ring-emerald-500]="g.isMainGuest">
+                                <div class="flex items-start justify-between">
+                                    <div class="font-medium text-slate-900">{{ g.firstName }} {{ g.lastName }}</div>
+                                    <span *ngIf="g.isMainGuest" class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Principal</span>
+                                </div>
+                                <div class="mt-1 text-xs text-slate-600">
+                                    <div>Email : {{ g.email }}</div>
+                                    <div>Téléphone : {{ g.phoneNumber }}</div>
+                                    <div>Âge : {{ g.age }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="dd.event" class="mt-4 rounded-xl border border-slate-200 p-3">
+                            <div class="text-sm font-semibold text-slate-900">Évènement</div>
+                            <div class="mt-1 text-sm text-slate-700">
+                                {{ dd.event.name }} — {{ dd.event.date | date:'mediumDate' }}
+                            </div>
+                            <div class="text-xs text-slate-500">Slug: {{ dd.event.slug }}</div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+                    <button (click)="closeModal()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
