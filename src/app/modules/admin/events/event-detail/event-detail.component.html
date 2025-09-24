@@ -206,3 +206,38 @@
         </div>
     </div>
 </section>
+
+<div *ngIf="confirmOpen()" class="fixed inset-0 z-[60]">
+    <!-- overlay -->
+    <div class="absolute inset-0 bg-black/40" (click)="cancelStatusChange()"></div>
+
+    <!-- dialog -->
+    <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-4" role="dialog" aria-modal="true">
+        <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div class="border-b border-slate-200 px-5 py-3">
+                <h3 class="text-base font-semibold text-slate-900">Confirmer le changement de statut</h3>
+            </div>
+            <div class="px-5 py-4">
+                <p class="text-sm text-slate-700">
+                    Voulez-vous vraiment passer cette demande de
+                    <span class="font-semibold">{{ pendingChange()?.prev }}</span>
+                    à
+                    <span class="font-semibold">{{ pendingChange()?.next }}</span> ?
+                </p>
+                <p class="mt-2 text-xs text-slate-500">
+                    Cette action notifiera le serveur et pourra impacter la suite du processus (emails, accès, etc.).
+                </p>
+            </div>
+            <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+                <button (click)="cancelStatusChange()"
+                        class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    Annuler
+                </button>
+                <button (click)="confirmStatusChange()"
+                        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+                    Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

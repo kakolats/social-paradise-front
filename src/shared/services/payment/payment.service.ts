@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { PaymentCanal } from '../../models/payment';
 
 const API_BASE_URL = environment.apiUrl
 
@@ -15,7 +16,7 @@ export interface PaymentNotifyPayload {
     demandSlug: string;
     amount: number;
     phoneNumber: string;
-    paymentCanal: 'WAVE' | 'ORANGE_MONEY';
+    paymentCanal: PaymentCanal;
 }
 
 @Injectable({
@@ -26,7 +27,7 @@ export class PaymentService {
 
     notify(payload: PaymentNotifyPayload): Observable<void> {
         // ← ajuste l'endpoint si nécessaire
-        return this.http.post<ApiResponse<unknown>>(`${API_BASE_URL}/payment/notify`, payload)
+        return this.http.post<ApiResponse<unknown>>(`${API_BASE_URL}/payment`, payload)
             .pipe(map(() => void 0));
     }
 }

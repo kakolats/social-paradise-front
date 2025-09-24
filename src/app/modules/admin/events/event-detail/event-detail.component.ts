@@ -7,6 +7,8 @@ import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { FormsModule } from '@angular/forms';
 
+type PendingStatusChange = { slug: string; prev: DemandStatus; next: DemandStatus } | null;
+
 @Component({
     selector: 'app-event-detail',
     standalone: true,
@@ -56,6 +58,9 @@ export class EventDetailComponent implements OnInit {
     allTypes: DemandType[] = [DemandType.UNIQUE, DemandType.GROUP];
 
     private eventSlug: string | null = null;
+
+    confirmOpen = signal<boolean>(false);
+    pendingChange = signal<PendingStatusChange>(null);
 
     ngOnInit(): void {
         this.eventSlug = this.route.snapshot.paramMap.get('slug');
@@ -133,19 +138,37 @@ export class EventDetailComponent implements OnInit {
         if (d.status === newStatus) return;
         const allowed = new Set([DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.PAYEE]);
         if (!allowed.has(newStatus)) return;
+        this.pendingChange.set({ slug: d.slug, prev: d.status, next: newStatus });
+        this.confirmOpen.set(true);
+    }
 
-        this.savingSlug.set(d.slug);
-        const prev = d.status;
+    // ⬇️ Annuler = fermer la modale et vider l'intention
+    cancelStatusChange() {
+        this.confirmOpen.set(false);
+        this.pendingChange.set(null);
+    }
+
+    // ⬇️ Confirmer = appliquer UI optimiste + appel API, sinon revert
+    confirmStatusChange() {
+        const pc = this.pendingChange();
+        if (!pc) return;
+
+        this.confirmOpen.set(false);
+        this.savingSlug.set(pc.slug);
 
         // UI optimiste
-        this.demandsRaw.update(arr => arr.map(x => x.slug === d.slug ? { ...x, status: newStatus } : x));
+        this.demandsRaw.update(arr => arr.map(x => x.slug === pc.slug ? { ...x, status: pc.next } : x));
 
-        this.demandService.updateStatus(d.slug, newStatus).subscribe({
-            next: () => this.savingSlug.set(null),
-            error: err => {
-                // revert
-                this.demandsRaw.update(arr => arr.map(x => x.slug === d.slug ? { ...x, status: prev } : x));
+        this.demandService.updateStatus(pc.slug, pc.next).subscribe({
+            next: () => {
                 this.savingSlug.set(null);
+                this.pendingChange.set(null);
+            },
+            error: err => {
+                // revert si échec
+                this.demandsRaw.update(arr => arr.map(x => x.slug === pc.slug ? { ...x, status: pc.prev } : x));
+                this.savingSlug.set(null);
+                this.pendingChange.set(null);
                 this.error.set(err?.error?.message ?? 'Erreur lors de la mise à jour du statut.');
             }
         });

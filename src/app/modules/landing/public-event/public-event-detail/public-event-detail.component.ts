@@ -1,13 +1,15 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { DemandService } from 'shared/services/demand/demand.service';
 import { PaymentService } from 'shared/services/payment/payment.service'; // service minimal ci-dessous
 import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
-import {  Price as FrontPrice } from 'shared/models/price';
+import { Price as FrontPrice } from 'shared/models/price';
+import { EventService } from '../../../../../shared/services/event/event.service';
+import { PaymentCanal } from '../../../../../shared/models/payment';
 
 @Component({
   selector: 'app-public-event-detail',
@@ -21,6 +23,7 @@ export class PublicEventDetailComponent implements OnInit {
     private demandService = inject(DemandService);
     private paymentService = inject(PaymentService);
     private fb = new FormBuilder();
+    private eventService = inject(EventService); // Juste pour le type Event
 
     // state
     loading = signal(false);
@@ -30,6 +33,7 @@ export class PublicEventDetailComponent implements OnInit {
     errorMsg = signal<string | null>(null);
 
     demand = signal<Demand | null>(null);
+    event = signal<FrontEvent>(null);
 
     DemandStatus = DemandStatus;
     DemandType = DemandType;
@@ -56,15 +60,23 @@ export class PublicEventDetailComponent implements OnInit {
             next: (d) => {
                 this.demand.set(d);
                 // Set montant auto
-                const amt = this.totalAmount();
-                this.form.controls.amount.setValue(amt);
-                this.loading.set(false);
+                this.eventService.getBySlug(d.event.slug).subscribe({
+                    next: (e) => {
+                        this.event.set(e);
+                        const amt = this.totalAmount();
+                        this.form.controls.amount.setValue(amt);
+                        this.loading.set(false);
+                    }
+                })
             },
             error: (err) => {
                 this.globalError.set(err?.error?.message ?? 'Impossible de charger la demande.');
                 this.loading.set(false);
             }
         });
+        this.eventService.getBySlug(slug).subscribe({
+
+        })
     }
 
     // --- UI helpers
@@ -83,6 +95,10 @@ export class PublicEventDetailComponent implements OnInit {
         return this.demand()?.demandStatus === DemandStatus.PAYEE;
     }
 
+    isNotified() {
+        return this.demand()?.demandStatus === DemandStatus.PAIEMENT_NOTIFIE;
+    }
+
     peopleCount = computed(() => this.demand()?.guests?.length ?? 0);
 
     private dateOnly(d: Date | string) {
@@ -91,7 +107,8 @@ export class PublicEventDetailComponent implements OnInit {
     }
 
     activePrice = computed<FrontPrice | null>(() => {
-        const ev = this.demand()?.event as FrontEvent | undefined;
+        const ev = this.event() as FrontEvent | undefined;
+        console.log("Calcul prix actif pour event", ev);
         if (!ev?.prices?.length) return null;
         const today = this.dateOnly(new Date());
         return ev.prices.find(p => this.dateOnly(p.startDate) <= today && today <= this.dateOnly(p.endDate)) ?? null;
@@ -132,11 +149,11 @@ export class PublicEventDetailComponent implements OnInit {
             demandSlug: this.demand()!.slug,
             amount: safeAmount,
             phoneNumber: this.form.controls.phoneNumber.value!,
-            paymentCanal: this.form.controls.paymentCanal.value!, // "WAVE" | "ORANGE_MONEY"
+            paymentCanal: this.form.controls.paymentCanal.value!=="WAVE"?PaymentCanal.WAVE:PaymentCanal.ORANGE_MONEY // "WAVE" | "ORANGE_MONEY"
         };
 
         this.submitting.set(true);
-        // @ts-ignore
+
         this.paymentService.notify(payload).subscribe({
             next: () => {
                 this.submitting.set(false);
