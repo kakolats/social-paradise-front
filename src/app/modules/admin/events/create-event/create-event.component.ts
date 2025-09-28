@@ -12,7 +12,8 @@ type PriceFG = FormGroup<{
 
 type EventFG = FormGroup<{
     name: FormControl<string | null>;
-    date: FormControl<string | null>; // yyyy-MM-dd
+    date: FormControl<string | null>;// yyyy-MM-dd
+    location: FormControl<string | null>;
     prices: FormArray<PriceFG>;
 }>;
 
@@ -34,6 +35,7 @@ export class CreateEventComponent {
     form: EventFG = this.fb.group({
         name: this.fb.control<string | null>(null, { validators: [Validators.required, Validators.minLength(3)] }),
         date: this.fb.control<string | null>(null, { validators: [Validators.required] }),
+        location: this.fb.control<string | null>(null, { validators: [Validators.required] }),
         prices: this.fb.array<PriceFG>([])
     });
 
@@ -98,6 +100,7 @@ export class CreateEventComponent {
         const payload = {
             name: f.name!,
             date: new Date(f.date!),
+            location: f.location!,
             prices: (f.prices ?? []).map(p => ({
                 name: p!.name!,
                 amount: Number(p!.amount),
