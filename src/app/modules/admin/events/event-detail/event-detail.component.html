@@ -58,22 +58,20 @@
 
     <!-- Demands list -->
     <div class="mx-auto px-4 sm:px-6">
-        <!-- Empty / Loading / Error -->
         <div *ngIf="loading()" class="mt-6 text-center text-slate-500">Chargement…</div>
         <div *ngIf="error()" class="mt-6 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ error() }}</div>
         <div *ngIf="!loading() && !error() && pagedDemands().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
             Aucune demande pour ces filtres.
         </div>
 
-        <!-- Cards -->
         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" *ngIf="!loading() && pagedDemands().length > 0">
             <div *ngFor="let d of pagedDemands(); trackBy: trackBySlug" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-2">
-                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full"
-                      [ngClass]="d.type === DemandType.GROUP ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'">
-                  <span class="text-lg">{{ d.type === DemandType.GROUP ? '👥' : '👤' }}</span>
-                </span>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                  [ngClass]="d.type === DemandType.GROUP ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'">
+              <span class="text-lg">{{ d.type === DemandType.GROUP ? '👥' : '👤' }}</span>
+            </span>
                         <div>
                             <div class="text-sm font-semibold text-slate-900">
                                 {{ d.mainGuest.firstName }} {{ d.mainGuest.lastName }}
@@ -94,14 +92,18 @@
 
                 <div class="mt-3 text-xs text-slate-500">
                     Créée le <span class="font-medium text-slate-800">{{ d.createdAt | date:'medium' }}</span> <br>
-                    Participants : <span class="font-medium text-slate-800">{{ d.numberOfGuests }}</span> <br>
-<!--                    · Slug : <span class="font-mono">{{ d.slug }}</span>-->
+                    Participants : <span class="font-medium text-slate-800">{{ d.numberOfGuests }}</span>
                 </div>
 
                 <div class="mt-4 flex items-center justify-between">
-              <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                {{ d.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
-              </span>
+          <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+            {{ d.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
+          </span>
+                    <span *ngIf="d.status===DemandStatus.SOUMISE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">SOUMISE</span>
+                    <span *ngIf="d.status===DemandStatus.VALIDEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">VALIDÉE</span>
+                    <span *ngIf="d.status===DemandStatus.REFUSEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">REFUSÉE</span>
+                    <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">NOTIF. PAIEMENT</span>
+                    <span *ngIf="d.status===DemandStatus.PAYEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">PAYÉE</span>
                     <button (click)="openDemandModal(d.slug)"
                             class="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90">
                         Voir détails
@@ -140,7 +142,7 @@
         </div>
     </div>
 
-    <!-- MODAL (inchangée fonctionnellement) -->
+    <!-- MODAL détails + mini-form paiement -->
     <div *ngIf="isModalOpen()" class="fixed inset-0 z-50">
         <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
         <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-3xl items-center justify-center px-4" role="dialog" aria-modal="true">
@@ -149,28 +151,17 @@
                     <h3 class="text-lg font-semibold text-slate-900">Détails de la demande</h3>
                     <button (click)="closeModal()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm hover:bg-slate-50">Fermer</button>
                 </div>
+
                 <div class="max-h-[70vh] overflow-y-auto p-5">
                     <div *ngIf="modalLoading()" class="py-10 text-center text-slate-500">Chargement des détails…</div>
                     <div *ngIf="modalError()" class="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ modalError() }}</div>
 
                     <ng-container *ngIf="!modalLoading() && selectedDemand() as dd">
                         <div class="mb-4 grid gap-3 sm:grid-cols-2">
-                            <div>
-                                <div class="text-xs text-slate-500">Slug</div>
-                                <div class="font-mono text-sm text-slate-800">{{ dd.slug }}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-slate-500">Créée le</div>
-                                <div class="text-sm text-slate-800">{{ dd.date | date:'medium' }}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-slate-500">Statut</div>
-                                <div class="text-sm font-medium text-slate-900">{{ dd.demandStatus }}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-slate-500">Type</div>
-                                <div class="text-sm font-medium text-slate-900">{{ dd.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}</div>
-                            </div>
+                            <div><div class="text-xs text-slate-500">Slug</div><div class="font-mono text-sm text-slate-800">{{ dd.slug }}</div></div>
+                            <div><div class="text-xs text-slate-500">Créée le</div><div class="text-sm text-slate-800">{{ dd.date | date:'medium' }}</div></div>
+                            <div><div class="text-xs text-slate-500">Statut</div><div class="text-sm font-medium text-slate-900">{{ dd.demandStatus }}</div></div>
+                            <div><div class="text-xs text-slate-500">Type</div><div class="text-sm font-medium text-slate-900">{{ dd.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}</div></div>
                         </div>
 
                         <div class="mb-2 text-sm font-semibold text-slate-900">Participants ({{ dd.guests?.length || 0 }})</div>
@@ -188,30 +179,77 @@
                             </div>
                         </div>
 
-                        <div *ngIf="dd.event" class="mt-4 rounded-xl border border-slate-200 p-3">
-                            <div class="text-sm font-semibold text-slate-900">Évènement</div>
+                        <div *ngIf="dd.payment" class="mt-4 rounded-xl border border-slate-200 p-3">
+                            <div class="text-sm font-semibold text-slate-900">Notification de paiement</div>
                             <div class="mt-1 text-sm text-slate-700">
-                                {{ dd.event.name }} — {{ dd.event.date | date:'mediumDate' }}
+                                {{ dd.payment.amount }} FCFA — {{ dd.payment.date | date:'mediumDate' }}
                             </div>
-                            <div class="text-xs text-slate-500">Slug: {{ dd.event.slug }}</div>
+                            <div *ngIf="dd.payment.phoneNumber" class="text-xs text-slate-500">Numéro de téléphone: {{ dd.payment.phoneNumber }}</div>
+                        </div>
+
+
+                        <!-- Mini-form de notification de paiement (uniquement si VALIDEE) -->
+                        <div *ngIf="dd.demandStatus === DemandStatus.VALIDEE" class="mt-4 rounded-xl border border-slate-200 p-3">
+                            <div class="mb-2 text-sm font-semibold text-slate-900">Notifier un paiement</div>
+
+                            <div class="grid gap-3 md:grid-cols-3">
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-slate-600">Montant</label>
+                                    <input type="number"
+                                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm"
+                                           [ngModel]="payAmount()" (ngModelChange)="payAmount.set($event)"
+                                           min="1" />
+                                    <p class="mt-1 text-[11px] text-slate-500">Pré-rempli (tarif actif × participants).</p>
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-slate-600">Canal</label>
+                                    <select class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+                                            [ngModel]="payCanal()" (ngModelChange)="onChangeCanal($event)">
+                                        <option [ngValue]="PaymentCanal.WAVE">Wave</option>
+                                        <option [ngValue]="PaymentCanal.ORANGE_MONEY">Orange Money</option>
+                                        <option [ngValue]="PaymentCanal.CASH">Cash</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-slate-600">Téléphone</label>
+                                    <input type="tel"
+                                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm"
+                                           [required]="payCanal() !== PaymentCanal.CASH"
+                                           [disabled]="payCanal() === PaymentCanal.CASH"
+                                           placeholder="ex: 77 00 00 00"
+                                           [ngModel]="payPhone()" (ngModelChange)="payPhone.set($event)" />
+                                    <p class="mt-1 text-[11px] text-slate-500" *ngIf="payCanal() === PaymentCanal.CASH">Non requis pour Cash.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex items-center justify-end gap-2">
+                                <button (click)="submitPaymentFromModal()"
+                                        [disabled]="submittingPayment()"
+                                        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50">
+                                    Notifier le paiement
+                                </button>
+                            </div>
+
+                            <div *ngIf="paymentSuccess()" class="mt-3 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                                ✅ {{ paymentSuccess() }}
+                            </div>
+                            <div *ngIf="paymentError()" class="mt-3 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                                ❌ {{ paymentError() }}
+                            </div>
                         </div>
                     </ng-container>
-                </div>
-                <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
-                    <button (click)="closeModal()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                        Fermer
-                    </button>
                 </div>
             </div>
         </div>
     </div>
+
 </section>
 
+<!-- MODALE DE CONFIRMATION CHANGEMENT STATUT -->
 <div *ngIf="confirmOpen()" class="fixed inset-0 z-[60]">
-    <!-- overlay -->
     <div class="absolute inset-0 bg-black/40" (click)="cancelStatusChange()"></div>
-
-    <!-- dialog -->
     <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-4" role="dialog" aria-modal="true">
         <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
             <div class="border-b border-slate-200 px-5 py-3">

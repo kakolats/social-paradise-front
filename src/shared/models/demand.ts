@@ -8,7 +8,7 @@ export interface Demand {
     slug: string;
     demandStatus: DemandStatus;
     type: DemandType;
-    payments?: Payment[];
+    payment?: Payment;
     guests?: Guest[];
     event?: Event
     eventSlug?: string

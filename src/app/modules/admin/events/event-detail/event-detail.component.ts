@@ -6,6 +6,8 @@ import { DemandService, DemandSummary } from 'shared/services/demand/demand.serv
 import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { FormsModule } from '@angular/forms';
+import { PaymentCanal } from 'shared/models/payment';
+import { PaymentService } from '../../../../../shared/services/payment/payment.service';
 
 type PendingStatusChange = { slug: string; prev: DemandStatus; next: DemandStatus } | null;
 
@@ -20,10 +22,10 @@ export class EventDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private eventService = inject(EventService);
     private demandService = inject(DemandService);
+    private paymentService = inject(PaymentService);
 
     // data
     event = signal<FrontEvent | null>(null);
-    /** Liste filtrée renvoyée par l'API (status/type). On pagine dessus côté front. */
     demandsRaw = signal<DemandSummary[]>([]);
 
     // ui state
@@ -40,13 +42,26 @@ export class EventDetailComponent implements OnInit {
     pageSize = signal<number>(6);
     pageSizeOptions = [6, 12, 24];
 
-    // modal
+    // modal details
     isModalOpen = signal<boolean>(false);
     modalLoading = signal<boolean>(false);
     modalError = signal<string | null>(null);
     selectedDemand = signal<Demand | null>(null);
 
+    // modal payment mini-form
+    payAmount = signal<number>(0);
+    payPhone = signal<string>('');
+    payCanal = signal<PaymentCanal>(PaymentCanal.WAVE);
+    submittingPayment = signal<boolean>(false);
+    paymentError = signal<string | null>(null);
+    paymentSuccess = signal<string | null>(null);
+
+    // confirm modal
+    confirmOpen = signal<boolean>(false);
+    pendingChange = signal<PendingStatusChange>(null);
+
     DemandType = DemandType;
+    PaymentCanal = PaymentCanal;
     updatableStatuses: DemandStatus[] = [DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.PAYEE];
     allStatuses: DemandStatus[] = [
         DemandStatus.SOUMISE,
@@ -59,21 +74,16 @@ export class EventDetailComponent implements OnInit {
 
     private eventSlug: string | null = null;
 
-    confirmOpen = signal<boolean>(false);
-    pendingChange = signal<PendingStatusChange>(null);
-
     ngOnInit(): void {
         this.eventSlug = this.route.snapshot.paramMap.get('slug');
         if (!this.eventSlug) {
             this.error.set('Slug évènement manquant.');
             return;
         }
-        // charger l'évènement
         this.eventService.getBySlug(this.eventSlug).subscribe({
             next: evt => this.event.set(evt),
             error: err => this.error.set(err?.error?.message ?? "Impossible de charger l'évènement."),
         });
-        // charger la liste filtrée
         this.fetchDemands();
     }
 
@@ -108,7 +118,6 @@ export class EventDetailComponent implements OnInit {
     pageNumbers = computed(() => {
         const total = this.totalPages();
         const current = this.page();
-        // petite pagination : 1 ... n (max 7 boutons)
         const spread = 3;
         const from = Math.max(1, current - spread);
         const to = Math.min(total, current + spread);
@@ -133,7 +142,7 @@ export class EventDetailComponent implements OnInit {
 
     reload() { this.fetchDemands(); }
 
-    // --- status update (VALIDEE / REFUSEE / PAYEE uniquement)
+    // --- status update (VALIDEE / REFUSEE / PAYEE uniquement) -> confirmation
     onChangeStatus(d: DemandSummary, newStatus: DemandStatus) {
         if (d.status === newStatus) return;
         const allowed = new Set([DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.PAYEE]);
@@ -142,13 +151,11 @@ export class EventDetailComponent implements OnInit {
         this.confirmOpen.set(true);
     }
 
-    // ⬇️ Annuler = fermer la modale et vider l'intention
     cancelStatusChange() {
         this.confirmOpen.set(false);
         this.pendingChange.set(null);
     }
 
-    // ⬇️ Confirmer = appliquer UI optimiste + appel API, sinon revert
     confirmStatusChange() {
         const pc = this.pendingChange();
         if (!pc) return;
@@ -174,16 +181,30 @@ export class EventDetailComponent implements OnInit {
         });
     }
 
-
+    // -------- Modal logic
     openDemandModal(slug: string) {
         this.isModalOpen.set(true);
         this.modalLoading.set(true);
         this.modalError.set(null);
         this.selectedDemand.set(null);
 
+        this.paymentError.set(null);
+        this.paymentSuccess.set(null);
+        this.payCanal.set(PaymentCanal.WAVE);
+        this.payPhone.set('');
+        this.payAmount.set(0);
+
         this.demandService.getBySlug(slug).subscribe({
-            next: d => { this.selectedDemand.set(d); this.modalLoading.set(false); },
-            error: err => { this.modalError.set(err?.error?.message ?? 'Erreur lors du chargement des détails.'); this.modalLoading.set(false); }
+            next: d => {
+                this.selectedDemand.set(d);
+                // Pré-remplir le montant (tarif actif × nb participants)
+                this.payAmount.set(this.modalAutoAmount());
+                this.modalLoading.set(false);
+            },
+            error: err => {
+                this.modalError.set(err?.error?.message ?? 'Erreur lors du chargement des détails.');
+                this.modalLoading.set(false);
+            }
         });
     }
 
@@ -192,8 +213,98 @@ export class EventDetailComponent implements OnInit {
         this.selectedDemand.set(null);
         this.modalError.set(null);
         this.modalLoading.set(false);
+        // reset mini-form
+        this.paymentError.set(null);
+        this.paymentSuccess.set(null);
+        this.payCanal.set(PaymentCanal.WAVE);
+        this.payPhone.set('');
+        this.payAmount.set(0);
+    }
+
+    // --- mini-form paiement helpers
+    onChangeCanal(c: PaymentCanal) {
+        this.payCanal.set(c);
+        // rien d'autre; la validation à l'envoi gère le phone requis si ≠ CASH
+    }
+
+    submitPaymentFromModal() {
+        const dd = this.selectedDemand();
+        if (!dd?.slug) return;
+        if (dd.demandStatus !== DemandStatus.VALIDEE) return;
+
+        const amount = Number(this.payAmount());
+        const canal = this.payCanal();
+        const phone = (this.payPhone() || '').trim();
+
+        if (!amount || amount <= 0) {
+            this.paymentError.set('Montant invalide.');
+            return;
+        }
+        if (canal !== PaymentCanal.CASH && phone.length === 0) {
+            this.paymentError.set('Le numéro de téléphone est requis pour ce canal.');
+            return;
+        }
+
+        const payload: any = {
+            demandSlug: dd.slug,
+            amount,
+            paymentCanal: canal, // 'WAVE' | 'ORANGE_MONEY' | 'CASH'
+        };
+        if (canal !== PaymentCanal.CASH) payload.phoneNumber = phone;
+
+        this.submittingPayment.set(true);
+        this.paymentError.set(null);
+        this.paymentSuccess.set(null);
+
+        this.paymentService.notify(payload).subscribe({
+            next: () => {
+                this.submittingPayment.set(false);
+                this.paymentSuccess.set('Notification enregistrée. Elle sera vérifiée par un administrateur.');
+                this.reload();
+            },
+            error: (err) => {
+                this.submittingPayment.set(false);
+                this.paymentError.set(err?.error?.message ?? 'Erreur lors de la notification de paiement.');
+            }
+        });
+    }
+
+    // --- date & pricing helpers (local date parsing to avoid UTC shift)
+    private parseLocalDate(d: string | Date): Date {
+        if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const m = /^\\d{4}-\\d{2}-\\d{2}$/.test(d) ? d.split('-').map(Number) : null;
+        if (m) {
+            const [y, mo, da] = m as unknown as number[];
+            return new Date(y, mo - 1, da);
+        }
+        const dt = new Date(d);
+        return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    }
+    private dateOnlyLocal(d: string | Date): Date {
+        const dt = d instanceof Date ? d : this.parseLocalDate(d);
+        return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    }
+    private modalPeopleCount(): number {
+        return this.selectedDemand()?.guests?.length ?? 0;
+    }
+    private modalActivePrice(): { amount: number } | null {
+        const ev = this.event() as FrontEvent | undefined;
+        const prices = ev?.prices as Array<{ amount: number; startDate: string | Date; endDate: string | Date }> | undefined;
+        if (!prices?.length) return null;
+        const today = this.dateOnlyLocal(new Date());
+        return prices.find(p => {
+            const s = this.dateOnlyLocal(p.startDate);
+            const e = this.dateOnlyLocal(p.endDate);
+            return s.getTime() <= today.getTime() && today.getTime() <= e.getTime();
+        }) ?? null;
+    }
+    private modalAutoAmount(): number {
+        const p = this.modalActivePrice();
+        return p ? p.amount * this.modalPeopleCount() : 0;
     }
 
     // utils
     trackBySlug(_: number, d: DemandSummary) { return d.slug; }
+
+    protected readonly DemandStatus = DemandStatus;
 }

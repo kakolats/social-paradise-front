@@ -106,7 +106,7 @@ export class DemandService {
             slug: json.slug,
             demandStatus: json.status as DemandStatus,
             type: json.type as DemandType,
-            payments: Array.isArray(json.payments) ? json.payments.map((p: any) => this.parsePayment(p)) : [],
+            payment: json.payment,
             guests: Array.isArray(json.guests) ? json.guests.map((g: any) => this.parseGuest(g)) : [],
             event: json.event ? this.parseEvent(json.event) : undefined,
             eventSlug: json.event?.slug, // pratique pour des actions ultérieures
