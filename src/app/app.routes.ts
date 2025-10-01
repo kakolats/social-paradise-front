@@ -10,7 +10,7 @@ import { AuthGuard } from '../shared/guards/auth/auth.guard';
 export const appRoutes: Route[] = [
 
     // Redirect empty path to '/example'
-    {path: '', pathMatch : 'full', redirectTo: 'example'},
+    {path: '', pathMatch : 'full', redirectTo: 'events/event-list'},
 
     // Redirect signed-in user to the '/example'
     //
