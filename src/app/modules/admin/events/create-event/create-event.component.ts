@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output, computed, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EventService } from '../../../../../shared/services/event/event.service';
+import { Router } from '@angular/router';
 
 type PriceFG = FormGroup<{
     name: FormControl<string | null>;
@@ -27,6 +28,7 @@ type EventFG = FormGroup<{
 export class CreateEventComponent {
     private fb = new FormBuilder();
     private eventService = inject(EventService);
+    private router = inject(Router);
 
     submitting = false;
 
@@ -115,6 +117,9 @@ export class CreateEventComponent {
                 this._createdMessage = `Événement créé avec succès${evt?.id ? ` (id: ${evt.id})` : ''}.`;
                 this.eventCreated.emit(evt?.id ?? 0);
                 this.submitting = false;
+                //redirection
+                this.router.navigate(['/events/event-list']);
+
             },
             error: (err) => {
                 this._errorMessage = err?.error?.message ?? 'Erreur lors de la création.';
