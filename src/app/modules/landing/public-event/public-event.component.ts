@@ -52,7 +52,7 @@ export class PublicEventComponent implements OnInit {
     errorMsg = signal<string | null>(null);
     successMsg = signal<string | null>(null);
 
-    placeholder = 'https://images.unsplash.com/photo-1515165562835-c3b8c2e71f19?q=80&w=1600&auto=format&fit=crop';
+    placeholder = 'https://images.stockcake.com/public/1/1/f/11f13b20-c518-44e5-9047-0720400eafca_large/elegant-masquerade-ball-stockcake.jpg';
 
     form: DemandFG = this.fb.group({
         mode: this.fb.control<'single' | 'group'>('single', { nonNullable: true }),

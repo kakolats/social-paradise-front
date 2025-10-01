@@ -60,6 +60,9 @@ export class EventDetailComponent implements OnInit {
     confirmOpen = signal<boolean>(false);
     pendingChange = signal<PendingStatusChange>(null);
 
+    // ➕ view switch
+    viewMode = signal<'cards' | 'list'>('list');
+
     DemandType = DemandType;
     PaymentCanal = PaymentCanal;
     updatableStatuses: DemandStatus[] = [DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.PAYEE];
@@ -141,6 +144,11 @@ export class EventDetailComponent implements OnInit {
     }
 
     reload() { this.fetchDemands(); }
+
+    // ➕ view switch
+    toggleView() {
+        this.viewMode.set(this.viewMode() === 'cards' ? 'list' : 'cards');
+    }
 
     // --- status update (VALIDEE / REFUSEE / PAYEE uniquement) -> confirmation
     onChangeStatus(d: DemandSummary, newStatus: DemandStatus) {
@@ -224,7 +232,6 @@ export class EventDetailComponent implements OnInit {
     // --- mini-form paiement helpers
     onChangeCanal(c: PaymentCanal) {
         this.payCanal.set(c);
-        // rien d'autre; la validation à l'envoi gère le phone requis si ≠ CASH
     }
 
     submitPaymentFromModal() {
@@ -248,7 +255,7 @@ export class EventDetailComponent implements OnInit {
         const payload: any = {
             demandSlug: dd.slug,
             amount,
-            paymentCanal: canal, // 'WAVE' | 'ORANGE_MONEY' | 'CASH'
+            paymentCanal: canal,
         };
         if (canal !== PaymentCanal.CASH) payload.phoneNumber = phone;
 
@@ -269,10 +276,10 @@ export class EventDetailComponent implements OnInit {
         });
     }
 
-    // --- date & pricing helpers (local date parsing to avoid UTC shift)
+    // --- date & pricing helpers
     private parseLocalDate(d: string | Date): Date {
         if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const m = /^\\d{4}-\\d{2}-\\d{2}$/.test(d) ? d.split('-').map(Number) : null;
+        const m = /^\d{4}-\d{2}-\d{2}$/.test(d) ? d.split('-').map(Number) : null;
         if (m) {
             const [y, mo, da] = m as unknown as number[];
             return new Date(y, mo - 1, da);
