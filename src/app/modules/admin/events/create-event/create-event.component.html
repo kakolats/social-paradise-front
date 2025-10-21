@@ -59,22 +59,36 @@
                                     Nom requis
                                 </p>
                             </td>
+
                             <td class="px-4 py-3">
                                 <input type="number" formControlName="amount" min="0"
                                        class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                                 <p *ngIf="p.controls.amount.touched && p.controls.amount.invalid" class="mt-1 text-xs text-red-600">
-                                    Montant requis (>= 0)
+                                    Montant requis (≥ 0)
                                 </p>
                             </td>
+
                             <td class="px-4 py-3">
                                 <input type="date" formControlName="startDate"
                                        class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <!-- Règle 3 : startDate doit être strictement > endDate du prix précédent -->
+                                <p *ngIf="i > 0 && (p.controls.startDate.touched || p.touched) && startNotAfterPrevEnd(i)"
+                                   class="mt-1 text-xs text-red-600">
+                                    Le début doit être strictement après la fin du prix précédent.
+                                </p>
                             </td>
+
                             <td class="px-4 py-3">
                                 <input type="date" formControlName="endDate"
                                        class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <!-- Règle 1 : start <= end -->
                                 <p *ngIf="p.touched && !rangeValid(p)" class="mt-1 text-xs text-red-600">Fin doit être ≥ début</p>
+                                <!-- Règles 2 & 3 : endDate ≤ event.date -->
+                                <p *ngIf="(p.controls.endDate.touched || p.touched) && endAfterEvent(i)" class="mt-1 text-xs text-red-600">
+                                    La fin doit être ≤ la date de l'événement.
+                                </p>
                             </td>
+
                             <td class="px-4 py-3">
                                 <button type="button" (click)="removePrice(i)"
                                         class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
@@ -93,7 +107,8 @@
                         class="rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
                     Réinitialiser
                 </button>
-                <button type="submit" [disabled]="submitting || form.invalid || !allRangesValid()"
+                <button type="submit"
+                        [disabled]="submitting || form.invalid || !allRangesValid() || !allBusinessValid()"
                         class="rounded-xl bg-slate-900 px-6 py-2 text-sm font-semibold text-white shadow hover:opacity-90 disabled:opacity-50">
                     Créer
                 </button>
