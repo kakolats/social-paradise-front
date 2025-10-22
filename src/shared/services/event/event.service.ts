@@ -47,6 +47,7 @@ export class EventService {
         return {
             id: json.id,
             name: json.name,
+            location : json.location,
             slug: json.slug,
             date: json.date ? new Date(json.date) : undefined as unknown as Date,
             prices: Array.isArray(json.prices)
