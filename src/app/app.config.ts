@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { APP_INITIALIZER, ApplicationConfig, inject } from '@angular/core';
 import { LuxonDateAdapter } from '@angular/material-luxon-adapter';
-import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
     PreloadAllModules,
@@ -19,6 +19,11 @@ import { firstValueFrom } from 'rxjs';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
 import { AuthService } from '../shared/services/auth/auth.service';
 import {AuthGuard} from "../shared/guards/auth/auth.guard";
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+registerLocaleData(localeFr);
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -54,7 +59,8 @@ export const appConfig: ApplicationConfig = {
                 },
             },
         },
-
+        { provide: LOCALE_ID, useValue: 'fr-FR' },   // <-- DatePipe & formats Angular en français
+        { provide: MAT_DATE_LOCALE, useValue: 'fr' },
         // Transloco Config
         provideTransloco({
             config: {

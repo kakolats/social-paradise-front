@@ -5,8 +5,8 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">{{ event()?.name || 'Évènement' }}</h1>
-                    <p class="text-slate-600">{{ event()?.date | date:'fullDate' }}</p>
-                    <p class="text-xs text-slate-400" *ngIf="event()?.slug">Slug: {{ event()?.slug }}</p>
+                    <p class="text-slate-600">{{ event()?.date | date:'longDate' }}</p>
+<!--                    <p class="text-xs text-slate-400" *ngIf="event()?.slug">Slug: {{ event()?.slug }}</p>-->
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -22,6 +22,28 @@
                         {{ viewMode() === 'cards' ? 'Afficher en liste' : 'Afficher en cards' }}
                     </button>
                 </div>
+            </div>
+
+            <!-- Tarifs de l'évènement -->
+            <div class="mt-4">
+                <div class="mb-2 text-sm font-semibold text-slate-900">Tarifs</div>
+
+                <div *ngIf="event()?.prices?.length as count; else noPrices"
+                     class="flex flex-wrap gap-2">
+                    <div *ngFor="let p of event()?.prices"
+                         class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 shadow-sm">
+                        <span *ngIf="p.name" class="font-medium">{{ p.name }}</span>
+                        <span *ngIf="p.name">&nbsp;•&nbsp;</span>
+                        <span class="font-semibold">{{ p.amount | number:'1.0-0' }} FCFA</span>
+                        <span class="text-slate-400">
+            &nbsp;— {{ p.startDate | date:'dd MMM' }} → {{ p.endDate | date:'dd MMM' }}
+          </span>
+                    </div>
+                </div>
+
+                <ng-template #noPrices>
+                    <div class="text-xs text-slate-500">Aucun tarif défini.</div>
+                </ng-template>
             </div>
         </div>
     </div>

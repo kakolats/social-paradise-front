@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Va
 import { EventService } from '../../../../../shared/services/event/event.service';
 import { Event } from '../../../../../shared/models/event';
 import { Price } from '../../../../../shared/models/price';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 type PriceFG = FormGroup<{
     name: FormControl<string | null>;
@@ -31,6 +31,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
     private fb = new FormBuilder();
     private eventService = inject(EventService);
     private route = inject(ActivatedRoute);
+    private router = inject(Router);
 
     /** Si renseigné, le composant passe en mode "édition" et met à jour cet event */
     eventToEdit?: Event;
@@ -246,6 +247,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
                     this._createdMessage = `Événement mis à jour avec succès${evt?.id ? ` (id: ${evt.id})` : ''}.`;
                     this.eventUpdated.emit(evt?.id ?? this.eventToEdit!.id);
                     this.submitting = false;
+                    this.router.navigate(['/events/event-list']);
                 },
                 error: (err) => {
                     this._errorMessage = err?.error?.message ?? 'Erreur lors de la mise à jour.';
@@ -261,6 +263,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
                 this._createdMessage = `Événement créé avec succès${evt?.id ? ` (id: ${evt.id})` : ''}.`;
                 this.eventCreated.emit(evt?.id ?? 0);
                 this.submitting = false;
+                this.router.navigate(['/events/event-list']);
             },
             error: (err) => {
                 this._errorMessage = err?.error?.message ?? 'Erreur lors de la création.';

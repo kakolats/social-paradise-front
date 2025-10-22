@@ -16,7 +16,7 @@
                         {{ event()?.name || event()?.name || 'Évènement' }}
                     </h1>
                     <p class="mt-2 text-slate-600">
-                        {{ (event()?.date) | date:'fullDate' }}
+                        {{ (event()?.date) | date:'longDate' }}
                     </p>
                 </div>
             </div>

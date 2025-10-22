@@ -47,7 +47,6 @@ export class EventListComponent {
     }
 
     onEdit(event: Event) {
-        console.log('Modifier l’événement:', event);
-        // idem, router vers /events/:id/edit
+        this.router.navigate(['/events/update-event', event.slug])
     }
 }
