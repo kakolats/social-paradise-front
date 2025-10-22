@@ -1,7 +1,8 @@
 <section class="mx-auto my-auto w-2/3 px-6 py-8">
     <div class="rounded-2xl border border-slate-200 bg-white/80 p-8 shadow-lg backdrop-blur">
-        <h2 class="mb-6 text-3xl font-bold tracking-tight text-slate-900">Créer un événement</h2>
-
+        <h2 class="mb-6 text-3xl font-bold tracking-tight text-slate-900">
+            {{ eventToEdit ? 'Modifier un événement' : 'Créer un événement' }}
+        </h2>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8">
             <!-- Event infos -->
             <div class="grid gap-6 md:grid-cols-2">
@@ -105,12 +106,12 @@
             <div class="flex justify-end gap-3">
                 <button type="button" (click)="reset()"
                         class="rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                    Réinitialiser
+                    {{ eventToEdit ? 'Annuler les modifications' : 'Réinitialiser' }}
                 </button>
                 <button type="submit"
                         [disabled]="submitting || form.invalid || !allRangesValid() || !allBusinessValid()"
                         class="rounded-xl bg-slate-900 px-6 py-2 text-sm font-semibold text-white shadow hover:opacity-90 disabled:opacity-50">
-                    Créer
+                    {{ eventToEdit ? 'Mettre à jour' : 'Créer' }}
                 </button>
             </div>
 

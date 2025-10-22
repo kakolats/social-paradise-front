@@ -13,6 +13,10 @@ export default [
                 path : 'create-event'
             },
             {
+                component: CreateEventComponent,
+                path : 'update-event/:slug'
+            },
+            {
                 component: EventListComponent,
                 path : 'event-list'
             },

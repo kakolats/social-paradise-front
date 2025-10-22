@@ -87,9 +87,9 @@ export class EventService {
         );
     }
 
-    update(id: number, patch: Partial<Event>): Observable<Event> {
+    update(slug: string, patch: Partial<Event>): Observable<Event> {
         const body = this.serializeEvent(patch);
-        return this.http.patch<ApiResponse<any>>(`${this.base}/${id}`, body).pipe(
+        return this.http.put<ApiResponse<any>>(`${this.base}/${slug}`, body).pipe(
             map(res => this.parseEvent(res.data))
         );
     }
