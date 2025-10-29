@@ -2,12 +2,16 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventService } from 'shared/services/event/event.service';
-import { DemandService, DemandSummary } from 'shared/services/demand/demand.service';
+import {
+    DemandService,
+    DemandSummary,
+    DemandStatsEntry
+} from 'shared/services/demand/demand.service';
 import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { FormsModule } from '@angular/forms';
 import { PaymentCanal } from 'shared/models/payment';
-import { PaymentService } from '../../../../../shared/services/payment/payment.service';
+import { PaymentService } from 'shared/services/payment/payment.service';
 
 type PendingStatusChange = { slug: string; prev: DemandStatus; next: DemandStatus } | null;
 
@@ -28,6 +32,10 @@ export class EventDetailComponent implements OnInit {
     event = signal<FrontEvent | null>(null);
     demandsRaw = signal<DemandSummary[]>([]);
 
+    // stats par statut
+    stats = signal<Record<DemandStatus, DemandStatsEntry> | null>(null);
+    statsError = signal<string | null>(null);
+
     // ui state
     loading = signal<boolean>(false);
     error = signal<string | null>(null);
@@ -40,7 +48,7 @@ export class EventDetailComponent implements OnInit {
     // pagination
     page = signal<number>(1);
     pageSize = signal<number>(6);
-    pageSizeOptions = [6, 12, 24];
+    pageSizeOptions = [2, 12, 24];
 
     // modal details
     isModalOpen = signal<boolean>(false);
@@ -65,7 +73,13 @@ export class EventDetailComponent implements OnInit {
 
     DemandType = DemandType;
     PaymentCanal = PaymentCanal;
-    updatableStatuses: DemandStatus[] = [DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.PAYEE];
+    DemandStatus = DemandStatus;
+
+    updatableStatuses: DemandStatus[] = [
+        DemandStatus.VALIDEE,
+        DemandStatus.REFUSEE,
+        DemandStatus.PAYEE
+    ];
     allStatuses: DemandStatus[] = [
         DemandStatus.SOUMISE,
         DemandStatus.VALIDEE,
@@ -83,11 +97,38 @@ export class EventDetailComponent implements OnInit {
             this.error.set('Slug évènement manquant.');
             return;
         }
+
+        // Charger l'event
         this.eventService.getBySlug(this.eventSlug).subscribe({
-            next: evt => this.event.set(evt),
-            error: err => this.error.set(err?.error?.message ?? "Impossible de charger l'évènement."),
+            next: evt => {
+                this.event.set(evt);
+            },
+            error: err => {
+                this.error.set(err?.error?.message ?? "Impossible de charger l'évènement.");
+            },
         });
+
+        // Charger la liste des demandes
         this.fetchDemands();
+
+        // Charger les stats
+        this.loadStats();
+    }
+
+    /** Stats par statut pour l'évènement */
+    private loadStats(): void {
+        if (!this.eventSlug) return;
+        this.demandService.getStatsByEventSlug(this.eventSlug).subscribe({
+            next: st => {
+                this.stats.set(st);
+                this.statsError.set(null);
+            },
+            error: err => {
+                this.statsError.set(
+                    err?.error?.message ?? 'Impossible de charger les statistiques.'
+                );
+            }
+        });
     }
 
     /** Appelle l'API avec les filtres en cours puis réinitialise la page. */
@@ -100,18 +141,30 @@ export class EventDetailComponent implements OnInit {
         const type = this.filterType();
 
         const obs = (status || type)
-            ? this.demandService.listByEventSlugFiltered(this.eventSlug, { status: status ?? undefined, type: type ?? undefined })
+            ? this.demandService.listByEventSlugFiltered(this.eventSlug, {
+                status: status ?? undefined,
+                type: type ?? undefined
+            })
             : this.demandService.listByEventSlug(this.eventSlug);
 
         obs.subscribe({
-            next: list => { this.demandsRaw.set(list); this.page.set(1); this.loading.set(false); },
-            error: err => { this.error.set(err?.error?.message ?? "Impossible de charger les demandes."); this.loading.set(false); }
+            next: list => {
+                this.demandsRaw.set(list);
+                this.page.set(1);
+                this.loading.set(false);
+            },
+            error: err => {
+                this.error.set(err?.error?.message ?? "Impossible de charger les demandes.");
+                this.loading.set(false);
+            }
         });
     }
 
     // --- computed pagination helpers
     filteredCount = computed(() => this.demandsRaw().length);
-    totalPages = computed(() => Math.max(1, Math.ceil(this.filteredCount() / this.pageSize())));
+    totalPages = computed(() =>
+        Math.max(1, Math.ceil(this.filteredCount() / this.pageSize()))
+    );
     pagedDemands = computed(() => {
         const p = this.page();
         const size = this.pageSize();
@@ -128,14 +181,29 @@ export class EventDetailComponent implements OnInit {
     });
 
     // --- pagination actions
-    goToPage(p: number) { this.page.set(Math.min(Math.max(1, p), this.totalPages())); }
-    prevPage() { this.goToPage(this.page() - 1); }
-    nextPage() { this.goToPage(this.page() + 1); }
-    changePageSize(size: number) { this.pageSize.set(size); this.page.set(1); }
+    goToPage(p: number) {
+        this.page.set(Math.min(Math.max(1, p), this.totalPages()));
+    }
+    prevPage() {
+        this.goToPage(this.page() - 1);
+    }
+    nextPage() {
+        this.goToPage(this.page() + 1);
+    }
+    changePageSize(size: number) {
+        this.pageSize.set(size);
+        this.page.set(1);
+    }
 
     // --- filters actions
-    setFilterStatus(s: DemandStatus | null) { this.filterStatus.set(s); this.fetchDemands(); }
-    setFilterType(t: DemandType | null) { this.filterType.set(t); this.fetchDemands(); }
+    setFilterStatus(s: DemandStatus | null) {
+        this.filterStatus.set(s);
+        this.fetchDemands();
+    }
+    setFilterType(t: DemandType | null) {
+        this.filterType.set(t);
+        this.fetchDemands();
+    }
     resetFilters() {
         this.filterStatus.set(null);
         this.filterType.set(null);
@@ -143,7 +211,10 @@ export class EventDetailComponent implements OnInit {
         this.fetchDemands();
     }
 
-    reload() { this.fetchDemands(); }
+    reload() {
+        this.fetchDemands();
+        this.loadStats();
+    }
 
     // ➕ view switch
     toggleView() {
@@ -153,7 +224,11 @@ export class EventDetailComponent implements OnInit {
     // --- status update (VALIDEE / REFUSEE / PAYEE uniquement) -> confirmation
     onChangeStatus(d: DemandSummary, newStatus: DemandStatus) {
         if (d.status === newStatus) return;
-        const allowed = new Set([DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.PAYEE]);
+        const allowed = new Set([
+            DemandStatus.VALIDEE,
+            DemandStatus.REFUSEE,
+            DemandStatus.PAYEE
+        ]);
         if (!allowed.has(newStatus)) return;
         this.pendingChange.set({ slug: d.slug, prev: d.status, next: newStatus });
         this.confirmOpen.set(true);
@@ -172,19 +247,28 @@ export class EventDetailComponent implements OnInit {
         this.savingSlug.set(pc.slug);
 
         // UI optimiste
-        this.demandsRaw.update(arr => arr.map(x => x.slug === pc.slug ? { ...x, status: pc.next } : x));
+        this.demandsRaw.update(arr =>
+            arr.map(x => (x.slug === pc.slug ? { ...x, status: pc.next } : x))
+        );
 
         this.demandService.updateStatus(pc.slug, pc.next).subscribe({
             next: () => {
                 this.savingSlug.set(null);
                 this.pendingChange.set(null);
+                // recharger aussi les stats (changement de statut impacte les stats)
+                this.loadStats();
             },
             error: err => {
                 // revert si échec
-                this.demandsRaw.update(arr => arr.map(x => x.slug === pc.slug ? { ...x, status: pc.prev } : x));
+                this.demandsRaw.update(arr =>
+                    arr.map(x => (x.slug === pc.slug ? { ...x, status: pc.prev } : x))
+                );
                 this.savingSlug.set(null);
                 this.pendingChange.set(null);
-                this.error.set(err?.error?.message ?? 'Erreur lors de la mise à jour du statut.');
+                this.error.set(
+                    err?.error?.message ??
+                    'Erreur lors de la mise à jour du statut.'
+                );
             }
         });
     }
@@ -210,7 +294,10 @@ export class EventDetailComponent implements OnInit {
                 this.modalLoading.set(false);
             },
             error: err => {
-                this.modalError.set(err?.error?.message ?? 'Erreur lors du chargement des détails.');
+                this.modalError.set(
+                    err?.error?.message ??
+                    'Erreur lors du chargement des détails.'
+                );
                 this.modalLoading.set(false);
             }
         });
@@ -248,14 +335,16 @@ export class EventDetailComponent implements OnInit {
             return;
         }
         if (canal !== PaymentCanal.CASH && phone.length === 0) {
-            this.paymentError.set('Le numéro de téléphone est requis pour ce canal.');
+            this.paymentError.set(
+                'Le numéro de téléphone est requis pour ce canal.'
+            );
             return;
         }
 
         const payload: any = {
             demandSlug: dd.slug,
             amount,
-            paymentCanal: canal,
+            paymentCanal: canal
         };
         if (canal !== PaymentCanal.CASH) payload.phoneNumber = phone;
 
@@ -266,19 +355,25 @@ export class EventDetailComponent implements OnInit {
         this.paymentService.notify(payload).subscribe({
             next: () => {
                 this.submittingPayment.set(false);
-                this.paymentSuccess.set('Notification enregistrée. Elle sera vérifiée par un administrateur.');
+                this.paymentSuccess.set(
+                    'Notification enregistrée. Elle sera vérifiée par un administrateur.'
+                );
                 this.reload();
             },
-            error: (err) => {
+            error: err => {
                 this.submittingPayment.set(false);
-                this.paymentError.set(err?.error?.message ?? 'Erreur lors de la notification de paiement.');
+                this.paymentError.set(
+                    err?.error?.message ??
+                    'Erreur lors de la notification de paiement.'
+                );
             }
         });
     }
 
     // --- date & pricing helpers
     private parseLocalDate(d: string | Date): Date {
-        if (d instanceof Date) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        if (d instanceof Date)
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
         const m = /^\d{4}-\d{2}-\d{2}$/.test(d) ? d.split('-').map(Number) : null;
         if (m) {
             const [y, mo, da] = m as unknown as number[];
@@ -287,31 +382,46 @@ export class EventDetailComponent implements OnInit {
         const dt = new Date(d);
         return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
     }
+
     private dateOnlyLocal(d: string | Date): Date {
         const dt = d instanceof Date ? d : this.parseLocalDate(d);
         return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
     }
+
     private modalPeopleCount(): number {
         return this.selectedDemand()?.guests?.length ?? 0;
     }
+
     private modalActivePrice(): { amount: number } | null {
         const ev = this.event() as FrontEvent | undefined;
-        const prices = ev?.prices as Array<{ amount: number; startDate: string | Date; endDate: string | Date }> | undefined;
+        const prices = ev?.prices as
+            | Array<{
+            amount: number;
+            startDate: string | Date;
+            endDate: string | Date;
+        }>
+            | undefined;
         if (!prices?.length) return null;
         const today = this.dateOnlyLocal(new Date());
-        return prices.find(p => {
-            const s = this.dateOnlyLocal(p.startDate);
-            const e = this.dateOnlyLocal(p.endDate);
-            return s.getTime() <= today.getTime() && today.getTime() <= e.getTime();
-        }) ?? null;
+        return (
+            prices.find(p => {
+                const s = this.dateOnlyLocal(p.startDate);
+                const e = this.dateOnlyLocal(p.endDate);
+                return (
+                    s.getTime() <= today.getTime() &&
+                    today.getTime() <= e.getTime()
+                );
+            }) ?? null
+        );
     }
+
     private modalAutoAmount(): number {
         const p = this.modalActivePrice();
         return p ? p.amount * this.modalPeopleCount() : 0;
     }
 
     // utils
-    trackBySlug(_: number, d: DemandSummary) { return d.slug; }
-
-    protected readonly DemandStatus = DemandStatus;
+    trackBySlug(_: number, d: DemandSummary) {
+        return d.slug;
+    }
 }

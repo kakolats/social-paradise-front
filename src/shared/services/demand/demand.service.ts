@@ -8,8 +8,7 @@ import { Payment as FrontPayment } from '../../models/payment';
 import { Event as FrontEvent } from '../../models/event';
 import { environment } from '../../../environments/environment';
 
-// ⚙️ À remplacer par environment.apiBaseUrl si tu préfères
-const API_BASE_URL = environment.apiUrl
+const API_BASE_URL = environment.apiUrl;
 
 interface ApiResponse<T> {
     success: boolean;
@@ -23,11 +22,11 @@ export interface CreateGuestPayload {
     email: string;
     phoneNumber: string;
     age: number;
-    isMainGuest?: boolean; // ⚠️ exactement un invité principal au niveau de la demande
+    isMainGuest?: boolean;
 }
 export interface CreateDemandPayload {
-    eventSlug: string;            // UUID de l'événement côté API
-    guests: CreateGuestPayload[]; // >= 1
+    eventSlug: string;
+    guests: CreateGuestPayload[];
 }
 
 /** Type de liste renvoyé par GET /demand/by-event/:slug (DemandWithMainGuestDto) */
@@ -45,6 +44,13 @@ export interface DemandSummary {
         phoneNumber: string;
         age: number;
     };
+}
+
+/** Stat d'un statut donné */
+export interface DemandStatsEntry {
+    status: DemandStatus;
+    totalDemands: number;
+    totalParticipants: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -84,16 +90,83 @@ export class DemandService {
         if (filter?.status) params = params.set('status', filter.status);
         if (filter?.type)   params = params.set('type', filter.type);
 
-        return this.http.get<ApiResponse<any[]>>(`${this.base}/by-event/${eventSlug}`, { params }).pipe(
+        return this.http.get<ApiResponse<any[]>>(
+            `${this.base}/by-event/${eventSlug}`,
+            { params }
+        ).pipe(
             map(res => (res.data ?? []).map(d => this.parseDemandSummary(d)))
         );
     }
 
     // ----------------- UPDATE
     updateStatus(slug: string, status: DemandStatus): Observable<void> {
-        return this.http.patch<ApiResponse<unknown>>(`${this.base}/${slug}/status`, { status }).pipe(
+        return this.http.patch<ApiResponse<unknown>>(
+            `${this.base}/${slug}/status`,
+            { status }
+        ).pipe(
             map(() => void 0)
         );
+    }
+
+    // ----------------- STATS
+    /**
+     * Récupère les stats par statut pour un event donné.
+     *
+     * Backend renvoie seulement les statuts présents, ex:
+     * [
+     *   { "status":"VALIDEE","totalDemands":1,"totalParticipants":1 },
+     *   { "status":"REFUSEE","totalDemands":1,"totalParticipants":1 },
+     *   { "status":"PAYEE","totalDemands":1,"totalParticipants":3 }
+     * ]
+     *
+     * On renvoie toujours un objet contenant toutes les clés DemandStatus,
+     * même si certaines sont à 0.
+     */
+    getStatsByEventSlug(eventSlug: string): Observable<Record<DemandStatus, DemandStatsEntry>> {
+        return this.http
+            .get<ApiResponse<any[]>>(`${this.base}/stats/${eventSlug}`)
+            .pipe(
+                map(res => {
+                    const rawList = Array.isArray(res.data) ? res.data : [];
+
+                    // point de départ : tout à 0
+                    const allStatuses: DemandStatus[] = [
+                        DemandStatus.SOUMISE,
+                        DemandStatus.VALIDEE,
+                        DemandStatus.REFUSEE,
+                        DemandStatus.PAIEMENT_NOTIFIE,
+                        DemandStatus.PAYEE,
+                    ];
+
+                    const statsMap: Record<DemandStatus, DemandStatsEntry> = {} as any;
+
+                    for (const st of allStatuses) {
+                        statsMap[st] = {
+                            status: st,
+                            totalDemands: 0,
+                            totalParticipants: 0,
+                        };
+                    }
+
+                    // injecter les données réelles reçues
+                    for (const row of rawList) {
+                        const status = row.status as DemandStatus;
+                        if (!status) continue;
+                        if (!statsMap[status]) {
+                            // si jamais le backend renvoie un statut inconnu du front,
+                            // on l'ignore plutôt que de crasher
+                            continue;
+                        }
+                        statsMap[status] = {
+                            status,
+                            totalDemands: row.totalDemands ?? 0,
+                            totalParticipants: row.totalParticipants ?? 0,
+                        };
+                    }
+
+                    return statsMap;
+                })
+            );
     }
 
     // ================= PARSERS =================
@@ -102,27 +175,32 @@ export class DemandService {
     private parseDemandDetail(json: any): Demand {
         return {
             id: json.id,
-            date: json.createdAt ? new Date(json.createdAt) : (undefined as unknown as Date),
+            date: json.createdAt
+                ? new Date(json.createdAt)
+                : (undefined as unknown as Date),
             slug: json.slug,
             demandStatus: json.status as DemandStatus,
             type: json.type as DemandType,
             payment: json.payment,
-            guests: Array.isArray(json.guests) ? json.guests.map((g: any) => this.parseGuest(g)) : [],
+            guests: Array.isArray(json.guests)
+                ? json.guests.map((g: any) => this.parseGuest(g))
+                : [],
             event: json.event ? this.parseEvent(json.event) : undefined,
-            eventSlug: json.event?.slug, // pratique pour des actions ultérieures
+            eventSlug: json.event?.slug,
         };
     }
 
     /** Parser pour la LISTE (DemandWithMainGuestDto) */
     private parseDemandSummary(j: any): DemandSummary {
-        // Le backend garantit la présence d'un mainGuest (sinon lève une erreur)
         return {
             id: j.id,
             slug: j.slug,
             status: j.status as DemandStatus,
             type: j.type as DemandType,
             numberOfGuests: j.numberOfGuests ?? 1,
-            createdAt: j.createdAt ? new Date(j.createdAt) : (undefined as unknown as Date),
+            createdAt: j.createdAt
+                ? new Date(j.createdAt)
+                : (undefined as unknown as Date),
             mainGuest: {
                 firstName: j.mainGuest?.firstName,
                 lastName: j.mainGuest?.lastName,
@@ -134,8 +212,6 @@ export class DemandService {
     }
 
     private parseGuest(j: any): FrontGuest {
-        // NOTE : l’API renvoie slug=UUID (string). Si ton interface Front `Guest.slug` est `number?`,
-        // ne l’hydrate pas pour rester strict. Si tu la passes en `string?`, décommente la ligne.
         return {
             id: String(j.id),
             firstName: j.firstName,
@@ -143,7 +219,7 @@ export class DemandService {
             email: j.email,
             phoneNumber: j.phoneNumber,
             age: j.age,
-            // slug: j.slug, // ← active si Guest.slug est string?
+            // slug: j.slug, // si interface front Guest.slug devient string
             state: !!j.state,
             isMainGuest: !!j.isMainGuest,
         };
@@ -155,7 +231,7 @@ export class DemandService {
             amount: j.amount,
             date: j.date ? new Date(j.date) : undefined,
             phoneNumber: j.phoneNumber,
-            paymentCanal: j.paymentCanal, // "WAVE" | "ORANGE_MONEY" | "CASH"
+            paymentCanal: j.paymentCanal,
         };
     }
 
@@ -163,7 +239,9 @@ export class DemandService {
         return {
             id: j.id,
             name: j.name,
-            date: j.date ? new Date(j.date) : (undefined as unknown as Date),
+            date: j.date
+                ? new Date(j.date)
+                : (undefined as unknown as Date),
             slug: j.slug,
             prices: Array.isArray(j.prices)
                 ? j.prices.map((p: any) => ({

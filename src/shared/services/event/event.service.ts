@@ -29,36 +29,43 @@ export class EventService {
         return `${y}-${m}-${day}`;
     }
 
-    private serializeEvent(e: Partial<Event>): any {
+    private serializeEvent(evt: Partial<Event>): any {
         return {
-            ...e,
-            ...(e.date ? { date: this.toDateOnly(e.date) } : {}),
-            prices: e.prices?.map(p => ({
+            name: evt.name,
+            date: evt.date instanceof Date ? evt.date.toISOString().slice(0,10) : evt.date, // "YYYY-MM-DD"
+            location: evt.location,
+            description: evt.description,
+            coverImage: evt.coverImage, // <-- new
+            prices: (evt.prices ?? []).map(p => ({
                 id: p.id,
                 name: p.name,
                 amount: p.amount,
-                startDate: this.toDateOnly(p.startDate),
-                endDate: this.toDateOnly(p.endDate),
+                startDate: p.startDate instanceof Date
+                    ? p.startDate.toISOString().slice(0,10)
+                    : p.startDate,
+                endDate: p.endDate instanceof Date
+                    ? p.endDate.toISOString().slice(0,10)
+                    : p.endDate,
             })),
         };
     }
 
-    private parseEvent(json: any): Event {
+    private parseEvent(raw: any): Event {
         return {
-            id: json.id,
-            name: json.name,
-            location : json.location,
-            slug: json.slug,
-            date: json.date ? new Date(json.date) : undefined as unknown as Date,
-            prices: Array.isArray(json.prices)
-                ? json.prices.map((p: any) => ({
-                    id: p.id,
-                    name: p.name,
-                    amount: p.amount,
-                    startDate: new Date(p.startDate),
-                    endDate: new Date(p.endDate),
-                } as Price))
-                : [],
+            id: raw.id,
+            name: raw.name,
+            date: raw.date ? new Date(raw.date) : undefined,
+            slug: raw.slug,
+            location: raw.location,
+            description: raw.description,
+            coverImage: raw.coverImage,
+            prices: (raw.prices ?? []).map((p: any): Price => ({
+                id: p.id,
+                name: p.name,
+                amount: p.amount,
+                startDate: p.startDate ? new Date(p.startDate) : undefined,
+                endDate: p.endDate ? new Date(p.endDate) : undefined,
+            })),
         };
     }
 

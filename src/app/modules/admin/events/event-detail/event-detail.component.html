@@ -2,25 +2,123 @@
     <!-- Header / Hero -->
     <div class="mx-auto px-4 sm:px-6">
         <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">{{ event()?.name || 'Évènement' }}</h1>
-                    <p class="text-slate-600">{{ event()?.date | date:'longDate' }}</p>
-<!--                    <p class="text-xs text-slate-400" *ngIf="event()?.slug">Slug: {{ event()?.slug }}</p>-->
+                    <h1 class="text-2xl font-bold text-slate-900">
+                        {{ event()?.name || 'Évènement' }}
+                    </h1>
+                    <p class="text-slate-600">
+                        {{ event()?.date | date:'longDate' }}
+                    </p>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="text-sm text-slate-600">
-                        Total demandes (filtrées) :
-                        <span class="font-semibold text-slate-900">{{ filteredCount() }}</span>
+                <div class="flex flex-col items-start gap-3 sm:items-end">
+                    <div class="flex items-center gap-3">
+                        <div class="text-sm text-slate-600">
+                            Total demandes (filtrées) :
+                            <span class="font-semibold text-slate-900">
+                            {{ filteredCount() }}
+                        </span>
+                        </div>
+
+                        <!-- Bouton switch view -->
+                        <button
+                            (click)="toggleView()"
+                            class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            {{ viewMode() === 'cards' ? 'Afficher en liste' : 'Afficher en cards' }}
+                        </button>
                     </div>
 
-                    <!-- ➕ Bouton switch view -->
-                    <button
-                        (click)="toggleView()"
-                        class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                        {{ viewMode() === 'cards' ? 'Afficher en liste' : 'Afficher en cards' }}
-                    </button>
+                    <!-- Stats (demandes & participants) -->
+                    <div class="w-full max-w-full">
+                        <div *ngIf="stats(); else noStatsYet"
+                             class="grid grid-cols-2 gap-2 text-xs text-slate-700 sm:grid-cols-3 lg:grid-cols-5">
+                            <!-- SOUMISE -->
+                            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                                <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
+                                    SOUMISE
+                                </div>
+                                <div class="mt-1 leading-tight">
+                                <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.SOUMISE]?.totalDemands || 0 }}
+                                </span> demandes,
+                                    <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.SOUMISE]?.totalParticipants || 0 }}
+                                </span> pers.
+                                </div>
+                            </div>
+
+                            <!-- VALIDEE -->
+                            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                                <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
+                                    VALIDÉE
+                                </div>
+                                <div class="mt-1 leading-tight">
+                                <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.VALIDEE]?.totalDemands || 0 }}
+                                </span> demandes,
+                                    <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.VALIDEE]?.totalParticipants || 0 }}
+                                </span> pers.
+                                </div>
+                            </div>
+
+                            <!-- REFUSEE -->
+                            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                                <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
+                                    REFUSÉE
+                                </div>
+                                <div class="mt-1 leading-tight">
+                                <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.REFUSEE]?.totalDemands || 0 }}
+                                </span> demandes,
+                                    <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.REFUSEE]?.totalParticipants || 0 }}
+                                </span> pers.
+                                </div>
+                            </div>
+
+                            <!-- PAIEMENT_NOTIFIE -->
+                            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                                <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
+                                    NOTIF. PAIEMENT
+                                </div>
+                                <div class="mt-1 leading-tight">
+                                <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.PAIEMENT_NOTIFIE]?.totalDemands || 0 }}
+                                </span> demandes,
+                                    <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.PAIEMENT_NOTIFIE]?.totalParticipants || 0 }}
+                                </span> pers.
+                                </div>
+                            </div>
+
+                            <!-- PAYEE -->
+                            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:col-span-2 lg:col-span-1">
+                                <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
+                                    PAYÉE
+                                </div>
+                                <div class="mt-1 leading-tight">
+                                <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.PAYEE]?.totalDemands || 0 }}
+                                </span> demandes,
+                                    <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.PAYEE]?.totalParticipants || 0 }}
+                                </span> pers.
+                                </div>
+                            </div>
+                        </div>
+
+                        <ng-template #noStatsYet>
+                            <div class="text-[11px] text-slate-400">
+                                Chargement des statistiques…
+                            </div>
+                        </ng-template>
+
+                        <div *ngIf="statsError()" class="mt-2 text-[11px] text-rose-600">
+                            ❌ {{ statsError() }}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -36,8 +134,8 @@
                         <span *ngIf="p.name">&nbsp;•&nbsp;</span>
                         <span class="font-semibold">{{ p.amount | number:'1.0-0' }} FCFA</span>
                         <span class="text-slate-400">
-            &nbsp;— {{ p.startDate | date:'dd MMM' }} → {{ p.endDate | date:'dd MMM' }}
-          </span>
+                        &nbsp;— {{ p.startDate | date:'dd MMM' }} → {{ p.endDate | date:'dd MMM' }}
+                    </span>
                     </div>
                 </div>
 
@@ -47,6 +145,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Filters -->
     <div class="mx-auto px-4 sm:px-6">
@@ -177,11 +276,11 @@
                     <td class="px-4 py-3 text-xs">
                         <div class="flex items-center gap-2">
                             <!-- badge lecture -->
-                            <span *ngIf="d.status===DemandStatus.SOUMISE" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">SOUMISE</span>
-                            <span *ngIf="d.status===DemandStatus.VALIDEE" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">VALIDÉE</span>
-                            <span *ngIf="d.status===DemandStatus.REFUSEE" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">REFUSÉE</span>
-                            <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">NOTIF. PAIEMENT</span>
-                            <span *ngIf="d.status===DemandStatus.PAYEE" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">PAYÉE</span>
+                            <span *ngIf="d.status===DemandStatus.SOUMISE" class="rounded-full bg-slate-400 px-2 py-0.5 text-[11px] font-medium text-black">SOUMISE</span>
+                            <span *ngIf="d.status===DemandStatus.VALIDEE" class="rounded-full bg-[#ffb20a] px-2 py-0.5 text-[11px] font-medium text-white">VALIDÉE</span>
+                            <span *ngIf="d.status===DemandStatus.REFUSEE" class="rounded-full bg-[#ff3131] px-2 py-0.5 text-[11px] font-medium text-white">REFUSÉE</span>
+                            <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="rounded-full bg-[#d36b3d] px-2 py-0.5 text-[11px] font-medium text-white">NOTIF. PAIEMENT</span>
+                            <span *ngIf="d.status===DemandStatus.PAYEE" class="rounded-full bg-[#00b16a] px-2 py-0.5 text-[11px] font-medium text-white">PAYÉE</span>
 
                             <!-- select modifiable -->
                             <select [ngModel]="d.status" (ngModelChange)="onChangeStatus(d, $event)"
@@ -273,6 +372,7 @@
                                 {{ dd.payment.amount }} FCFA — {{ dd.payment.date | date:'mediumDate' }}
                             </div>
                             <div *ngIf="dd.payment.phoneNumber" class="text-xs text-slate-500">Numéro de téléphone: {{ dd.payment.phoneNumber }}</div>
+                            <div *ngIf="dd.payment.paymentCanal" class="text-xs text-slate-500">Canal de paiement: {{ dd.payment.paymentCanal }}</div>
                         </div>
 
                         <!-- Mini-form de notification de paiement (uniquement si VALIDEE) -->

@@ -12,17 +12,50 @@
                            class="w-full rounded-xl border border-slate-300 px-4 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                     <p *ngIf="invalid('name')" class="mt-1 text-sm text-red-600">Nom requis (3+ caractères).</p>
                 </div>
+
                 <div>
                     <label class="mb-1 block text-base font-medium text-slate-700">Date de l'événement</label>
                     <input type="date" formControlName="date"
                            class="w-full rounded-xl border border-slate-300 px-4 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                     <p *ngIf="invalid('date')" class="mt-1 text-sm text-red-600">Date requise.</p>
                 </div>
+
                 <div>
                     <label class="mb-1 block text-base font-medium text-slate-700">Lieu de l'événement</label>
                     <input type="text" formControlName="location"
                            class="w-full rounded-xl border border-slate-300 px-4 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                     <p *ngIf="invalid('location')" class="mt-1 text-sm text-red-600">Lieu requis (3+ caractères).</p>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="mb-1 block text-base font-medium text-slate-700">Description</label>
+                    <textarea formControlName="description" rows="4"
+                              class="w-full rounded-xl border border-slate-300 px-4 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                              placeholder="Décrivez l'événement..."></textarea>
+                </div>
+            </div>
+
+            <!-- Cover image -->
+            <div class="space-y-4">
+                <div>
+                    <label class="mb-1 block text-base font-medium text-slate-700">Image de couverture</label>
+
+                    <!-- Preview current cover if exists -->
+                    <div *ngIf="form.controls.coverImage.value" class="mb-3">
+                        <p class="text-xs text-slate-500 mb-2">Image actuelle :</p>
+                        <img [src]="form.controls.coverImage.value"
+                             alt="cover"
+                             class="max-h-40 w-auto rounded-xl border border-slate-200 object-cover shadow-sm" />
+                    </div>
+
+                    <input type="file"
+                           accept="image/*"
+                           (change)="onCoverFileChange($event)"
+                           class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-[#d36b3d] file:px-4 file:py-2 file:text-white file:font-semibold file:hover:opacity-90 file:cursor-pointer cursor-pointer" />
+
+                    <p class="mt-2 text-xs text-slate-500">
+                        Choisissez une image. Elle sera téléversée puis utilisée comme couverture.
+                    </p>
                 </div>
             </div>
 
@@ -32,7 +65,9 @@
                     <h3 class="text-xl font-semibold text-slate-900">Plages de prix</h3>
                     <div class="flex gap-2">
                         <button type="button" (click)="addPrice()"
-                                class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">+ Ajouter un prix</button>
+                                class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+                            + Ajouter un prix
+                        </button>
                     </div>
                 </div>
 
@@ -72,7 +107,6 @@
                             <td class="px-4 py-3">
                                 <input type="date" formControlName="startDate"
                                        class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
-                                <!-- Règle 3 : startDate doit être strictement > endDate du prix précédent -->
                                 <p *ngIf="i > 0 && (p.controls.startDate.touched || p.touched) && startNotAfterPrevEnd(i)"
                                    class="mt-1 text-xs text-red-600">
                                     Le début doit être strictement après la fin du prix précédent.
@@ -82,9 +116,7 @@
                             <td class="px-4 py-3">
                                 <input type="date" formControlName="endDate"
                                        class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
-                                <!-- Règle 1 : start <= end -->
                                 <p *ngIf="p.touched && !rangeValid(p)" class="mt-1 text-xs text-red-600">Fin doit être ≥ début</p>
-                                <!-- Règles 2 & 3 : endDate ≤ event.date -->
                                 <p *ngIf="(p.controls.endDate.touched || p.touched) && endAfterEvent(i)" class="mt-1 text-xs text-red-600">
                                     La fin doit être ≤ la date de l'événement.
                                 </p>
