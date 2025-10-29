@@ -32,7 +32,7 @@
                     <h3 class="text-xl font-semibold text-slate-900">Plages de prix</h3>
                     <div class="flex gap-2">
                         <button type="button" (click)="addPrice()"
-                                class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">+ Ajouter un prix</button>
+                                class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">+ Ajouter un prix</button>
                     </div>
                 </div>
 
@@ -110,7 +110,7 @@
                 </button>
                 <button type="submit"
                         [disabled]="submitting || form.invalid || !allRangesValid() || !allBusinessValid()"
-                        class="rounded-xl bg-slate-900 px-6 py-2 text-sm font-semibold text-white shadow hover:opacity-90 disabled:opacity-50">
+                        class="rounded-xl bg-[#d36b3d] px-6 py-2 text-sm font-semibold text-white shadow hover:opacity-90 disabled:opacity-50">
                     {{ eventToEdit ? 'Mettre à jour' : 'Créer' }}
                 </button>
             </div>
