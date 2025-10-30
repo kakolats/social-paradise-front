@@ -10,6 +10,7 @@ import { Event as FrontEvent } from 'shared/models/event';
 import { Price as FrontPrice } from 'shared/models/price';
 import { EventService } from '../../../../../shared/services/event/event.service';
 import { PaymentCanal } from '../../../../../shared/models/payment';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-public-event-detail',
@@ -19,6 +20,21 @@ import { PaymentCanal } from '../../../../../shared/models/payment';
   styleUrl: './public-event-detail.component.scss'
 })
 export class PublicEventDetailComponent implements OnInit {
+
+    readonly orangeMoneyNumber = environment.orangeMoneyNumber ?? '';
+    readonly orangeMoneyQrUrl= environment.orangeMoneyQrUrl; // facultatif si tu préfères l’injecter depuis le parent
+
+    // ✅ 2) Lien Wave (montant dynamique)
+    wavePayUrl() {
+        const amt = Math.max(0, Math.round(this.totalAmount() || 0));
+        const base = 'https://pay.wave.com/m/M_sn_Sl2Ujzz-WzTu/c/sn/';
+        return `${base}?amount=${amt}`;
+    }
+
+    showOrangeMoneyBlock() {
+        return !!this.orangeMoneyNumber && (this.totalAmount() || 0) > 0;
+    }
+
     private route = inject(ActivatedRoute);
     private demandService = inject(DemandService);
     private paymentService = inject(PaymentService);

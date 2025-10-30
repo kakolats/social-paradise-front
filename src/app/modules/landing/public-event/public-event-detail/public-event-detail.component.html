@@ -90,17 +90,85 @@
         </div>
     </div>
 
-    <!-- Paiement en ligne : infos -->
+    <!-- Paiement en ligne : infos + actions -->
     <div class="mx-auto max-w-4xl px-4 sm:px-6">
         <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="mb-2 text-sm font-semibold text-slate-900">Moyens de paiement en ligne</div>
-            <ul class="list-disc space-y-1 pl-6 text-sm text-slate-700">
-                <li><strong>Wave</strong> — Paiement via mobile, numéro associé requis.</li>
-                <li><strong>Orange Money</strong> — Paiement via mobile, numéro associé requis.</li>
-            </ul>
-            <p class="mt-2 text-xs text-slate-500">
-                Après notification, l’équipe vérifiera votre paiement. Vous recevrez un email lorsque la demande passera à l’état <strong>PAYEE</strong>.
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-sm font-semibold text-slate-900">Moyens de paiement en ligne</h2>
+
+                <!-- Bouton Wave -->
+                <a
+                    [href]="wavePayUrl()"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center gap-2 rounded-xl bg-[#1B64F2] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90">
+                    Payer avec Wave
+                    <span class="rounded-md bg-white/20 px-2 py-0.5 text-xs">
+          {{ totalAmount() | number }} FCFA
+        </span>
+                </a>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-4">
+                Après notification, l’équipe vérifiera votre paiement. Vous recevrez un email lorsque la demande passera à l’état
+                <strong>PAYEE</strong>.
             </p>
+
+            <!-- ORANGE MONEY -->
+            <div *ngIf="showOrangeMoneyBlock()" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div class="mb-2 text-sm font-semibold text-slate-900">Orange Money</div>
+
+                <!-- 🖥️ Desktop : image QR fournie -->
+                <div class="hidden md:flex items-center gap-4">
+                    <img
+                        *ngIf="orangeMoneyQrUrl; else noQr"
+                        [src]="orangeMoneyQrUrl"
+                        alt="QR Orange Money pour paiement"
+                        class="h-36 w-36 rounded-lg border border-slate-200 object-contain bg-white" />
+                    <ng-template #noQr>
+                        <div class="h-36 w-36 grid place-items-center rounded-lg border border-dashed border-slate-300 bg-white text-xs text-slate-400">
+                            QR non configuré
+                        </div>
+                    </ng-template>
+
+                    <div class="text-sm text-slate-700">
+                        <div class="mb-1">
+                            Scannez ce QR avec votre application <strong>Orange Money</strong> pour payer.
+                        </div>
+                        <ul class="list-disc pl-5 space-y-1 text-xs text-slate-600">
+                            <li>Numéro destinataire : <span class="font-medium text-slate-900">{{ orangeMoneyNumber }}</span></li>
+                            <li>Montant : <span class="font-medium text-slate-900">{{ totalAmount() | number }} FCFA</span></li>
+<!--                            <li>Référence : <span class="font-medium text-slate-900">{{ demand()?.slug }}</span></li>-->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 📱 Mobile : numéro cliquable -->
+                <div class="md:hidden text-sm text-slate-700">
+                    <div class="mb-2">
+                        Payez par <strong>Orange Money</strong> au numéro ci-dessous, puis revenez notifier :
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm">
+                        <div>
+                            <div class="text-xs text-slate-500">Numéro destinataire</div>
+                            <div class="font-semibold text-slate-900">{{ orangeMoneyNumber }}</div>
+                        </div>
+                        <!--<a
+                            [href]="'tel:' + orangeMoneyNumber"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            Appeler
+                        </a>-->
+                    </div>
+                    <div class="mt-2 text-xs text-slate-600">
+                        Montant : <span class="font-semibold text-slate-900">{{ totalAmount() | number }} FCFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Si pas de numéro OM configuré -->
+            <div *ngIf="!orangeMoneyNumber" class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 mt-3">
+                ⚠️ Orange Money indisponible : numéro destinataire non configuré.
+            </div>
         </div>
     </div>
 
