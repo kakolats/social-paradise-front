@@ -71,6 +71,8 @@ export class EventDetailComponent implements OnInit {
     // ➕ view switch
     viewMode = signal<'cards' | 'list'>('list');
 
+    searchQuery = signal<string>('');
+
     DemandType = DemandType;
     PaymentCanal = PaymentCanal;
     DemandStatus = DemandStatus;
@@ -159,9 +161,12 @@ export class EventDetailComponent implements OnInit {
             }
         });
     }
-
+    private searchedDemands = computed(() =>
+        this.demandsRaw().filter(d => this.matchesSearch(d, this.searchQuery()))
+    );
     // --- computed pagination helpers
-    filteredCount = computed(() => this.demandsRaw().length);
+    filteredCount = computed(() => this.searchedDemands().length);
+
     totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredCount() / this.pageSize()))
     );
@@ -169,7 +174,7 @@ export class EventDetailComponent implements OnInit {
         const p = this.page();
         const size = this.pageSize();
         const start = (p - 1) * size;
-        return this.demandsRaw().slice(start, start + size);
+        return this.searchedDemands().slice(start, start + size);
     });
     pageNumbers = computed(() => {
         const total = this.totalPages();
@@ -423,5 +428,36 @@ export class EventDetailComponent implements OnInit {
     // utils
     trackBySlug(_: number, d: DemandSummary) {
         return d.slug;
+    }
+
+    private normalize(v: unknown): string {
+        return (v ?? '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, ''); // remove accents
+    }
+
+    private matchesSearch(d: DemandSummary, q: string): boolean {
+        const n = this.normalize(q);
+        if (!n) return true;
+
+        const fullName = `${d.mainGuest?.firstName ?? ''} ${d.mainGuest?.lastName ?? ''}`;
+        const haystacks = [
+            fullName,
+            d.mainGuest?.email ?? '',
+            // d.status ?? '',
+            // d.type ?? '',
+        ];
+
+        return haystacks.some(h => this.normalize(h).includes(n));
+    }
+
+    setSearch(q: string) {
+        this.searchQuery.set(q ?? '');
+        this.page.set(1); // reset pagination on search
+    }
+    clearSearch() {
+        this.setSearch('');
     }
 }

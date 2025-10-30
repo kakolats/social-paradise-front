@@ -149,43 +149,87 @@
 
     <!-- Filters -->
     <div class="mx-auto px-4 sm:px-6">
-        <div class="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5 items-end">
+        <div class="mt-6 grid gap-3 items-end sm:grid-cols-4 lg:grid-cols-6">
+            <!-- Statut -->
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-900">Statut</label>
-                <select [ngModel]="filterStatus()" (ngModelChange)="setFilterStatus($event)"
-                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                <select
+                    [ngModel]="filterStatus()"
+                    (ngModelChange)="setFilterStatus($event)"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                >
                     <option [ngValue]="null">Tous</option>
                     <option *ngFor="let s of allStatuses" [ngValue]="s">{{ s }}</option>
                 </select>
             </div>
 
+            <!-- Type -->
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-900">Type</label>
-                <select [ngModel]="filterType()" (ngModelChange)="setFilterType($event)"
-                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                <select
+                    [ngModel]="filterType()"
+                    (ngModelChange)="setFilterType($event)"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                >
                     <option [ngValue]="null">Tous</option>
                     <option *ngFor="let t of allTypes" [ngValue]="t">{{ t }}</option>
                 </select>
             </div>
 
+            <!-- Taille de page -->
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-900">Taille de page</label>
-                <select [ngModel]="pageSize()" (ngModelChange)="changePageSize($event)"
-                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                <select
+                    [ngModel]="pageSize()"
+                    (ngModelChange)="changePageSize($event)"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                >
                     <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
                 </select>
             </div>
 
-            <div class="sm:col-span-2 lg:col-span-2 flex items-end justify-end gap-2">
-                <button (click)="reload()" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <!-- Recherche (client-side only) -->
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-900">Recherche</label>
+                <div class="relative">
+                    <input
+                        type="text"
+                        [ngModel]="searchQuery()"
+                        (ngModelChange)="setSearch($event)"
+                        (keydown.escape)="clearSearch()"
+                        placeholder="Nom, email"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 pr-20 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    />
+                    <button
+                        type="button"
+                        (click)="clearSearch()"
+                        *ngIf="searchQuery()"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                        aria-label="Effacer la recherche"
+                    >
+                        Effacer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="sm:col-span-4 lg:col-span-2 flex items-end justify-end gap-2">
+                <button
+                    (click)="reload()"
+                    class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                >
                     Recharger
                 </button>
-                <button (click)="resetFilters()" class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90">
+                <button
+                    (click)="resetFilters()"
+                    class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                >
                     Réinitialiser les filtres
                 </button>
             </div>
         </div>
     </div>
+
 
     <!-- Demands list -->
     <div class="mx-auto px-4 sm:px-6">
