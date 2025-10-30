@@ -15,8 +15,12 @@
                     <h1 class="text-3xl font-bold tracking-tight text-slate-900">
                         {{ event()?.name || event()?.name || 'Évènement' }}
                     </h1>
+
                     <p class="mt-2 text-slate-600">
-                        {{ (event()?.date) | date:'longDate' }}
+                        {{ (event()?.date) | date:'longDate' }} - {{ (event()?.location) }}
+                    </p>
+                    <p class="mt-2 text-slate-900">
+                        {{ (event()?.description) }}
                     </p>
                 </div>
             </div>
@@ -41,7 +45,7 @@
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="text-lg font-semibold text-slate-900">{{ p.name || 'Tarif' }}</h3>
                     <span class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-sm font-semibold text-white">
-                {{ p.amount }} FCFA
+                {{ p.amount| number }} FCFA
               </span>
                 </div>
                 <p class="mt-2 text-sm text-slate-600">
@@ -168,7 +172,7 @@
                         <ng-container *ngIf="activePrice() as tier">
                             · Total indicatif :
                             <span class="font-semibold text-slate-900">
-                    {{ tier.amount * peopleCount() }} FCFA
+                    {{ tier.amount * peopleCount() | number }} FCFA
                   </span>
                         </ng-container>
                     </div>

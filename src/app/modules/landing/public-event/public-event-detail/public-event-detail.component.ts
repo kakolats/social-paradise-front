@@ -99,6 +99,10 @@ export class PublicEventDetailComponent implements OnInit {
         return this.demand()?.demandStatus === DemandStatus.PAIEMENT_NOTIFIE;
     }
 
+    isRejected(){
+        return this.demand()?.demandStatus === DemandStatus.REFUSEE;
+    }
+
     peopleCount = computed(() => this.demand()?.guests?.length ?? 0);
 
     private dateOnly(d: Date | string) {
@@ -145,11 +149,26 @@ export class PublicEventDetailComponent implements OnInit {
             return;
         }
 
+        let paymentC:PaymentCanal;
+        switch (this.form.controls.paymentCanal.value) {
+            case "WAVE":
+                paymentC = PaymentCanal.WAVE
+                break
+            case "ORANGE_MONEY":
+                paymentC = PaymentCanal.ORANGE_MONEY
+                break
+            case "CASH" :
+                paymentC = PaymentCanal.CASH;
+                break
+            default:
+                break
+        }
+
         const payload = {
             demandSlug: this.demand()!.slug,
             amount: safeAmount,
             phoneNumber: this.form.controls.phoneNumber.value!,
-            paymentCanal: this.form.controls.paymentCanal.value!=="WAVE"?PaymentCanal.WAVE:PaymentCanal.ORANGE_MONEY // "WAVE" | "ORANGE_MONEY"
+            paymentCanal: paymentC
         };
 
         this.submitting.set(true);

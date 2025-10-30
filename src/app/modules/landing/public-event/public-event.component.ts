@@ -92,7 +92,11 @@ export class PublicEventComponent implements OnInit {
         this.loading.set(true);
         this.errorMsg.set(null);
         this.eventService.getBySlug(slug).subscribe({
-            next: (evt) => { this.event.set(evt); this.loading.set(false); },
+            next: (evt) => { this.event.set(evt); this.loading.set(false);
+                if(evt.coverImage){
+                    this.placeholder = evt.coverImage;
+                }
+                },
             error: (err) => { this.errorMsg.set(err?.error?.message ?? "Impossible de charger l'évènement."); this.loading.set(false); },
         });
     }

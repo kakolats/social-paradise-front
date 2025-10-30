@@ -48,7 +48,7 @@ export class EventDetailComponent implements OnInit {
     // pagination
     page = signal<number>(1);
     pageSize = signal<number>(6);
-    pageSizeOptions = [2, 12, 24];
+    pageSizeOptions = [6, 12, 24];
 
     // modal details
     isModalOpen = signal<boolean>(false);
