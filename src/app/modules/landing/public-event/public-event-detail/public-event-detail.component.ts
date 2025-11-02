@@ -9,8 +9,15 @@ import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { Price as FrontPrice } from 'shared/models/price';
 import { EventService } from '../../../../../shared/services/event/event.service';
-import { PaymentCanal } from '../../../../../shared/models/payment';
+import { PaymentCanal,PaymentPlace } from '../../../../../shared/models/payment';
 import { environment } from '../../../../../environments/environment';
+
+type PlaceInfo = {
+    key?: PaymentPlace;
+    name: string;
+    address: string;
+    mapUrl: string;
+};
 
 @Component({
   selector: 'app-public-event-detail',
@@ -20,6 +27,35 @@ import { environment } from '../../../../../environments/environment';
   styleUrl: './public-event-detail.component.scss'
 })
 export class PublicEventDetailComponent implements OnInit {
+
+    readonly cashPlaces: PlaceInfo[] = [
+        {
+            key: PaymentPlace.FITLAB,
+            name: 'Fitlab',
+            address: '14 Rue Carnot, Dakar',
+            mapUrl: 'https://maps.app.goo.gl/3ziu4WkKkCYUBmzG7',
+        },
+        {
+            key: PaymentPlace.FRUIT_STORE,
+            name: 'Fruitstore',
+            address: 'Rue Félix Faure',
+            mapUrl: 'https://maps.app.goo.gl/CUfUWzD5KjZnK3e99',
+        },
+        {
+            key: PaymentPlace.GROOV,
+            name: 'Groov',
+            address: "Place de l'Indépendance, Rue des Essarts, Dakar",
+            mapUrl: 'https://maps.app.goo.gl/BNmZyLtt6MBy9aMG7',
+        },
+    ];
+
+    mainGuestLabel = computed(() => {
+        const d = this.demand();
+        const main = d?.guests?.find(g => g.isMainGuest) ?? d?.guests?.[0];
+        if (!main) return '';
+        const fullName = [main.firstName, main.lastName].filter(Boolean).join(' ');
+        return `${fullName}${main.email ? ' — ' + main.email : ''}`;
+    });
 
     readonly orangeMoneyNumber = environment.orangeMoneyNumber ?? '';
     readonly orangeMoneyQrUrl= environment.orangeMoneyQrUrl; // facultatif si tu préfères l’injecter depuis le parent
@@ -53,11 +89,13 @@ export class PublicEventDetailComponent implements OnInit {
 
     DemandStatus = DemandStatus;
     DemandType = DemandType;
+    PaymentPlace = PaymentPlace;
 
     form = this.fb.group({
         amount: [{ value: 0, disabled: false }, [Validators.required, Validators.min(0)]],
         phoneNumber: ['', [Validators.required]],
         paymentCanal: ['WAVE', [Validators.required]],
+        paymentPlace: [null as PaymentPlace | null]  //
     });
 
     ngOnInit() {
@@ -66,7 +104,23 @@ export class PublicEventDetailComponent implements OnInit {
             this.globalError.set('Slug de demande manquant.');
             return;
         }
+
+        // 🔁 Rendez PaymentPlace obligatoire uniquement si CASH
+        this.form.controls.paymentCanal.valueChanges.subscribe((val) => {
+            if (val === 'CASH') {
+                this.form.controls.paymentPlace.setValidators([Validators.required]);
+            } else {
+                this.form.controls.paymentPlace.clearValidators();
+                this.form.controls.paymentPlace.setValue(null);
+            }
+            this.form.controls.paymentPlace.updateValueAndValidity({ emitEvent: false });
+        });
+
         this.fetch(slug);
+    }
+
+    isCashSelected() {
+        return this.form.controls.paymentCanal.value === 'CASH';
     }
 
     fetch(slug: string) {
@@ -156,47 +210,50 @@ export class PublicEventDetailComponent implements OnInit {
         this.successMsg.set(null);
         this.errorMsg.set(null);
 
-        // Recalcule le montant avant envoi pour éviter toute manipulation
         const safeAmount = this.totalAmount();
         this.form.controls.amount.setValue(safeAmount);
 
         if (this.form.invalid || !this.canNotify()) {
-            this.errorMsg.set("Formulaire invalide ou aucun tarif actif.");
+            this.errorMsg.set('Formulaire invalide ou aucun tarif actif.');
             return;
         }
 
-        let paymentC:PaymentCanal;
+        let paymentC: PaymentCanal | undefined;
         switch (this.form.controls.paymentCanal.value) {
-            case "WAVE":
-                paymentC = PaymentCanal.WAVE
-                break
-            case "ORANGE_MONEY":
-                paymentC = PaymentCanal.ORANGE_MONEY
-                break
-            case "CASH" :
-                paymentC = PaymentCanal.CASH;
-                break
-            default:
-                break
+            case 'WAVE': paymentC = PaymentCanal.WAVE; break;
+            case 'ORANGE_MONEY': paymentC = PaymentCanal.ORANGE_MONEY; break;
+            case 'CASH': paymentC = PaymentCanal.CASH; break;
         }
 
-        const payload = {
+        // Mapper PaymentPlace si CASH
+        let paymentPlaceValue: PaymentPlace | undefined;
+        if (paymentC === PaymentCanal.CASH) {
+            switch (this.form.controls.paymentPlace.value) {
+                case PaymentPlace.FRUIT_STORE:
+                case PaymentPlace.GROOV:
+                case PaymentPlace.FITLAB:
+                    paymentPlaceValue = this.form.controls.paymentPlace.value as PaymentPlace;
+                    break;
+            }
+        }
+
+        const payload: any = {
             demandSlug: this.demand()!.slug,
             amount: safeAmount,
             phoneNumber: this.form.controls.phoneNumber.value!,
             paymentCanal: paymentC
         };
+        if (paymentPlaceValue) payload.paymentPlace = paymentPlaceValue;
 
         this.submitting.set(true);
-
         this.paymentService.notify(payload).subscribe({
             next: () => {
                 this.submitting.set(false);
-                this.successMsg.set("Votre notification de paiement a été enregistrée. Elle sera vérifiée par un administrateur.");
+                this.successMsg.set('Votre notification de paiement a été enregistrée. Elle sera vérifiée par un administrateur.');
             },
             error: (err) => {
                 this.submitting.set(false);
-                this.errorMsg.set(err?.error?.message ?? "Erreur lors de la notification de paiement.");
+                this.errorMsg.set(err?.error?.message ?? 'Erreur lors de la notification de paiement.');
             }
         });
     }

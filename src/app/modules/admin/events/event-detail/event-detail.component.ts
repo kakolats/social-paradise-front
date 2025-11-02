@@ -10,7 +10,7 @@ import {
 import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { FormsModule } from '@angular/forms';
-import { PaymentCanal } from 'shared/models/payment';
+import { PaymentCanal, PaymentPlace  } from 'shared/models/payment';
 import { PaymentService } from 'shared/services/payment/payment.service';
 
 type PendingStatusChange = { slug: string; prev: DemandStatus; next: DemandStatus } | null;
@@ -60,6 +60,7 @@ export class EventDetailComponent implements OnInit {
     payAmount = signal<number>(0);
     payPhone = signal<string>('');
     payCanal = signal<PaymentCanal>(PaymentCanal.WAVE);
+    payPlace = signal<PaymentPlace | null>(null);
     submittingPayment = signal<boolean>(false);
     paymentError = signal<string | null>(null);
     paymentSuccess = signal<string | null>(null);
@@ -75,6 +76,7 @@ export class EventDetailComponent implements OnInit {
 
     DemandType = DemandType;
     PaymentCanal = PaymentCanal;
+    PaymentPlace = PaymentPlace;
     DemandStatus = DemandStatus;
 
     updatableStatuses: DemandStatus[] = [
@@ -284,7 +286,7 @@ export class EventDetailComponent implements OnInit {
         this.modalLoading.set(true);
         this.modalError.set(null);
         this.selectedDemand.set(null);
-
+        this.payPlace.set(null);
         this.paymentError.set(null);
         this.paymentSuccess.set(null);
         this.payCanal.set(PaymentCanal.WAVE);
@@ -314,6 +316,7 @@ export class EventDetailComponent implements OnInit {
         this.modalError.set(null);
         this.modalLoading.set(false);
         // reset mini-form
+        this.payPlace.set(null);
         this.paymentError.set(null);
         this.paymentSuccess.set(null);
         this.payCanal.set(PaymentCanal.WAVE);
@@ -324,6 +327,10 @@ export class EventDetailComponent implements OnInit {
     // --- mini-form paiement helpers
     onChangeCanal(c: PaymentCanal) {
         this.payCanal.set(c);
+        // si on quitte CASH, on nettoie le lieu
+        if (c !== PaymentCanal.CASH) {
+            this.payPlace.set(null);
+        }
     }
 
     submitPaymentFromModal() {
@@ -339,10 +346,14 @@ export class EventDetailComponent implements OnInit {
             this.paymentError.set('Montant invalide.');
             return;
         }
+
+        // ✅ validations selon canal
         if (canal !== PaymentCanal.CASH && phone.length === 0) {
-            this.paymentError.set(
-                'Le numéro de téléphone est requis pour ce canal.'
-            );
+            this.paymentError.set('Le numéro de téléphone est requis pour ce canal.');
+            return;
+        }
+        if (canal === PaymentCanal.CASH && !this.payPlace()) {
+            this.paymentError.set('Veuillez indiquer le lieu d’encaissement.');
             return;
         }
 
@@ -351,7 +362,11 @@ export class EventDetailComponent implements OnInit {
             amount,
             paymentCanal: canal
         };
-        if (canal !== PaymentCanal.CASH) payload.phoneNumber = phone;
+        if (canal !== PaymentCanal.CASH) {
+            payload.phoneNumber = phone;
+        } else {
+            payload.paymentPlace = this.payPlace();
+        }
 
         this.submittingPayment.set(true);
         this.paymentError.set(null);
@@ -360,17 +375,12 @@ export class EventDetailComponent implements OnInit {
         this.paymentService.notify(payload).subscribe({
             next: () => {
                 this.submittingPayment.set(false);
-                this.paymentSuccess.set(
-                    'Notification enregistrée. Elle sera vérifiée par un administrateur.'
-                );
+                this.paymentSuccess.set('Notification enregistrée. Elle sera vérifiée par un administrateur.');
                 this.reload();
             },
             error: err => {
                 this.submittingPayment.set(false);
-                this.paymentError.set(
-                    err?.error?.message ??
-                    'Erreur lors de la notification de paiement.'
-                );
+                this.paymentError.set(err?.error?.message ?? 'Erreur lors de la notification de paiement.');
             }
         });
     }

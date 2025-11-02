@@ -417,6 +417,7 @@
                             </div>
                             <div *ngIf="dd.payment.phoneNumber" class="text-xs text-slate-500">Numéro de téléphone: {{ dd.payment.phoneNumber }}</div>
                             <div *ngIf="dd.payment.paymentCanal" class="text-xs text-slate-500">Canal de paiement: {{ dd.payment.paymentCanal }}</div>
+                            <div *ngIf="dd.payment.paymentPlace" class="text-xs text-slate-500">Lieu de collecte: {{ dd.payment.paymentPlace }}</div>
                         </div>
 
                         <!-- Mini-form de notification de paiement (uniquement si VALIDEE) -->
@@ -452,6 +453,23 @@
                                            placeholder="ex: 77 00 00 00"
                                            [ngModel]="payPhone()" (ngModelChange)="payPhone.set($event)" />
                                     <p class="mt-1 text-[11px] text-slate-500" *ngIf="payCanal() === PaymentCanal.CASH">Non requis pour Cash.</p>
+                                </div>
+
+                                <div *ngIf="payCanal() === PaymentCanal.CASH">
+                                    <label class="mb-1 block text-xs font-medium text-slate-600">Lieu d’encaissement</label>
+                                    <select
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                                        [ngModel]="payPlace()"
+                                        (ngModelChange)="payPlace.set($event)"
+                                        required>
+                                        <option [ngValue]="null">Sélectionner…</option>
+                                        <option [ngValue]="PaymentPlace.FRUIT_STORE">Fruit Store</option>
+                                        <option [ngValue]="PaymentPlace.GROOV">Groov</option>
+                                        <option [ngValue]="PaymentPlace.FITLAB">FitLab</option>
+                                    </select>
+                                    <p class="mt-1 text-[11px] text-rose-600" *ngIf="!payPlace() && submittingPayment()">
+                                        Le lieu d’encaissement est requis pour un paiement Cash.
+                                    </p>
                                 </div>
                             </div>
 
