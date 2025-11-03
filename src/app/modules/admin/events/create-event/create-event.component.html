@@ -134,6 +134,72 @@
                 </div>
             </div>
 
+            <!-- Tables -->
+            <div>
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-slate-900">Types de tables</h3>
+                    <div class="flex gap-2">
+                        <button type="button"
+                                (click)="addTable()"
+                                class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+                            + Ajouter une table
+                        </button>
+                    </div>
+                </div>
+
+                <div *ngIf="tables().length === 0"
+                     class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+                    Aucune table ajoutée
+                </div>
+
+                <div *ngIf="tables().length > 0" class="overflow-hidden rounded-2xl border border-slate-200">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Nom</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Montant (XOF)</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Capacité</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                        <tr *ngFor="let t of tables().controls; let i = index; trackBy: trackByIndex" [formGroup]="t">
+                            <td class="px-4 py-3">
+                                <input type="text" formControlName="name"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <p *ngIf="t.controls.name.touched && t.controls.name.invalid" class="mt-1 text-xs text-red-600">
+                                    Nom requis
+                                </p>
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <input type="number" formControlName="amount" min="0" step="1"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <p *ngIf="t.controls.amount.touched && t.controls.amount.invalid" class="mt-1 text-xs text-red-600">
+                                    Montant ≥ 0
+                                </p>
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <input type="number" formControlName="capacity" min="1"
+                                       class="w-full rounded-lg border border-slate-300 px-3 py-1.5 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
+                                <p *ngIf="t.controls.capacity.touched && t.controls.capacity.invalid" class="mt-1 text-xs text-red-600">
+                                    Capacité ≥ 1
+                                </p>
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <button type="button" (click)="removeTable(i)"
+                                        class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="flex justify-end gap-3">
                 <button type="button" (click)="reset()"

@@ -6,6 +6,7 @@ import { Demand, DemandStatus, DemandType } from '../../models/demand';
 import { Guest as FrontGuest } from '../../models/guest';
 import { Payment as FrontPayment } from '../../models/payment';
 import { Event as FrontEvent } from '../../models/event';
+import { TableItem, Table } from '../../models/table';
 import { environment } from '../../../environments/environment';
 
 const API_BASE_URL = environment.apiUrl;
@@ -24,9 +25,16 @@ export interface CreateGuestPayload {
     age: number;
     isMainGuest?: boolean;
 }
+
+interface TableSelection {
+    tableId: number;
+    quantity: number;
+}
+
 export interface CreateDemandPayload {
     eventSlug: string;
     guests: CreateGuestPayload[];
+    tableSelections?: TableSelection[];
 }
 
 /** Type de liste renvoyé par GET /demand/by-event/:slug (DemandWithMainGuestDto) */
@@ -185,6 +193,9 @@ export class DemandService {
             guests: Array.isArray(json.guests)
                 ? json.guests.map((g: any) => this.parseGuest(g))
                 : [],
+            tableItems: Array.isArray(json.tableItems)
+                ? json.tableItems.map((t: any) => this.parseTableItem(t))
+                : [],
             event: json.event ? this.parseEvent(json.event) : undefined,
             eventSlug: json.event?.slug,
         };
@@ -252,6 +263,23 @@ export class DemandService {
                     endDate: new Date(p.endDate),
                 }))
                 : [],
+        };
+    }
+
+    private parseTableItem(j: any): TableItem {
+        return {
+            id: j.id ?? 0,
+            table: this.parseTable(j.table),
+            quantity: j.quantity ?? 0,
+        };
+    }
+
+    private parseTable(j: any): Table {
+        return {
+            id: j.id,
+            name: j.name ?? '',
+            amount: typeof j.amount === 'string' ? parseFloat(j.amount) : (j.amount ?? 0),
+            capacity: j.capacity ?? 0,
         };
     }
 }

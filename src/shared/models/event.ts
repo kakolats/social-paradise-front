@@ -1,4 +1,5 @@
 import { Price } from './price';
+import { Table } from './table';
 
 export interface Event {
     id?: number;
@@ -9,4 +10,5 @@ export interface Event {
     description?: string;
     slug?: string;
     prices?: Price[];
+    tables?: Table[];
 }
