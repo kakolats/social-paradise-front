@@ -63,7 +63,7 @@
         <h2 class="mt-10 mb-4 text-xl font-semibold text-slate-900">Options de tables</h2>
 
         <div *ngIf="!event()?.tables?.length" class="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-            Aucun type de table défini pour cet évènement.
+            Pour toutes informations sur les reservations de table, veuillez nous contactez
         </div>
 
         <div *ngIf="event()?.tables?.length" class="space-y-3">
@@ -129,7 +129,7 @@
                         <div class="text-sm text-slate-600">
                             Prix unitaire aujourd'hui :
                             <span class="font-semibold text-slate-900">
-                    {{ tier.amount }} FCFA
+                    {{ tier.amount | number }} FCFA
                   </span>
                         </div>
                     </div>
@@ -216,7 +216,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="flex items-center justify-between gap-4">
+                <div class="flex flex-col items-center justify-between gap-4">
                     <div class="text-sm text-slate-600">
                         Nombre de personnes :
                         <span class="font-semibold text-slate-900">{{ peopleCount() }}</span>

@@ -216,7 +216,7 @@
                 Pour un paiement en espèces, vous pouvez déposer l’enveloppe à l’un des lieux ci-dessous.
                 <br class="hidden sm:block" />
                 <span class="text-slate-700">
-        Merci d’indiquer lisiblement sur l’enveloppe : <strong>Nom & email de l’invité principal</strong>.
+        Merci d’indiquer lisiblement sur l’enveloppe : <strong>Nom & numéro de l’invité principal</strong>.
       </span>
                 <span *ngIf="mainGuestLabel()" class="block mt-1 text-[11px] text-slate-500">
         Exemple pour cette demande : <span class="font-medium text-slate-900">{{ mainGuestLabel() }}</span>
@@ -263,7 +263,7 @@
                     <p class="mt-1 text-xs text-slate-500">Calculé automatiquement.</p>
                 </div>
 
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" *ngIf="!isCashSelected()">
                     <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
                     <input type="tel" formControlName="phoneNumber" placeholder="ex: 77 00 00 00"
                            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"/>

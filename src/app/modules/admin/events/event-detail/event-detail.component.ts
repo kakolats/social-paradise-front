@@ -531,6 +531,7 @@ export class EventDetailComponent implements OnInit {
         const haystacks = [
             fullName,
             d.mainGuest?.email ?? '',
+            d.mainGuest?.phoneNumber ?? '',
             // d.status ?? '',
             // d.type ?? '',
         ];

@@ -54,7 +54,7 @@ export class PublicEventDetailComponent implements OnInit {
         const main = d?.guests?.find(g => g.isMainGuest) ?? d?.guests?.[0];
         if (!main) return '';
         const fullName = [main.firstName, main.lastName].filter(Boolean).join(' ');
-        return `${fullName}${main.email ? ' — ' + main.email : ''}`;
+        return `${fullName}${main.email ? ' — ' + main.phoneNumber : ''}`;
     });
 
     readonly orangeMoneyNumber = environment.orangeMoneyNumber ?? '';
@@ -109,11 +109,16 @@ export class PublicEventDetailComponent implements OnInit {
         this.form.controls.paymentCanal.valueChanges.subscribe((val) => {
             if (val === 'CASH') {
                 this.form.controls.paymentPlace.setValidators([Validators.required]);
+                // Téléphone optionnel si CASH
+                this.form.controls.phoneNumber.clearValidators();
             } else {
                 this.form.controls.paymentPlace.clearValidators();
                 this.form.controls.paymentPlace.setValue(null);
+                // Téléphone requis pour WAVE / ORANGE_MONEY
+                this.form.controls.phoneNumber.setValidators([Validators.required]);
             }
             this.form.controls.paymentPlace.updateValueAndValidity({ emitEvent: false });
+            this.form.controls.phoneNumber.updateValueAndValidity({ emitEvent: false });
         });
 
         this.fetch(slug);
@@ -249,9 +254,12 @@ export class PublicEventDetailComponent implements OnInit {
         const payload: any = {
             demandSlug: this.demand()!.slug,
             amount: safeAmount,
-            phoneNumber: this.form.controls.phoneNumber.value!,
             paymentCanal: paymentC
         };
+        const phoneVal = this.form.controls.phoneNumber.value;
+        if (phoneVal) {
+            payload.phoneNumber = phoneVal;
+        }
         if (paymentPlaceValue) payload.paymentPlace = paymentPlaceValue;
 
         this.submitting.set(true);
