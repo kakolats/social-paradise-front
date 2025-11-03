@@ -24,11 +24,18 @@ import { Price } from '../../../../../shared/models/price';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FileUploadService } from 'shared/services/file-upload.service';
 
+// ---------- Types de FormGroup
 type PriceFG = FormGroup<{
     name: FormControl<string | null>;
     amount: FormControl<number | null>;
     startDate: FormControl<string | null>;
     endDate: FormControl<string | null>;
+}>;
+
+type TableFG = FormGroup<{
+    name: FormControl<string | null>;
+    amount: FormControl<number | null>;
+    capacity: FormControl<number | null>;
 }>;
 
 type EventFG = FormGroup<{
@@ -38,6 +45,7 @@ type EventFG = FormGroup<{
     description: FormControl<string | null>;
     coverImage: FormControl<string | null>; // will hold URL, not File
     prices: FormArray<PriceFG>;
+    tables: FormArray<TableFG>;
 }>;
 
 @Component({
@@ -78,6 +86,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
         description: this.fb.control<string | null>(null),
         coverImage: this.fb.control<string | null>(null), // we'll set URL here
         prices: this.fb.array<PriceFG>([]),
+        tables: this.fb.array<TableFG>([]),
     });
 
     createdMessage = computed(() => this._createdMessage);
@@ -98,9 +107,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['eventToEdit'] && changes['eventToEdit'].currentValue) {
-            this.fillFormFromEvent(
-                changes['eventToEdit'].currentValue as Event
-            );
+            this.fillFormFromEvent(changes['eventToEdit'].currentValue as Event);
         }
     }
 
@@ -109,9 +116,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
         if (!str) return null;
         const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
         if (!m) return null;
-        const y = +m[1],
-            mo = +m[2],
-            d = +m[3];
+        const y = +m[1], mo = +m[2], d = +m[3];
         return new Date(y, mo - 1, d);
     }
 
@@ -119,22 +124,17 @@ export class CreateEventComponent implements OnInit, OnChanges {
         if (!a && !b) return 0;
         if (!a) return 1;
         if (!b) return -1;
-        const ad = new Date(
-            a.getFullYear(),
-            a.getMonth(),
-            a.getDate()
-        ).getTime();
-        const bd = new Date(
-            b.getFullYear(),
-            b.getMonth(),
-            b.getDate()
-        ).getTime();
+        const ad = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
+        const bd = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
         return ad < bd ? -1 : ad > bd ? 1 : 0;
     }
 
     // ---------- Form utils
     prices(): FormArray<PriceFG> {
         return this.form.controls.prices;
+    }
+    tables(): FormArray<TableFG> {
+        return this.form.controls.tables;
     }
 
     trackByIndex = (i: number) => i;
@@ -156,11 +156,32 @@ export class CreateEventComponent implements OnInit, OnChanges {
         });
     }
 
+    private makeTable(): TableFG {
+        return this.fb.group({
+            name: this.fb.control<string | null>(null, {
+                validators: [Validators.required, Validators.minLength(1)],
+            }),
+            amount: this.fb.control<number | null>(null, {                 // 👈 NEW
+                validators: [Validators.required, Validators.min(0)],
+            }),
+            capacity: this.fb.control<number | null>(null, {
+                validators: [Validators.required, Validators.min(1)],
+            }),
+        });
+    }
+
     addPrice() {
         this.prices().push(this.makePrice());
     }
     removePrice(i: number) {
         this.prices().removeAt(i);
+    }
+
+    addTable() {
+        this.tables().push(this.makeTable());
+    }
+    removeTable(i: number) {
+        this.tables().removeAt(i);
     }
 
     invalid(ctrl: keyof EventFG['controls']): boolean {
@@ -212,9 +233,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
     }
 
     // ---------- Fill form when editing
-    private toDateInputValue(
-        d: string | Date | null | undefined
-    ): string | null {
+    private toDateInputValue(d: string | Date | null | undefined): string | null {
         if (!d) return null;
         const dt = typeof d === 'string' ? new Date(d) : d;
         const y = dt.getFullYear();
@@ -226,6 +245,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
     private fillFormFromEvent(evt: Event) {
         this.form.reset();
         this.prices().clear();
+        this.tables().clear();
 
         this.form.patchValue({
             name: evt.name ?? null,
@@ -246,6 +266,16 @@ export class CreateEventComponent implements OnInit, OnChanges {
             this.prices().push(fg);
         });
 
+        (evt.tables ?? []).forEach((t) => {
+            const tg = this.makeTable();
+            tg.patchValue({
+                name: t.name ?? null,
+                amount: t.amount ?? null,
+                capacity: t.capacity ?? null,
+            });
+            this.tables().push(tg);
+        });
+
         // no selectedFile initially when editing existing
         this.selectedFile = null;
     }
@@ -257,6 +287,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
         } else {
             this.form.reset();
             this.prices().clear();
+            this.tables().clear();
             this.selectedFile = null;
         }
         this._createdMessage = '';
@@ -269,7 +300,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
         const f = this.form.value;
         return {
             name: f.name!,
-            date: new Date(f.date!), // we'll serialize to YYYY-MM-DD in EventService
+            date: new Date(f.date!), // EventService sérialisera en "YYYY-MM-DD"
             location: f.location!,
             description: f.description ?? '',
             coverImage: coverUrlOverride ?? f.coverImage ?? null,
@@ -278,6 +309,11 @@ export class CreateEventComponent implements OnInit, OnChanges {
                 amount: Number(p!.amount),
                 startDate: new Date(p!.startDate!),
                 endDate: new Date(p!.endDate!),
+            })),
+            tables: (f.tables ?? []).map((t) => ({
+                name: t!.name!,
+                amount: Number(t!.amount),
+                capacity: Number(t!.capacity),
             })),
         };
     }
@@ -300,18 +336,28 @@ export class CreateEventComponent implements OnInit, OnChanges {
 
         this.form.markAllAsTouched();
 
+        // validations
+        const tablesValid = this.tables().controls.every(
+            (t) => t.valid && Number(t.controls.capacity.value) >= 1 &&
+                Number(t.controls.amount.value) >= 0
+        );
+
         if (
             this.form.invalid ||
             !this.allRangesValid() ||
-            !this.allBusinessValid()
+            !this.allBusinessValid() ||
+            !tablesValid
         ) {
             this.submitting = false;
+
             if (!this.form.controls.date.value) {
-                this._errorMessage =
-                    'Veuillez renseigner la date de l’événement.';
+                this._errorMessage = 'Veuillez renseigner la date de l’événement.';
             } else if (!this.allRangesValid()) {
                 this._errorMessage =
                     'Chaque prix doit avoir une date de fin supérieure ou égale à sa date de début.';
+            } else if (!tablesValid) {
+                this._errorMessage =
+                    'Chaque table doit avoir un nom et une capacité d’au moins 1.';
             } else {
                 this._errorMessage =
                     'Vérifiez les dates des prix : respect de la date de l’événement et ordre strict entre les plages.';
@@ -319,7 +365,6 @@ export class CreateEventComponent implements OnInit, OnChanges {
             return;
         }
 
-        // We might need to upload the cover first
         const doCreateOrUpdate = (coverUrlFromUpload: string | null) => {
             const payload = this.buildPayloadFromForm(
                 coverUrlFromUpload ?? undefined
@@ -332,16 +377,13 @@ export class CreateEventComponent implements OnInit, OnChanges {
                     .subscribe({
                         next: (evt) => {
                             this._createdMessage = `Événement mis à jour avec succès${evt?.id ? ` (id: ${evt.id})` : ''}.`;
-                            this.eventUpdated.emit(
-                                evt?.id ?? this.eventToEdit!.id!
-                            );
+                            this.eventUpdated.emit(evt?.id ?? this.eventToEdit!.id!);
                             this.submitting = false;
                             this.router.navigate(['/events/event-list']);
                         },
                         error: (err) => {
                             this._errorMessage =
-                                err?.error?.message ??
-                                'Erreur lors de la mise à jour.';
+                                err?.error?.message ?? 'Erreur lors de la mise à jour.';
                             this.submitting = false;
                         },
                     });
@@ -364,25 +406,18 @@ export class CreateEventComponent implements OnInit, OnChanges {
             });
         };
 
-        // If we have a new file selected, upload first
         if (this.selectedFile) {
-            this.fileUploadService
-                .uploadEventCover(this.selectedFile)
-                .subscribe({
-                    next: (res) => {
-                        // res.url is returned by backend
-                        console.log(res);
-                        doCreateOrUpdate(res["data"]["url"]);
-                    },
-                    error: (err) => {
-                        this._errorMessage =
-                            err?.error?.message ??
-                            'Erreur lors de l’upload de l’image.';
-                        this.submitting = false;
-                    },
-                });
+            this.fileUploadService.uploadEventCover(this.selectedFile).subscribe({
+                next: (res) => {
+                    doCreateOrUpdate(res['data']['url']);
+                },
+                error: (err) => {
+                    this._errorMessage =
+                        err?.error?.message ?? 'Erreur lors de l’upload de l’image.';
+                    this.submitting = false;
+                },
+            });
         } else {
-            // no new file -> reuse existing coverImage (if any)
             doCreateOrUpdate(null);
         }
     }

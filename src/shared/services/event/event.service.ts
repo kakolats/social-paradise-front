@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Event } from '../../models/event';
 import { Price } from '../../models/price';
 import { map, Observable } from 'rxjs';
+import { Table } from 'shared/models/table';
 
 const API_BASE_URL = environment.apiUrl;
 interface ApiResponse<T> {
@@ -47,6 +48,12 @@ export class EventService {
                     ? p.endDate.toISOString().slice(0,10)
                     : p.endDate,
             })),
+            tables: (evt.tables ?? []).map(t => ({
+                id: t.id,
+                name: t.name,
+                amount: t.amount,
+                capacity: t.capacity,
+            })),
         };
     }
 
@@ -65,6 +72,12 @@ export class EventService {
                 amount: p.amount,
                 startDate: p.startDate ? new Date(p.startDate) : undefined,
                 endDate: p.endDate ? new Date(p.endDate) : undefined,
+            })),
+            tables: (raw.tables ?? []).map((t: any): Table => ({
+                id: t.id,
+                name: t.name,
+                amount: t.amount,
+                capacity: t.capacity,
             })),
         };
     }
