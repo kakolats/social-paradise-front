@@ -188,10 +188,19 @@ export class PublicEventDetailComponent implements OnInit {
         return ev.prices.find(p => this.dateOnly(p.startDate) <= today && today <= this.dateOnly(p.endDate)) ?? null;
     });
 
+    tablesTotal = computed(() => {
+        const d = this.demand();
+        if (!d?.tableItems?.length) return 0;
+        return d.tableItems.reduce((sum, item) => {
+            return sum + (item.table.amount * item.quantity);
+        }, 0);
+    });
+
     totalAmount = computed(() => {
         const ap = this.activePrice();
         const n = this.peopleCount();
-        return ap ? ap.amount * n : 0;
+        const participantsTotal = ap ? ap.amount * n : 0;
+        return participantsTotal + this.tablesTotal();
     });
 
     canNotify() {

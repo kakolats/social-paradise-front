@@ -1,6 +1,7 @@
 import { Payment } from './payment';
 import { Guest } from './guest';
 import { Event } from './event';
+import { TableItem } from './table';
 
 export interface Demand {
     id?: number;
@@ -10,6 +11,7 @@ export interface Demand {
     type: DemandType;
     payment?: Payment;
     guests?: Guest[];
+    tableItems?: TableItem[];
     event?: Event
     eventSlug?: string
 }

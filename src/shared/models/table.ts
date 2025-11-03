@@ -4,3 +4,9 @@ export interface Table {
     amount: number;
     capacity: number;
 }
+
+export interface TableItem {
+    id: number;
+    table: Table;
+    quantity: number;
+}

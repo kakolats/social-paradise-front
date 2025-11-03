@@ -68,6 +68,9 @@ export class EventDetailComponent implements OnInit {
     // confirm modal
     confirmOpen = signal<boolean>(false);
     pendingChange = signal<PendingStatusChange>(null);
+    
+    // stockage des sélections temporaires dans les selects (slug -> statut)
+    selectedStatusInSelects = signal<Map<string, DemandStatus>>(new Map());
 
     // ➕ view switch
     viewMode = signal<'cards' | 'list'>('list');
@@ -92,6 +95,23 @@ export class EventDetailComponent implements OnInit {
         DemandStatus.PAYEE
     ];
     allTypes: DemandType[] = [DemandType.UNIQUE, DemandType.GROUP];
+
+    getAvailableStatuses(currentStatus: DemandStatus): DemandStatus[] {
+        switch (currentStatus) {
+            case DemandStatus.SOUMISE:
+                return [DemandStatus.VALIDEE, DemandStatus.REFUSEE];
+            case DemandStatus.VALIDEE:
+                return [DemandStatus.REFUSEE];
+            case DemandStatus.PAIEMENT_NOTIFIE:
+                return [DemandStatus.PAYEE, DemandStatus.REFUSEE];
+            case DemandStatus.REFUSEE:
+                return [DemandStatus.VALIDEE];
+            case DemandStatus.PAYEE:
+                return []; // Aucun changement possible
+            default:
+                return [];
+        }
+    }
 
     private eventSlug: string | null = null;
 
@@ -228,22 +248,43 @@ export class EventDetailComponent implements OnInit {
         this.viewMode.set(this.viewMode() === 'cards' ? 'list' : 'cards');
     }
 
-    // --- status update (VALIDEE / REFUSEE / PAYEE uniquement) -> confirmation
+    // --- status update -> confirmation (vérifie les transitions autorisées)
     onChangeStatus(d: DemandSummary, newStatus: DemandStatus) {
         if (d.status === newStatus) return;
-        const allowed = new Set([
-            DemandStatus.VALIDEE,
-            DemandStatus.REFUSEE,
-            DemandStatus.PAYEE
-        ]);
-        if (!allowed.has(newStatus)) return;
+        const availableStatuses = this.getAvailableStatuses(d.status);
+        if (!availableStatuses.includes(newStatus)) return;
+        // Stocker temporairement la sélection
+        this.selectedStatusInSelects.update(map => {
+            const newMap = new Map(map);
+            newMap.set(d.slug, newStatus);
+            return newMap;
+        });
         this.pendingChange.set({ slug: d.slug, prev: d.status, next: newStatus });
         this.confirmOpen.set(true);
     }
 
     cancelStatusChange() {
+        const pc = this.pendingChange();
         this.confirmOpen.set(false);
         this.pendingChange.set(null);
+        // Réinitialiser la sélection si annulation
+        if (pc) {
+            this.selectedStatusInSelects.update(map => {
+                const newMap = new Map(map);
+                newMap.delete(pc.slug);
+                return newMap;
+            });
+        }
+    }
+
+    getSelectValue(slug: string, currentStatus: DemandStatus): DemandStatus | null {
+        const selected = this.selectedStatusInSelects().get(slug);
+        // Si une sélection temporaire existe ET qu'elle est différente du statut actuel, l'utiliser
+        // Sinon retourner null pour réinitialiser le select
+        if (selected && selected !== currentStatus) {
+            return selected;
+        }
+        return null;
     }
 
     confirmStatusChange() {
@@ -262,6 +303,12 @@ export class EventDetailComponent implements OnInit {
             next: () => {
                 this.savingSlug.set(null);
                 this.pendingChange.set(null);
+                // Réinitialiser la sélection dans le select pour cette demande
+                this.selectedStatusInSelects.update(map => {
+                    const newMap = new Map(map);
+                    newMap.delete(pc.slug);
+                    return newMap;
+                });
                 // recharger aussi les stats (changement de statut impacte les stats)
                 this.loadStats();
             },
@@ -270,6 +317,12 @@ export class EventDetailComponent implements OnInit {
                 this.demandsRaw.update(arr =>
                     arr.map(x => (x.slug === pc.slug ? { ...x, status: pc.prev } : x))
                 );
+                // Réinitialiser la sélection dans le select
+                this.selectedStatusInSelects.update(map => {
+                    const newMap = new Map(map);
+                    newMap.delete(pc.slug);
+                    return newMap;
+                });
                 this.savingSlug.set(null);
                 this.pendingChange.set(null);
                 this.error.set(
@@ -430,9 +483,31 @@ export class EventDetailComponent implements OnInit {
         );
     }
 
-    private modalAutoAmount(): number {
+    private modalTablesTotal(): number {
+        const dd = this.selectedDemand();
+        if (!dd?.tableItems?.length) return 0;
+        return dd.tableItems.reduce((sum, item) => {
+            return sum + (item.table.amount * item.quantity);
+        }, 0);
+    }
+
+    getModalTablesTotal(): number {
+        return this.modalTablesTotal();
+    }
+
+    getModalPassTotal(): number {
         const p = this.modalActivePrice();
         return p ? p.amount * this.modalPeopleCount() : 0;
+    }
+
+    getModalTotalPrice(): number {
+        return this.getModalPassTotal() + this.getModalTablesTotal();
+    }
+
+    private modalAutoAmount(): number {
+        const p = this.modalActivePrice();
+        const participantsTotal = p ? p.amount * this.modalPeopleCount() : 0;
+        return participantsTotal + this.modalTablesTotal();
     }
 
     // utils
