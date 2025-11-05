@@ -13,6 +13,7 @@ import { Table } from '../../../../shared/models/table';
 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
+import { QuillViewComponent, QuillViewHTMLComponent } from 'ngx-quill';
 
 type ParticipantFG = FormGroup<{
     firstName: FormControl<string | null>;
@@ -42,11 +43,17 @@ type DemandFG = FormGroup<{
 }>;
 
 @Component({
-  selector: 'app-public-event',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DatePipe],
-  templateUrl: './public-event.component.html',
-  styleUrl: './public-event.component.scss'
+    selector: 'app-public-event',
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        DatePipe,
+        QuillViewHTMLComponent,
+        QuillViewComponent,
+    ],
+    templateUrl: './public-event.component.html',
+    styleUrl: './public-event.component.scss',
 })
 export class PublicEventComponent implements OnInit {
     private route = inject(ActivatedRoute);
@@ -59,15 +66,27 @@ export class PublicEventComponent implements OnInit {
     errorMsg = signal<string | null>(null);
     successMsg = signal<string | null>(null);
 
-    placeholder = 'https://images.stockcake.com/public/1/1/f/11f13b20-c518-44e5-9047-0720400eafca_large/elegant-masquerade-ball-stockcake.jpg';
+    placeholder =  '';
 
     form: DemandFG = this.fb.group({
-        mode: this.fb.control<'single' | 'group'>('single', { nonNullable: true }),
-        s_firstName: this.fb.control<string | null>(null, [Validators.required]),
+        mode: this.fb.control<'single' | 'group'>('single', {
+            nonNullable: true,
+        }),
+        s_firstName: this.fb.control<string | null>(null, [
+            Validators.required,
+        ]),
         s_lastName: this.fb.control<string | null>(null, [Validators.required]),
-        s_email: this.fb.control<string | null>(null, [Validators.required, Validators.email]),
-        s_phoneNumber: this.fb.control<string | null>(null, [Validators.required]),
-        s_age: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
+        s_email: this.fb.control<string | null>(null, [
+            Validators.required,
+            Validators.email,
+        ]),
+        s_phoneNumber: this.fb.control<string | null>(null, [
+            Validators.required,
+        ]),
+        s_age: this.fb.control<number | null>(null, [
+            Validators.required,
+            Validators.min(0),
+        ]),
         participants: this.fb.array<ParticipantFG>([]),
         tableSelections: this.fb.array<TableSelectionFG>([]),
     });
@@ -76,20 +95,37 @@ export class PublicEventComponent implements OnInit {
         const slug = this.route.snapshot.paramMap.get('slug');
         if (slug) this.fetchEvent(slug);
 
-        this.form.controls.mode.valueChanges.subscribe(mode => {
+        this.form.controls.mode.valueChanges.subscribe((mode) => {
             if (mode === 'single') {
                 this.participants().clear();
-                this.form.controls.s_firstName.addValidators([Validators.required]);
-                this.form.controls.s_lastName.addValidators([Validators.required]);
-                this.form.controls.s_email.addValidators([Validators.required, Validators.email]);
-                this.form.controls.s_phoneNumber.addValidators([Validators.required]);
-                this.form.controls.s_age.addValidators([Validators.required, Validators.min(0)]);
+                this.form.controls.s_firstName.addValidators([
+                    Validators.required,
+                ]);
+                this.form.controls.s_lastName.addValidators([
+                    Validators.required,
+                ]);
+                this.form.controls.s_email.addValidators([
+                    Validators.required,
+                    Validators.email,
+                ]);
+                this.form.controls.s_phoneNumber.addValidators([
+                    Validators.required,
+                ]);
+                this.form.controls.s_age.addValidators([
+                    Validators.required,
+                    Validators.min(0),
+                ]);
             } else {
-                this.form.controls.s_firstName.clearValidators(); this.form.controls.s_firstName.reset();
-                this.form.controls.s_lastName.clearValidators(); this.form.controls.s_lastName.reset();
-                this.form.controls.s_email.clearValidators(); this.form.controls.s_email.reset();
-                this.form.controls.s_phoneNumber.clearValidators(); this.form.controls.s_phoneNumber.reset();
-                this.form.controls.s_age.clearValidators(); this.form.controls.s_age.reset();
+                this.form.controls.s_firstName.clearValidators();
+                this.form.controls.s_firstName.reset();
+                this.form.controls.s_lastName.clearValidators();
+                this.form.controls.s_lastName.reset();
+                this.form.controls.s_email.clearValidators();
+                this.form.controls.s_email.reset();
+                this.form.controls.s_phoneNumber.clearValidators();
+                this.form.controls.s_phoneNumber.reset();
+                this.form.controls.s_age.clearValidators();
+                this.form.controls.s_age.reset();
                 if (this.participants().length === 0) this.addParticipant(true);
             }
             this.form.updateValueAndValidity({ emitEvent: false });
@@ -100,12 +136,19 @@ export class PublicEventComponent implements OnInit {
         this.loading.set(true);
         this.errorMsg.set(null);
         this.eventService.getBySlug(slug).subscribe({
-            next: (evt) => { this.event.set(evt); this.loading.set(false);
-                if(evt.coverImage){
+            next: (evt) => {
+                this.event.set(evt);
+                this.loading.set(false);
+                if (evt.coverImage) {
                     this.placeholder = evt.coverImage;
                 }
-                },
-            error: (err) => { this.errorMsg.set(err?.error?.message ?? "Impossible de charger l'évènement."); this.loading.set(false); },
+            },
+            error: (err) => {
+                this.errorMsg.set(
+                    err?.error?.message ?? "Impossible de charger l'évènement."
+                );
+                this.loading.set(false);
+            },
         });
     }
 
@@ -113,15 +156,25 @@ export class PublicEventComponent implements OnInit {
         const e = this.event();
         if (!e?.prices?.length) return null;
         const today = this.dateOnly(new Date());
-        return e.prices.find(p => this.dateOnly(p.startDate) <= today && today <= this.dateOnly(p.endDate)) || null;
+        return (
+            e.prices.find(
+                (p) =>
+                    this.dateOnly(p.startDate) <= today &&
+                    today <= this.dateOnly(p.endDate)
+            ) || null
+        );
     });
 
     isActivePrice(p: any) {
         const ap = this.activePrice();
         if (!ap) return false;
-        return this.dateOnly(ap.startDate).getTime() === this.dateOnly(p.startDate).getTime()
-            && this.dateOnly(ap.endDate).getTime() === this.dateOnly(p.endDate).getTime()
-            && ap.amount === p.amount;
+        return (
+            this.dateOnly(ap.startDate).getTime() ===
+                this.dateOnly(p.startDate).getTime() &&
+            this.dateOnly(ap.endDate).getTime() ===
+                this.dateOnly(p.endDate).getTime() &&
+            ap.amount === p.amount
+        );
     }
 
     private dateOnly(d: Date | string): Date {
@@ -134,30 +187,58 @@ export class PublicEventComponent implements OnInit {
     }
     private makeParticipant(isMain = false): ParticipantFG {
         return this.fb.group({
-            firstName: this.fb.control<string | null>(null, [Validators.required]),
-            lastName: this.fb.control<string | null>(null, [Validators.required]),
-            email: this.fb.control<string | null>(null, [Validators.required, Validators.email]),
-            phoneNumber: this.fb.control<string | null>(null, [Validators.required]),
-            age: this.fb.control<number | null>(null, [Validators.required, Validators.min(0)]),
+            firstName: this.fb.control<string | null>(null, [
+                Validators.required,
+            ]),
+            lastName: this.fb.control<string | null>(null, [
+                Validators.required,
+            ]),
+            email: this.fb.control<string | null>(null, [
+                Validators.required,
+                Validators.email,
+            ]),
+            phoneNumber: this.fb.control<string | null>(null, [
+                Validators.required,
+            ]),
+            age: this.fb.control<number | null>(null, [
+                Validators.required,
+                Validators.min(0),
+            ]),
             isMainGuest: this.fb.control<boolean | null>(isMain),
         });
     }
-    addParticipant(isMain = false) { this.participants().push(this.makeParticipant(isMain)); }
-    addMany(n: number) { for (let i = 0; i < n; i++) this.addParticipant(false); }
-    removeParticipant(i: number) {
-        const wasMain = this.participants().at(i).controls.isMainGuest.value === true;
-        this.participants().removeAt(i);
-        if (wasMain && this.participants().length > 0) this.participants().at(0).controls.isMainGuest.setValue(true);
+    addParticipant(isMain = false) {
+        this.participants().push(this.makeParticipant(isMain));
     }
-    markAsMainGuest(index: number) { this.participants().controls.forEach((fg, i) => fg.controls.isMainGuest.setValue(i === index)); }
+    addMany(n: number) {
+        for (let i = 0; i < n; i++) this.addParticipant(false);
+    }
+    removeParticipant(i: number) {
+        const wasMain =
+            this.participants().at(i).controls.isMainGuest.value === true;
+        this.participants().removeAt(i);
+        if (wasMain && this.participants().length > 0)
+            this.participants().at(0).controls.isMainGuest.setValue(true);
+    }
+    markAsMainGuest(index: number) {
+        this.participants().controls.forEach((fg, i) =>
+            fg.controls.isMainGuest.setValue(i === index)
+        );
+    }
     hasExactlyOneMainGuest(): boolean {
-        return this.participants().controls.filter(fg => fg.controls.isMainGuest.value === true).length === 1;
+        return (
+            this.participants().controls.filter(
+                (fg) => fg.controls.isMainGuest.value === true
+            ).length === 1
+        );
     }
 
     peopleCount = toSignal(
         this.form.valueChanges.pipe(
             startWith(this.form.value),
-            map(v => v.mode === 'single' ? 1 : (this.participants().length || 0))
+            map((v) =>
+                v.mode === 'single' ? 1 : this.participants().length || 0
+            )
         ),
         { initialValue: 1 }
     );
@@ -165,15 +246,22 @@ export class PublicEventComponent implements OnInit {
     tableSelections(): FormArray<TableSelectionFG> {
         return this.form.get('tableSelections') as FormArray<TableSelectionFG>;
     }
-    private makeTableSelection(tableId: number, initialQty = 1): TableSelectionFG {
+    private makeTableSelection(
+        tableId: number,
+        initialQty = 1
+    ): TableSelectionFG {
         return this.fb.group({
-            tableId: this.fb.control<number | null>(tableId, { validators: [Validators.required] }),
-            quantity: this.fb.control<number | null>(initialQty, { validators: [Validators.required, Validators.min(1)] }),
+            tableId: this.fb.control<number | null>(tableId, {
+                validators: [Validators.required],
+            }),
+            quantity: this.fb.control<number | null>(initialQty, {
+                validators: [Validators.required, Validators.min(1)],
+            }),
         });
     }
     private findSelectionIndex(tableId: number): number {
         return this.tableSelections().controls.findIndex(
-            s => Number(s.controls.tableId.value) === Number(tableId)
+            (s) => Number(s.controls.tableId.value) === Number(tableId)
         );
     }
     isTableSelected(tableId: number): boolean {
@@ -193,11 +281,16 @@ export class PublicEventComponent implements OnInit {
         if (idx === -1) return;
         let q = Math.max(1, Math.floor(Number(qty) || 1));
         if (typeof max === 'number' && max > 0) q = Math.min(q, max);
-        this.tableSelections().at(idx).controls.quantity.setValue(q, { emitEvent: true });
+        this.tableSelections()
+            .at(idx)
+            .controls.quantity.setValue(q, { emitEvent: true });
     }
     getTableQty(tableId: number): number {
         const idx = this.findSelectionIndex(tableId);
-        return idx === -1 ? 1 : Number(this.tableSelections().at(idx).controls.quantity.value) || 1;
+        return idx === -1
+            ? 1
+            : Number(this.tableSelections().at(idx).controls.quantity.value) ||
+                  1;
     }
 
     invalid(ctrl: keyof DemandFG['controls']): boolean {
@@ -214,7 +307,7 @@ export class PublicEventComponent implements OnInit {
                 return this.tableSelections().controls.reduce((sum, s) => {
                     const tid = Number(s.controls.tableId.value);
                     const qty = Number(s.controls.quantity.value) || 0;
-                    const t = e.tables!.find(tt => Number(tt.id) === tid);
+                    const t = e.tables!.find((tt) => Number(tt.id) === tid);
                     return sum + (t ? t.amount * qty : 0);
                 }, 0);
             })
@@ -232,7 +325,9 @@ export class PublicEventComponent implements OnInit {
 
     totalIndicatif = computed(() => {
         const ap = this.activePrice();
-        const participantsTotal = ap ? ap.amount * (this.peopleCount() ?? 1) : 0;
+        const participantsTotal = ap
+            ? ap.amount * (this.peopleCount() ?? 1)
+            : 0;
         const tables = this.tablesTotal() ?? 0;
         return participantsTotal + tables;
     });
@@ -240,24 +335,26 @@ export class PublicEventComponent implements OnInit {
     submitDisabled(): boolean {
         if (!this.event()) return true;
         if (this.form.controls.mode.value === 'single') {
-            return this.form.controls.s_firstName.invalid
-                || this.form.controls.s_lastName.invalid
-                || this.form.controls.s_email.invalid
-                || this.form.controls.s_phoneNumber.invalid
-                || this.form.controls.s_age.invalid;
+            return (
+                this.form.controls.s_firstName.invalid ||
+                this.form.controls.s_lastName.invalid ||
+                this.form.controls.s_email.invalid ||
+                this.form.controls.s_phoneNumber.invalid ||
+                this.form.controls.s_age.invalid
+            );
         } else {
-            const baseInvalid = this.participants().length === 0
-                || !this.hasExactlyOneMainGuest()
-                || this.participants().invalid;
+            const baseInvalid =
+                this.participants().length === 0 ||
+                !this.hasExactlyOneMainGuest() ||
+                this.participants().invalid;
 
             // 👇 NEW: valider aussi tableSelections (si présent)
             const tablesInvalid = this.tableSelections().controls.some(
-                s => s.invalid || (Number(s.controls.quantity.value) || 0) < 1
+                (s) => s.invalid || (Number(s.controls.quantity.value) || 0) < 1
             );
 
             return baseInvalid || tablesInvalid;
         }
-
     }
     resetForm() {
         this.form.reset();
@@ -286,10 +383,12 @@ export class PublicEventComponent implements OnInit {
             payload = { eventSlug: this.event()!.slug!, guests: [g] };
         } else {
             if (!this.hasExactlyOneMainGuest()) {
-                this.errorMsg.set("Veuillez sélectionner exactement un invité principal.");
+                this.errorMsg.set(
+                    'Veuillez sélectionner exactement un invité principal.'
+                );
                 return;
             }
-            const guests = this.participants().controls.map(fg => ({
+            const guests = this.participants().controls.map((fg) => ({
                 firstName: fg.controls.firstName.value!,
                 lastName: fg.controls.lastName.value!,
                 email: fg.controls.email.value!,
@@ -303,7 +402,7 @@ export class PublicEventComponent implements OnInit {
         if (this.tableSelections().length > 0) {
             payload = {
                 ...payload,
-                tableSelections: this.tableSelections().controls.map(s => ({
+                tableSelections: this.tableSelections().controls.map((s) => ({
                     tableId: Number(s.controls.tableId.value),
                     quantity: Number(s.controls.quantity.value) || 1,
                 })),
@@ -311,8 +410,17 @@ export class PublicEventComponent implements OnInit {
         }
 
         this.demandService.create(payload).subscribe({
-            next: () => { this.successMsg.set("Votre demande a été soumise avec succès. Un email sera envoyé à l'invité principal si la demande est validée."); },
-            error: (err) => { this.errorMsg.set(err?.error?.message ?? "Erreur lors de la création de la demande."); }
+            next: () => {
+                this.successMsg.set(
+                    "Votre demande a été soumise avec succès. Un email sera envoyé à l'invité principal si la demande est validée."
+                );
+            },
+            error: (err) => {
+                this.errorMsg.set(
+                    err?.error?.message ??
+                        'Erreur lors de la création de la demande.'
+                );
+            },
         });
     }
 
