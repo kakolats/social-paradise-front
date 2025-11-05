@@ -4,7 +4,7 @@
         <div class="relative overflow-hidden rounded-3xl bg-white shadow">
             <div class="grid gap-0 md:grid-cols-2">
                 <div class="relative h-64 w-full md:h-full">
-                    <img
+                    <img *ngIf="placeholder!=''"
                         src="{{placeholder}}"
                         width="1600" height="900" alt="cover"
                         class="h-full w-full object-cover"
@@ -12,14 +12,18 @@
                     <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0"></div>
                 </div>
                 <div class="p-6 md:p-10 flex flex-col justify-center">
-                    <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+                    <h1 class="text-3xl font-bold tracking-tight text-slate-900" style="padding: 0px 15px;">
                         {{ event()?.name || event()?.name || 'Évènement' }}
                     </h1>
 
-                    <p class="mt-2 text-slate-600">
+                    <p class="mt-2 text-slate-600" style="padding: 0px 15px;">
                         {{ (event()?.date) | date:'longDate' }} - {{ (event()?.location) }}
                     </p>
-                    <div class="mt-2 text-slate-900" [innerHTML]="event()?.description"></div>
+<!--                    <div class="mt-2 text-slate-900 ql-render" [innerHTML]="event()?.description"></div>-->
+                    <div class="mt-2">
+                        <quill-view [content]="event()?.description"></quill-view>
+                    </div>
+
                 </div>
             </div>
         </div>
