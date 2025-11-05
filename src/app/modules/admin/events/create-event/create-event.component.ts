@@ -1,4 +1,5 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { QuillModule } from 'ngx-quill';
 import {
     Component,
     EventEmitter,
@@ -51,7 +52,7 @@ type EventFG = FormGroup<{
 @Component({
     selector: 'app-create-event',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, NgOptimizedImage],
+    imports: [CommonModule, ReactiveFormsModule, NgOptimizedImage, QuillModule],
     templateUrl: './create-event.component.html',
     styleUrl: './create-event.component.scss',
 })

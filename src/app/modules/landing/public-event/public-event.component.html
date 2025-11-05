@@ -19,9 +19,7 @@
                     <p class="mt-2 text-slate-600">
                         {{ (event()?.date) | date:'longDate' }} - {{ (event()?.location) }}
                     </p>
-                    <p class="mt-2 text-slate-900">
-                        {{ (event()?.description) }}
-                    </p>
+                    <div class="mt-2 text-slate-900" [innerHTML]="event()?.description"></div>
                 </div>
             </div>
         </div>
