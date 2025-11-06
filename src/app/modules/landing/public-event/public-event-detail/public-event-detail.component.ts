@@ -36,10 +36,10 @@ export class PublicEventDetailComponent implements OnInit {
             mapUrl: 'https://maps.app.goo.gl/3ziu4WkKkCYUBmzG7',
         },
         {
-            key: PaymentPlace.FRUIT_STORE,
-            name: 'Fruitstore',
-            address: 'Rue Félix Faure',
-            mapUrl: 'https://maps.app.goo.gl/CUfUWzD5KjZnK3e99',
+            key: PaymentPlace.HEMISPHERE,
+            name: 'Hémisphère Voyages',
+            address: '36 Rue Jules Ferry angle Joseph Gomis',
+            mapUrl: 'https://maps.app.goo.gl/EHn1Vk87E9Sm92ND6',
         },
         {
             key: PaymentPlace.GROOV,
@@ -243,7 +243,7 @@ export class PublicEventDetailComponent implements OnInit {
         let paymentPlaceValue: PaymentPlace | undefined;
         if (paymentC === PaymentCanal.CASH) {
             switch (this.form.controls.paymentPlace.value) {
-                case PaymentPlace.FRUIT_STORE:
+                case PaymentPlace.HEMISPHERE:
                 case PaymentPlace.GROOV:
                 case PaymentPlace.FITLAB:
                     paymentPlaceValue = this.form.controls.paymentPlace.value as PaymentPlace;
