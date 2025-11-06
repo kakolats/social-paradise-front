@@ -60,7 +60,7 @@
                     </div>
                     <div class="mt-1 flex items-center justify-between">
                         <span>Total indicatif</span>
-                        <span class="font-semibold text-slate-900">{{ totalAmount() | number }} FCFA</span>
+                        <span class="font-semibold text-slate-900">{{ totalAmount() | number }} FCFA + 1% frais (Wave)</span>
                     </div>
                 </div>
                 <ng-template #noPrice>
@@ -137,7 +137,7 @@
                     class="inline-flex items-center gap-2 rounded-xl bg-[#1B64F2] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90">
                     Payer avec Wave
                     <span class="rounded-md bg-white/20 px-2 py-0.5 text-xs">
-          {{ totalAmount() | number }} FCFA
+          {{ totalAmount() | number }} FCFA + 1% frais
         </span>
                 </a>
             </div>

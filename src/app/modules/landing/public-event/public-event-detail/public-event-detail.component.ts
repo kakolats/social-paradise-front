@@ -62,7 +62,7 @@ export class PublicEventDetailComponent implements OnInit {
 
     // ✅ 2) Lien Wave (montant dynamique)
     wavePayUrl() {
-        const amt = Math.max(0, Math.round(this.totalAmount() || 0));
+        const amt = Math.max(0, Math.round(this.totalAmount()+(this.totalAmount()*0.1) || 0));
         const base = 'https://pay.wave.com/m/M_sn_Sl2Ujzz-WzTu/c/sn/';
         return `${base}?amount=${amt}`;
     }
