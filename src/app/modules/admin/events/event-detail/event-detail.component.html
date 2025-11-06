@@ -276,7 +276,7 @@
                     <div class="text-right">
                         <label class="block text-xs text-slate-500 mb-1">Statut</label>
                         <select *ngIf="getAvailableStatuses(d.status).length > 0"
-                                [ngModel]="getSelectValue(d.slug, d.status) ?? d.status" 
+                                [ngModel]="getSelectValue(d.slug, d.status) ?? d.status"
                                 (ngModelChange)="onChangeStatus(d, $event)"
                                 class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
                             <option [ngValue]="null">--</option>
@@ -349,7 +349,7 @@
 
                             <!-- select modifiable -->
                             <select *ngIf="getAvailableStatuses(d.status).length > 0"
-                                    [ngModel]="getSelectValue(d.slug, d.status) ?? d.status" 
+                                    [ngModel]="getSelectValue(d.slug, d.status) ?? d.status"
                                     (ngModelChange)="onChangeStatus(d, $event)"
                                     class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
                                 <option [ngValue]="null">--</option>
@@ -537,7 +537,8 @@
                                         (ngModelChange)="payPlace.set($event)"
                                         required>
                                         <option [ngValue]="null">Sélectionner…</option>
-                                        <option [ngValue]="PaymentPlace.FRUIT_STORE">Fruit Store</option>
+<!--                                        <option [ngValue]="PaymentPlace.FRUIT_STORE">Fruit Store</option>-->
+                                        <option [ngValue]="PaymentPlace.HEMISPHERE">Hémisphère Voyages</option>
                                         <option [ngValue]="PaymentPlace.GROOV">Groov</option>
                                         <option [ngValue]="PaymentPlace.FITLAB">FitLab</option>
                                     </select>
