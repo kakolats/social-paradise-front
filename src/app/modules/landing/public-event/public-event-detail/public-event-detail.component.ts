@@ -9,7 +9,7 @@ import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { Price as FrontPrice } from 'shared/models/price';
 import { EventService } from '../../../../../shared/services/event/event.service';
-import { PaymentCanal,PaymentPlace } from '../../../../../shared/models/payment';
+import { PaymentCanal, PaymentPlace } from '../../../../../shared/models/payment';
 import { environment } from '../../../../../environments/environment';
 
 type PlaceInfo = {
@@ -46,6 +46,12 @@ export class PublicEventDetailComponent implements OnInit {
             name: 'Groov',
             address: "Place de l'Indépendance, Rue des Essarts, Dakar",
             mapUrl: 'https://maps.app.goo.gl/BNmZyLtt6MBy9aMG7',
+        },
+        {
+            key: PaymentPlace.IROKO_BEACH,
+            name: 'Iroko Beach Saly',
+            address: "Résidence des cristallines, Saly",
+            mapUrl: 'https://maps.app.goo.gl/wK2EYaMrseAdFocQA',
         },
     ];
 
@@ -244,6 +250,7 @@ export class PublicEventDetailComponent implements OnInit {
         if (paymentC === PaymentCanal.CASH) {
             switch (this.form.controls.paymentPlace.value) {
                 case PaymentPlace.HEMISPHERE:
+                case PaymentPlace.IROKO_BEACH:
                 case PaymentPlace.GROOV:
                 case PaymentPlace.FITLAB:
                     paymentPlaceValue = this.form.controls.paymentPlace.value as PaymentPlace;
