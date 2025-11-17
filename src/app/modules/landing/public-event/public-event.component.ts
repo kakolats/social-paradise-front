@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { EventService } from '../../../../shared/services/event/event.service';
@@ -57,6 +57,7 @@ type DemandFG = FormGroup<{
 })
 export class PublicEventComponent implements OnInit {
     private route = inject(ActivatedRoute);
+    private router = inject(Router);
     private eventService = inject(EventService);
     private demandService = inject(DemandService);
     private fb = new FormBuilder();
@@ -411,9 +412,17 @@ export class PublicEventComponent implements OnInit {
 
         this.demandService.create(payload).subscribe({
             next: () => {
-                this.successMsg.set(
-                    "Votre demande a été soumise avec succès. Un email sera envoyé à l'invité principal si la demande est validée."
-                );
+                const eventSlug = this.event()?.slug;
+                if (eventSlug) {
+                    this.resetForm();
+                    void this.router.navigate(
+                        ['/public-event', eventSlug, 'success']
+                    );
+                } else {
+                    this.successMsg.set(
+                        "Votre demande a été soumise avec succès. Un email sera envoyé à l'invité principal si la demande est validée."
+                    );
+                }
             },
             error: (err) => {
                 this.errorMsg.set(
