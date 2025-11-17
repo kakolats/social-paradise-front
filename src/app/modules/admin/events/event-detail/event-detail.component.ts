@@ -48,7 +48,7 @@ export class EventDetailComponent implements OnInit {
     // pagination
     page = signal<number>(1);
     pageSize = signal<number>(6);
-    pageSizeOptions = [6, 12, 24];
+    pageSizeOptions = [6, 12, 24, 50, 100];
 
     // modal details
     isModalOpen = signal<boolean>(false);
@@ -68,7 +68,7 @@ export class EventDetailComponent implements OnInit {
     // confirm modal
     confirmOpen = signal<boolean>(false);
     pendingChange = signal<PendingStatusChange>(null);
-    
+
     // stockage des sélections temporaires dans les selects (slug -> statut)
     selectedStatusInSelects = signal<Map<string, DemandStatus>>(new Map());
 
