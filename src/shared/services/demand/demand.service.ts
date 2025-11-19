@@ -45,6 +45,7 @@ export interface DemandSummary {
     type: DemandType;
     numberOfGuests: number;
     createdAt: Date;
+    guests: FrontGuest[];
     mainGuest: {
         firstName: string;
         lastName: string;
@@ -212,6 +213,7 @@ export class DemandService {
             createdAt: j.createdAt
                 ? new Date(j.createdAt)
                 : (undefined as unknown as Date),
+            guests: j.guests,
             mainGuest: {
                 firstName: j.mainGuest?.firstName,
                 lastName: j.mainGuest?.lastName,

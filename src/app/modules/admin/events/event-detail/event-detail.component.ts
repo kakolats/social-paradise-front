@@ -523,7 +523,7 @@ export class EventDetailComponent implements OnInit {
             .replace(/[\u0300-\u036f]/g, ''); // remove accents
     }
 
-    private matchesSearch(d: DemandSummary, q: string): boolean {
+    /*private matchesSearch(d: DemandSummary, q: string): boolean {
         const n = this.normalize(q);
         if (!n) return true;
 
@@ -531,12 +531,28 @@ export class EventDetailComponent implements OnInit {
         const haystacks = [
             fullName,
             d.mainGuest?.email ?? '',
-            d.mainGuest?.phoneNumber ?? '',
-            // d.status ?? '',
-            // d.type ?? '',
         ];
 
         return haystacks.some(h => this.normalize(h).includes(n));
+    }*/
+
+    private matchesSearch(d: DemandSummary, q: string): boolean {
+        const n = this.normalize(q);
+        if (!n) return true;
+
+        // Si pas de guests, impossible de matcher
+        if (!d.guests || d.guests.length === 0) return false;
+
+        // Pour chaque guest → construire les "haystacks"
+        return d.guests.some(g => {
+            const fullName = `${g.firstName ?? ''} ${g.lastName ?? ''}`;
+            const haystacks = [
+                fullName,
+                g.email ?? '',
+            ];
+
+            return haystacks.some(h => this.normalize(h).includes(n));
+        });
     }
 
     setSearch(q: string) {
