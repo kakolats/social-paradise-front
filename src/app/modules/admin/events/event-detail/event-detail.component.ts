@@ -69,6 +69,11 @@ export class EventDetailComponent implements OnInit {
     confirmOpen = signal<boolean>(false);
     pendingChange = signal<PendingStatusChange>(null);
 
+    deleteOpen = signal<boolean>(false);
+    deleteTarget = signal<{ slug: string; label?: string } | null>(null);
+    deleting = signal<boolean>(false);
+    deleteError = signal<string | null>(null);
+
     // stockage des sélections temporaires dans les selects (slug -> statut)
     selectedStatusInSelects = signal<Map<string, DemandStatus>>(new Map());
 
@@ -577,4 +582,47 @@ export class EventDetailComponent implements OnInit {
             }
         });
     }
+
+    openDeleteModal(d: DemandSummary) {
+        this.deleteTarget.set({
+            slug: d.slug,
+            label: `${d.mainGuest?.firstName ?? ''} ${d.mainGuest?.lastName ?? ''}`.trim()
+        });
+        this.deleteError.set(null);
+        this.deleting.set(false);
+        this.deleteOpen.set(true);
+    }
+
+    cancelDelete() {
+        this.deleteOpen.set(false);
+        this.deleteTarget.set(null);
+        this.deleteError.set(null);
+        this.deleting.set(false);
+    }
+
+    confirmDelete() {
+        const target = this.deleteTarget();
+        if (!target) return;
+
+        this.deleting.set(true);
+        this.deleteError.set(null);
+
+        this.demandService.deleteBySlug(target.slug).subscribe({
+            next: () => {
+                this.deleting.set(false);
+                this.deleteOpen.set(false);
+                this.deleteTarget.set(null);
+                // recharger la liste (et fermer la modale détails si ouverte)
+                this.reload();
+                this.closeModal();
+            },
+            error: err => {
+                this.deleting.set(false);
+                this.deleteError.set(
+                    err?.error?.message ?? "Erreur lors de la suppression de la demande."
+                );
+            }
+        });
+    }
+
 }
