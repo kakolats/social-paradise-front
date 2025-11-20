@@ -562,4 +562,19 @@ export class EventDetailComponent implements OnInit {
     clearSearch() {
         this.setSearch('');
     }
+
+    deleteDemand(slug:string){
+        this.demandService.deleteBySlug(slug).subscribe({
+            next: () => {
+                this.reload();
+                this.closeModal();
+            },
+            error: err => {
+                this.modalError.set(
+                    err?.error?.message ??
+                    'Erreur lors de la suppression de la demande.'
+                );
+            }
+        });
+    }
 }

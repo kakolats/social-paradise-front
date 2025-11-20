@@ -358,10 +358,14 @@
                             <span *ngIf="getAvailableStatuses(d.status).length === 0" class="text-[11px] text-slate-500">-</span>
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-xs">
+                    <td class="px-4 py-3 text-xs flex gap-2">
                         <button (click)="openDemandModal(d.slug)"
                                 class="rounded-lg bg-[#d36b3d] px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
                             Voir détails
+                        </button>
+                        <button *ngIf="d.status!=DemandStatus.PAYEE" (click)="deleteDemand(d.slug)"
+                                class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                            Supprimer
                         </button>
                     </td>
                 </tr>

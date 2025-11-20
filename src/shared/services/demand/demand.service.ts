@@ -82,6 +82,12 @@ export class DemandService {
         );
     }
 
+    deleteBySlug(slug: string): Observable<void> {
+        return this.http.delete(`${this.base}/${slug}`).pipe(
+            map(() => void 0)
+        )
+    }
+
     // ----------------- READ (LISTE / RÉSUMÉ)
     /** Liste sans filtres (pas de query params) — renvoie DemandSummary[] */
     listByEventSlug(eventSlug: string): Observable<DemandSummary[]> {
