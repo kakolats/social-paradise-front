@@ -8,7 +8,7 @@
                     <p class="text-slate-600" *ngIf="demand() as d">
                         Créée le {{ d.date | date:'longDate' }}
                     </p>
-                    <p class="text-xs text-slate-400" *ngIf="demand()?.slug">Slug : {{ demand()?.slug }}</p>
+<!--                    <p class="text-xs text-slate-400" *ngIf="demand()?.slug">Slug : {{ demand()?.slug }}</p>-->
                 </div>
 
                 <!-- Statut mis en avant -->
@@ -36,7 +36,7 @@
                 <ng-container *ngIf="demand()?.event as ev">
                     <div class="mt-1 text-slate-700">{{ ev.name }}</div>
                     <div class="text-sm text-slate-600">{{ ev.date | date:'longDate' }}</div>
-                    <div class="text-xs text-slate-400">Slug: {{ ev.slug }}</div>
+<!--                    <div class="text-xs text-slate-400">Slug: {{ ev.slug }}</div>-->
                 </ng-container>
             </div>
 
@@ -130,6 +130,15 @@
                 <h2 class="text-sm font-semibold text-slate-900">Moyens de paiement en ligne</h2>
             </div>
 
+            <p class="text-xs text-red-900 mt-4">
+                Après le paiement, revenez <strong>NOTIFIER</strong> l’opération via le <strong>FORMULAIRE</strong> ci-dessous.
+            </p>
+
+            <p class="text-xs text-red-900 mb-4">
+                Après notification, l’équipe vérifiera votre paiement. Vous recevrez un email lorsque la demande passera à l’état
+                <strong>PAYEE</strong>.
+            </p>
+
             <!-- WAVE -->
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-3">
                 <div class="mb-2 text-sm font-semibold text-slate-900">Wave</div>
@@ -200,15 +209,6 @@
                     </div>
                 </div>
             </div>
-
-            <p class="text-xs text-slate-500 mt-4">
-                Après le paiement, revenez notifier l’opération via le formulaire ci-dessous.
-            </p>
-
-            <p class="text-xs text-slate-500 mb-4">
-                Après notification, l’équipe vérifiera votre paiement. Vous recevrez un email lorsque la demande passera à l’état
-                <strong>PAYEE</strong>.
-            </p>
 
             <!-- Si pas de numéro OM configuré -->
             <div *ngIf="!orangeMoneyNumber" class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 mt-3">

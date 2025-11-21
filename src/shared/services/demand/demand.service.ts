@@ -45,6 +45,7 @@ export interface DemandSummary {
     type: DemandType;
     numberOfGuests: number;
     createdAt: Date;
+    guests: FrontGuest[];
     mainGuest: {
         firstName: string;
         lastName: string;
@@ -79,6 +80,12 @@ export class DemandService {
         return this.http.get<ApiResponse<any>>(`${this.base}/${slug}`).pipe(
             map(res => this.parseDemandDetail(res.data))
         );
+    }
+
+    deleteBySlug(slug: string): Observable<void> {
+        return this.http.delete(`${this.base}/${slug}`).pipe(
+            map(() => void 0)
+        )
     }
 
     // ----------------- READ (LISTE / RÉSUMÉ)
@@ -212,6 +219,7 @@ export class DemandService {
             createdAt: j.createdAt
                 ? new Date(j.createdAt)
                 : (undefined as unknown as Date),
+            guests: j.guests,
             mainGuest: {
                 firstName: j.mainGuest?.firstName,
                 lastName: j.mainGuest?.lastName,

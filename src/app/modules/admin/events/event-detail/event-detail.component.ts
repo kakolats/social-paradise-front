@@ -69,6 +69,11 @@ export class EventDetailComponent implements OnInit {
     confirmOpen = signal<boolean>(false);
     pendingChange = signal<PendingStatusChange>(null);
 
+    deleteOpen = signal<boolean>(false);
+    deleteTarget = signal<{ slug: string; label?: string } | null>(null);
+    deleting = signal<boolean>(false);
+    deleteError = signal<string | null>(null);
+
     // stockage des sélections temporaires dans les selects (slug -> statut)
     selectedStatusInSelects = signal<Map<string, DemandStatus>>(new Map());
 
@@ -523,7 +528,7 @@ export class EventDetailComponent implements OnInit {
             .replace(/[\u0300-\u036f]/g, ''); // remove accents
     }
 
-    private matchesSearch(d: DemandSummary, q: string): boolean {
+    /*private matchesSearch(d: DemandSummary, q: string): boolean {
         const n = this.normalize(q);
         if (!n) return true;
 
@@ -531,12 +536,28 @@ export class EventDetailComponent implements OnInit {
         const haystacks = [
             fullName,
             d.mainGuest?.email ?? '',
-            d.mainGuest?.phoneNumber ?? '',
-            // d.status ?? '',
-            // d.type ?? '',
         ];
 
         return haystacks.some(h => this.normalize(h).includes(n));
+    }*/
+
+    private matchesSearch(d: DemandSummary, q: string): boolean {
+        const n = this.normalize(q);
+        if (!n) return true;
+
+        // Si pas de guests, impossible de matcher
+        if (!d.guests || d.guests.length === 0) return false;
+
+        // Pour chaque guest → construire les "haystacks"
+        return d.guests.some(g => {
+            const fullName = `${g.firstName ?? ''} ${g.lastName ?? ''}`;
+            const haystacks = [
+                fullName,
+                g.email ?? '',
+            ];
+
+            return haystacks.some(h => this.normalize(h).includes(n));
+        });
     }
 
     setSearch(q: string) {
@@ -546,4 +567,62 @@ export class EventDetailComponent implements OnInit {
     clearSearch() {
         this.setSearch('');
     }
+
+    deleteDemand(slug:string){
+        this.demandService.deleteBySlug(slug).subscribe({
+            next: () => {
+                this.reload();
+                this.closeModal();
+            },
+            error: err => {
+                this.modalError.set(
+                    err?.error?.message ??
+                    'Erreur lors de la suppression de la demande.'
+                );
+            }
+        });
+    }
+
+    openDeleteModal(d: DemandSummary) {
+        this.deleteTarget.set({
+            slug: d.slug,
+            label: `${d.mainGuest?.firstName ?? ''} ${d.mainGuest?.lastName ?? ''}`.trim()
+        });
+        this.deleteError.set(null);
+        this.deleting.set(false);
+        this.deleteOpen.set(true);
+    }
+
+    cancelDelete() {
+        this.deleteOpen.set(false);
+        this.deleteTarget.set(null);
+        this.deleteError.set(null);
+        this.deleting.set(false);
+    }
+
+    confirmDelete() {
+        const target = this.deleteTarget();
+        if (!target) return;
+
+        this.deleting.set(true);
+        this.deleteError.set(null);
+
+        this.demandService.deleteBySlug(target.slug).subscribe({
+            next: () => {
+                this.deleting.set(false);
+                this.deleteOpen.set(false);
+                this.deleteTarget.set(null);
+                // recharger la liste (et fermer la modale détails si ouverte)
+                this.reload();
+                this.closeModal();
+            },
+            error: err => {
+                this.deleting.set(false);
+                this.deleteError.set(
+                    err?.error?.message ?? "Erreur lors de la suppression de la demande."
+                );
+            }
+        });
+    }
+
 }
