@@ -523,6 +523,8 @@ export class EventDetailComponent implements OnInit {
     private normalize(v: unknown): string {
         return (v ?? '')
             .toString()
+            .trim()
+            .replace(/\s+/g, ' ')
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, ''); // remove accents
@@ -550,7 +552,10 @@ export class EventDetailComponent implements OnInit {
 
         // Pour chaque guest → construire les "haystacks"
         return d.guests.some(g => {
-            const fullName = `${g.firstName ?? ''} ${g.lastName ?? ''}`;
+            const first = (g.firstName ?? '').trim();
+            const last  = (g.lastName ?? '').trim();
+            const fullName = `${first} ${last}`.trim();
+            // const fullName = `${g.firstName ?? ''} ${g.lastName ?? ''}`;
             const haystacks = [
                 fullName,
                 g.email ?? '',
