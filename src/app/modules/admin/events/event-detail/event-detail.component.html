@@ -32,7 +32,7 @@
                     <!-- Stats (demandes & participants) -->
                     <div class="w-full max-w-full">
                         <div *ngIf="stats(); else noStatsYet"
-                             class="grid grid-cols-2 gap-2 text-xs text-slate-700 sm:grid-cols-3 lg:grid-cols-5">
+                             class="grid grid-cols-2 gap-2 text-xs text-slate-700 sm:grid-cols-3 lg:grid-cols-6">
                             <!-- SOUMISE -->
                             <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                                 <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
@@ -104,6 +104,21 @@
                                 </span> demandes,
                                     <span class="font-medium text-slate-900">
                                     {{ stats()![DemandStatus.PAYEE]?.totalParticipants || 0 }}
+                                </span> pers.
+                                </div>
+                            </div>
+
+                            <!-- OFFERT -->
+                            <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:col-span-2 lg:col-span-1">
+                                <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
+                                    OFFERT
+                                </div>
+                                <div class="mt-1 leading-tight">
+                                <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.OFFERT]?.totalDemands || 0 }}
+                                </span> demandes,
+                                    <span class="font-medium text-slate-900">
+                                    {{ stats()![DemandStatus.OFFERT]?.totalParticipants || 0 }}
                                 </span> pers.
                                 </div>
                             </div>
@@ -300,6 +315,7 @@
                     <span *ngIf="d.status===DemandStatus.REFUSEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">REFUSÉE</span>
                     <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">NOTIF. PAIEMENT</span>
                     <span *ngIf="d.status===DemandStatus.PAYEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">PAYÉE</span>
+                    <span *ngIf="d.status===DemandStatus.OFFERT" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">OFFERT</span>
                     <button (click)="openDemandModal(d.slug)"
                             class="rounded-xl bg-[#d36b3d] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90">
                         Voir détails
@@ -346,6 +362,7 @@
                             <span *ngIf="d.status===DemandStatus.REFUSEE" class="rounded-full bg-[#ff3131] px-2 py-0.5 text-[11px] font-medium text-white">REFUSÉE</span>
                             <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="rounded-full bg-[#d36b3d] px-2 py-0.5 text-[11px] font-medium text-white">NOTIF. PAIEMENT</span>
                             <span *ngIf="d.status===DemandStatus.PAYEE" class="rounded-full bg-[#00b16a] px-2 py-0.5 text-[11px] font-medium text-white">PAYÉE</span>
+                            <span *ngIf="d.status===DemandStatus.OFFERT" class="rounded-full bg-[#00b16a] px-2 py-0.5 text-[11px] font-medium text-white">OFFERT</span>
 
                             <!-- select modifiable -->
                             <select *ngIf="getAvailableStatuses(d.status).length > 0"
@@ -363,7 +380,7 @@
                                 class="rounded-lg bg-[#d36b3d] px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
                             Voir détails
                         </button>
-                        <button *ngIf="d.status!=DemandStatus.PAYEE" (click)="openDeleteModal(d)"
+                        <button *ngIf="d.status!=DemandStatus.PAYEE && d.status!=DemandStatus.OFFERT" (click)="openDeleteModal(d)"
                                 class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
                             Supprimer
                         </button>
