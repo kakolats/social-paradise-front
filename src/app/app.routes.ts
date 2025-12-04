@@ -3,6 +3,7 @@ import { initialDataResolver } from 'app/app.resolvers';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { AuthGuard } from '../shared/guards/auth/auth.guard';
+import { GuestQrScanComponent } from './modules/security/guest-qr-scan/guest-qr-scan.component';
 
 // @formatter:off
 /* eslint-disable max-len */
@@ -78,6 +79,7 @@ export const appRoutes: Route[] = [
         children: [
             // {path: 'example', loadChildren: () => import('app/modules/admin/example/example.routes')},
             {path: 'events', loadChildren: () => import('app/modules/admin/events/events.routes')},
+            {path: 'security/guest', component : GuestQrScanComponent}
         ]
     }
 ];

@@ -1,0 +1,75 @@
+<!-- guest-qr-scanner.component.html -->
+<section class="w-full max-w-xl mx-auto p-4">
+    <h1 class="text-xl font-semibold text-slate-900 mb-3">
+        Scan du ticket (QR Code)
+    </h1>
+
+    <!-- Scanner -->
+    <div class="rounded-2xl border border-slate-200 bg-black/5 p-3 mb-4">
+        <div
+            *ngIf="scanning()"
+            id="html5qr-reader"
+            class="block w-full aspect-[3/4] bg-black rounded-xl overflow-hidden"
+        >
+        </div>
+
+        <div *ngIf="!scanning()" class="text-sm text-slate-500">
+            Scanner en pause.
+        </div>
+    </div>
+
+    <!-- Etat chargement -->
+    <div *ngIf="loading()" class="mb-3 text-sm text-slate-600">
+        Validation du ticket en cours…
+    </div>
+
+    <!-- Erreur -->
+    <div
+        *ngIf="error()"
+        class="mb-3 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+    >
+        ❌ {{ error() }}
+    </div>
+
+    <!-- Résultat -->
+    <div
+        *ngIf="guest() as g"
+        class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
+    >
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <div class="text-xs font-medium text-emerald-700 uppercase">
+                    Ticket valide
+                </div>
+                <div class="text-lg font-semibold text-slate-900">
+                    {{ guestFullName() }}
+                </div>
+            </div>
+            <div class="text-xs text-slate-500">
+                Slug :
+                <span class="font-mono">{{ g.slug }}</span>
+            </div>
+        </div>
+
+        <div class="grid gap-2 text-sm text-slate-700">
+            <div><span class="font-medium">Email :</span> {{ g.email }}</div>
+            <div *ngIf="g.phoneNumber">
+                <span class="font-medium">Téléphone :</span> {{ g.phoneNumber }}
+            </div>
+            <div *ngIf="g.age">
+                <span class="font-medium">Âge :</span> {{ g.age }}</div
+            >
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-2">
+        <button
+            type="button"
+            (click)="resetScan()"
+            class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+        >
+            Réinitialiser / Re-scanner
+        </button>
+    </div>
+</section>

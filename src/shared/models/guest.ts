@@ -1,3 +1,5 @@
+import { Demand } from './demand';
+
 export interface Guest {
     id: string;
     firstName: string;
@@ -8,4 +10,5 @@ export interface Guest {
     slug?: number;
     state: boolean;
     isMainGuest: boolean;
+    demand?: Demand;
 }
