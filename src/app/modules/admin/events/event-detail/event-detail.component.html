@@ -1,20 +1,20 @@
-<section class="w-full mx-6 py-6">
+<section class="w-full px-2 py-4 sm:mx-6 sm:py-6">
     <!-- Header / Hero -->
-    <div class="mx-auto px-4 sm:px-6">
-        <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+    <div class="mx-auto px-2 sm:px-4 md:px-6">
+        <div class="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">
+                    <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">
                         {{ event()?.name || 'Évènement' }}
                     </h1>
-                    <p class="text-slate-600">
+                    <p class="text-sm text-slate-600 sm:text-base">
                         {{ event()?.date | date:'longDate' }}
                     </p>
                 </div>
 
                 <div class="flex flex-col items-start gap-3 sm:items-end">
-                    <div class="flex items-center gap-3">
-                        <div class="text-sm text-slate-600">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                        <div class="text-xs text-slate-600 sm:text-sm">
                             Total demandes (filtrées) :
                             <span class="font-semibold text-slate-900">
                             {{ filteredCount() }}
@@ -24,7 +24,7 @@
                         <!-- Bouton switch view -->
                         <button
                             (click)="toggleView()"
-                            class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:w-auto sm:px-4 sm:py-2 sm:text-sm">
                             {{ viewMode() === 'cards' ? 'Afficher en liste' : 'Afficher en cards' }}
                         </button>
                     </div>
@@ -32,7 +32,7 @@
                     <!-- Stats (demandes & participants) -->
                     <div class="w-full max-w-full">
                         <div *ngIf="stats(); else noStatsYet"
-                             class="grid grid-cols-2 gap-2 text-xs text-slate-700 sm:grid-cols-3 lg:grid-cols-6">
+                             class="grid grid-cols-2 gap-1.5 text-[10px] text-slate-700 sm:gap-2 sm:text-xs sm:grid-cols-3 lg:grid-cols-6">
                             <!-- SOUMISE -->
                             <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                                 <div class="font-semibold text-slate-900 text-[11px] uppercase tracking-wide">
@@ -180,8 +180,8 @@
 
 
     <!-- Filters -->
-    <div class="mx-auto px-4 sm:px-6">
-        <div class="mt-6 grid gap-3 items-end sm:grid-cols-4 lg:grid-cols-6">
+    <div class="mx-auto px-2 sm:px-4 md:px-6">
+        <div class="mt-4 grid gap-2 items-end sm:mt-6 sm:gap-3 sm:grid-cols-4 lg:grid-cols-6">
             <!-- Statut -->
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-900">Statut</label>
@@ -245,16 +245,16 @@
             </div>
 
             <!-- Actions -->
-            <div class="sm:col-span-4 lg:col-span-2 flex items-end justify-end gap-2">
+            <div class="col-span-full sm:col-span-4 lg:col-span-2 flex flex-col gap-2 items-stretch sm:flex-row sm:items-end sm:justify-end">
                 <button
                     (click)="reload()"
-                    class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:w-auto sm:px-4 sm:text-sm"
                 >
                     Recharger
                 </button>
                 <button
                     (click)="resetFilters()"
-                    class="rounded-xl bg-[#d36b3d] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                    class="w-full rounded-xl bg-[#d36b3d] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto sm:px-4 sm:text-sm"
                 >
                     Réinitialiser les filtres
                 </button>
@@ -272,8 +272,8 @@
         </div>
 
         <!-- ===== Vue CARDS ===== -->
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" *ngIf="!loading() && pagedDemands().length > 0 && viewMode() === 'cards'">
-            <div *ngFor="let d of pagedDemands(); trackBy: trackBySlug" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="mt-4 grid gap-3 sm:mt-6 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4" *ngIf="!loading() && pagedDemands().length > 0 && viewMode() === 'cards'">
+            <div *ngFor="let d of pagedDemands(); trackBy: trackBySlug" class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-2">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full"
@@ -306,18 +306,20 @@
                     Participants : <span class="font-medium text-slate-800">{{ d.numberOfGuests }}</span>
                 </div>
 
-                <div class="mt-4 flex items-center justify-between">
-          <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                <div class="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-wrap items-center gap-1.5">
+          <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">
             {{ d.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
           </span>
-                    <span *ngIf="d.status===DemandStatus.SOUMISE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">SOUMISE</span>
-                    <span *ngIf="d.status===DemandStatus.VALIDEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">VALIDÉE</span>
-                    <span *ngIf="d.status===DemandStatus.REFUSEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">REFUSÉE</span>
-                    <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">NOTIF. PAIEMENT</span>
-                    <span *ngIf="d.status===DemandStatus.PAYEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">PAYÉE</span>
-                    <span *ngIf="d.status===DemandStatus.OFFERT" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">OFFERT</span>
+                        <span *ngIf="d.status===DemandStatus.SOUMISE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">SOUMISE</span>
+                        <span *ngIf="d.status===DemandStatus.VALIDEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">VALIDÉE</span>
+                        <span *ngIf="d.status===DemandStatus.REFUSEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">REFUSÉE</span>
+                        <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">NOTIF. PAIEMENT</span>
+                        <span *ngIf="d.status===DemandStatus.PAYEE" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">PAYÉE</span>
+                        <span *ngIf="d.status===DemandStatus.OFFERT" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-xs">OFFERT</span>
+                    </div>
                     <button (click)="openDemandModal(d.slug)"
-                            class="rounded-xl bg-[#d36b3d] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                            class="w-full rounded-xl bg-[#d36b3d] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto sm:px-3 sm:py-2 sm:text-xs">
                         Voir détails
                     </button>
                 </div>
@@ -328,62 +330,64 @@
 
         <!-- ===== Vue LISTE (table) ===== -->
         <div *ngIf="!loading() && pagedDemands().length > 0 && viewMode() === 'list'"
-             class="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+             class="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Invité principal</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Email</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Type</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Créée le</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Participants</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Statut</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700">Actions</th>
+                    <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Invité principal</th>
+                    <th class="hidden px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:table-cell sm:px-4 sm:py-3 sm:text-xs">Email</th>
+                    <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Type</th>
+                    <th class="hidden px-2 py-2 text-left text-[10px] font-semibold text-slate-700 md:table-cell md:px-4 md:py-3 md:text-xs">Créée le</th>
+                    <th class="hidden px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:table-cell sm:px-4 sm:py-3 sm:text-xs">Participants</th>
+                    <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Statut</th>
+                    <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Actions</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                 <tr *ngFor="let d of pagedDemands(); trackBy: trackBySlug" class="hover:bg-slate-50">
-                    <td class="px-4 py-3 text-sm text-slate-900 font-medium">
+                    <td class="px-2 py-2 text-[11px] text-slate-900 font-medium sm:px-4 sm:py-3 sm:text-sm">
                         {{ d.mainGuest.firstName }} {{ d.mainGuest.lastName }}
                     </td>
-                    <td class="px-4 py-3 text-xs text-slate-600">{{ d.mainGuest.email }}</td>
-                    <td class="px-4 py-3 text-xs">
-              <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-700">
+                    <td class="hidden px-2 py-2 text-[11px] text-slate-600 sm:table-cell sm:px-4 sm:py-3 sm:text-xs">{{ d.mainGuest.email }}</td>
+                    <td class="px-2 py-2 text-[11px] sm:px-4 sm:py-3 sm:text-xs">
+              <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-700 sm:px-2.5 sm:py-1 sm:text-[11px]">
                 {{ d.type === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
               </span>
                     </td>
-                    <td class="px-4 py-3 text-xs text-slate-600">{{ d.createdAt | date:'medium' }}</td>
-                    <td class="px-4 py-3 text-xs text-slate-600">{{ d.numberOfGuests }}</td>
-                    <td class="px-4 py-3 text-xs">
-                        <div class="flex items-center gap-2">
+                    <td class="hidden px-2 py-2 text-[11px] text-slate-600 md:table-cell md:px-4 md:py-3 md:text-xs">{{ d.createdAt | date:'medium' }}</td>
+                    <td class="hidden px-2 py-2 text-[11px] text-slate-600 sm:table-cell sm:px-4 sm:py-3 sm:text-xs">{{ d.numberOfGuests }}</td>
+                    <td class="px-2 py-2 text-[11px] sm:px-4 sm:py-3 sm:text-xs">
+                        <div class="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
                             <!-- badge lecture -->
-                            <span *ngIf="d.status===DemandStatus.SOUMISE" class="rounded-full bg-slate-400 px-2 py-0.5 text-[11px] font-medium text-black">SOUMISE</span>
-                            <span *ngIf="d.status===DemandStatus.VALIDEE" class="rounded-full bg-[#ffb20a] px-2 py-0.5 text-[11px] font-medium text-white">VALIDÉE</span>
-                            <span *ngIf="d.status===DemandStatus.REFUSEE" class="rounded-full bg-[#ff3131] px-2 py-0.5 text-[11px] font-medium text-white">REFUSÉE</span>
-                            <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="rounded-full bg-[#d36b3d] px-2 py-0.5 text-[11px] font-medium text-white">NOTIF. PAIEMENT</span>
-                            <span *ngIf="d.status===DemandStatus.PAYEE" class="rounded-full bg-[#00b16a] px-2 py-0.5 text-[11px] font-medium text-white">PAYÉE</span>
-                            <span *ngIf="d.status===DemandStatus.OFFERT" class="rounded-full bg-[#00b16a] px-2 py-0.5 text-[11px] font-medium text-white">OFFERT</span>
+                            <span *ngIf="d.status===DemandStatus.SOUMISE" class="rounded-full bg-slate-400 px-1.5 py-0.5 text-[9px] font-medium text-black sm:px-2 sm:text-[11px]">SOUMISE</span>
+                            <span *ngIf="d.status===DemandStatus.VALIDEE" class="rounded-full bg-[#ffb20a] px-1.5 py-0.5 text-[9px] font-medium text-white sm:px-2 sm:text-[11px]">VALIDÉE</span>
+                            <span *ngIf="d.status===DemandStatus.REFUSEE" class="rounded-full bg-[#ff3131] px-1.5 py-0.5 text-[9px] font-medium text-white sm:px-2 sm:text-[11px]">REFUSÉE</span>
+                            <span *ngIf="d.status===DemandStatus.PAIEMENT_NOTIFIE" class="rounded-full bg-[#d36b3d] px-1.5 py-0.5 text-[9px] font-medium text-white sm:px-2 sm:text-[11px]">NOTIF. PAIEMENT</span>
+                            <span *ngIf="d.status===DemandStatus.PAYEE" class="rounded-full bg-[#00b16a] px-1.5 py-0.5 text-[9px] font-medium text-white sm:px-2 sm:text-[11px]">PAYÉE</span>
+                            <span *ngIf="d.status===DemandStatus.OFFERT" class="rounded-full bg-[#00b16a] px-1.5 py-0.5 text-[9px] font-medium text-white sm:px-2 sm:text-[11px]">OFFERT</span>
 
                             <!-- select modifiable -->
                             <select *ngIf="getAvailableStatuses(d.status).length > 0"
                                     [ngModel]="getSelectValue(d.slug, d.status) ?? d.status"
                                     (ngModelChange)="onChangeStatus(d, $event)"
-                                    class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-1.5 py-0.5 text-[9px] text-slate-900 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:w-auto sm:px-2 sm:py-1 sm:text-[11px]">
                                 <option [ngValue]="null">--</option>
                                 <option *ngFor="let s of getAvailableStatuses(d.status)" [ngValue]="s">{{ s }}</option>
                             </select>
-                            <span *ngIf="getAvailableStatuses(d.status).length === 0" class="text-[11px] text-slate-500">-</span>
+                            <span *ngIf="getAvailableStatuses(d.status).length === 0" class="text-[9px] text-slate-500 sm:text-[11px]">-</span>
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-xs flex gap-2">
+                    <td class="px-2 py-2 text-[11px] sm:px-4 sm:py-3 sm:text-xs">
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
                         <button (click)="openDemandModal(d.slug)"
-                                class="rounded-lg bg-[#d36b3d] px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                                class="rounded-lg bg-[#d36b3d] px-2 py-1 text-[9px] font-semibold text-white shadow-sm hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs">
                             Voir détails
                         </button>
                         <button *ngIf="d.status!=DemandStatus.PAYEE && d.status!=DemandStatus.OFFERT" (click)="openDeleteModal(d)"
-                                class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                                class="rounded-lg bg-red-500 px-2 py-1 text-[9px] font-semibold text-white shadow-sm hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs">
                             Supprimer
                         </button>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -391,27 +395,27 @@
         </div>
 
         <!-- Pagination -->
-        <div *ngIf="!loading() && totalPages() > 1" class="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <div class="text-sm text-slate-600">
+        <div *ngIf="!loading() && totalPages() > 1" class="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-xs text-slate-600 sm:text-sm">
                 Page <span class="font-semibold text-slate-900">{{ page() }}</span> / {{ totalPages() }}
                 · {{ filteredCount() }} demande(s)
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                 <button (click)="prevPage()" [disabled]="page() === 1"
-                        class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm disabled:opacity-50">
+                        class="rounded-xl border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm">
                     Précédent
                 </button>
 
                 <ng-container *ngFor="let p of pageNumbers()">
                     <button (click)="goToPage(p)"
                             [class.bg-slate-900]="p === page()" [class.text-white]="p === page()"
-                            class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            class="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:px-3 sm:py-1.5 sm:text-sm">
                         {{ p }}
                     </button>
                 </ng-container>
 
                 <button (click)="nextPage()" [disabled]="page() === totalPages()"
-                        class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm disabled:opacity-50">
+                        class="rounded-xl border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm">
                     Suivant
                 </button>
             </div>
@@ -422,14 +426,14 @@
     <!-- ... (garde ton bloc modal tel quel ; il reste identique à ce que tu m'as donné) ... -->
     <div *ngIf="isModalOpen()" class="fixed inset-0 z-50">
         <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
-        <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-3xl items-center justify-center px-4" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-3xl items-center justify-center px-2 sm:px-4" role="dialog" aria-modal="true">
             <div class="max-h-[90vh] w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-                    <h3 class="text-lg font-semibold text-slate-900">Détails de la demande</h3>
-                    <button (click)="closeModal()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm hover:bg-slate-50">Fermer</button>
+                <div class="flex items-center justify-between border-b border-slate-200 px-3 py-2 sm:px-5 sm:py-3">
+                    <h3 class="text-base font-semibold text-slate-900 sm:text-lg">Détails de la demande</h3>
+                    <button (click)="closeModal()" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-50 sm:text-sm">Fermer</button>
                 </div>
 
-                <div class="max-h-[70vh] overflow-y-auto p-5">
+                <div class="max-h-[70vh] overflow-y-auto p-3 sm:p-5">
                     <div *ngIf="modalLoading()" class="py-10 text-center text-slate-500">Chargement des détails…</div>
                     <div *ngIf="modalError()" class="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ modalError() }}</div>
 
@@ -519,19 +523,19 @@
                         <div *ngIf="dd.demandStatus === DemandStatus.VALIDEE" class="mt-4 rounded-xl border border-slate-200 p-3">
                             <div class="mb-2 text-sm font-semibold text-slate-900">Notifier un paiement</div>
 
-                            <div class="grid gap-3 md:grid-cols-3">
+                            <div class="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-slate-600">Montant</label>
                                     <input type="number"
-                                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm"
+                                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs shadow-sm sm:text-sm"
                                            [ngModel]="payAmount()" (ngModelChange)="payAmount.set($event)"
                                            min="1" />
-                                    <p class="mt-1 text-[11px] text-slate-500">Pré-rempli (tarif actif × participants + tables).</p>
+                                    <p class="mt-1 text-[10px] text-slate-500 sm:text-[11px]">Pré-rempli (tarif actif × participants + tables).</p>
                                 </div>
 
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-slate-600">Canal</label>
-                                    <select class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+                                    <select class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs shadow-sm sm:text-sm"
                                             [ngModel]="payCanal()" (ngModelChange)="onChangeCanal($event)">
                                         <option [ngValue]="PaymentCanal.WAVE">Wave</option>
                                         <option [ngValue]="PaymentCanal.ORANGE_MONEY">Orange Money</option>
@@ -542,18 +546,18 @@
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-slate-600">Téléphone</label>
                                     <input type="tel"
-                                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm"
+                                           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs shadow-sm sm:text-sm"
                                            [required]="payCanal() !== PaymentCanal.CASH"
                                            [disabled]="payCanal() === PaymentCanal.CASH"
                                            placeholder="ex: 77 00 00 00"
                                            [ngModel]="payPhone()" (ngModelChange)="payPhone.set($event)" />
-                                    <p class="mt-1 text-[11px] text-slate-500" *ngIf="payCanal() === PaymentCanal.CASH">Non requis pour Cash.</p>
+                                    <p class="mt-1 text-[10px] text-slate-500 sm:text-[11px]" *ngIf="payCanal() === PaymentCanal.CASH">Non requis pour Cash.</p>
                                 </div>
 
-                                <div *ngIf="payCanal() === PaymentCanal.CASH">
-                                    <label class="mb-1 block text-xs font-medium text-slate-600">Lieu d’encaissement</label>
+                                <div *ngIf="payCanal() === PaymentCanal.CASH" class="sm:col-span-2 md:col-span-1">
+                                    <label class="mb-1 block text-xs font-medium text-slate-600">Lieu d'encaissement</label>
                                     <select
-                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:text-sm"
                                         [ngModel]="payPlace()"
                                         (ngModelChange)="payPlace.set($event)"
                                         required>
@@ -564,8 +568,8 @@
                                         <option [ngValue]="PaymentPlace.FITLAB">FitLab</option>
                                         <option [ngValue]="PaymentPlace.IROKO_BEACH">Iroko Beach Saly</option>
                                     </select>
-                                    <p class="mt-1 text-[11px] text-rose-600" *ngIf="!payPlace() && submittingPayment()">
-                                        Le lieu d’encaissement est requis pour un paiement Cash.
+                                    <p class="mt-1 text-[10px] text-rose-600 sm:text-[11px]" *ngIf="!payPlace() && submittingPayment()">
+                                        Le lieu d'encaissement est requis pour un paiement Cash.
                                     </p>
                                 </div>
                             </div>
@@ -573,7 +577,7 @@
                             <div class="mt-3 flex items-center justify-end gap-2">
                                 <button (click)="submitPaymentFromModal()"
                                         [disabled]="submittingPayment()"
-                                        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50">
+                                        class="w-full rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm">
                                     Notifier le paiement
                                 </button>
                             </div>
@@ -595,29 +599,29 @@
 <!-- MODALE DE CONFIRMATION CHANGEMENT STATUT -->
 <div *ngIf="confirmOpen()" class="fixed inset-0 z-[60]">
     <div class="absolute inset-0 bg-black/40" (click)="cancelStatusChange()"></div>
-    <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-4" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-2 sm:px-4" role="dialog" aria-modal="true">
         <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div class="border-b border-slate-200 px-5 py-3">
-                <h3 class="text-base font-semibold text-slate-900">Confirmer le changement de statut</h3>
+            <div class="border-b border-slate-200 px-3 py-2 sm:px-5 sm:py-3">
+                <h3 class="text-sm font-semibold text-slate-900 sm:text-base">Confirmer le changement de statut</h3>
             </div>
-            <div class="px-5 py-4">
-                <p class="text-sm text-slate-700">
+            <div class="px-3 py-3 sm:px-5 sm:py-4">
+                <p class="text-xs text-slate-700 sm:text-sm">
                     Voulez-vous vraiment passer cette demande de
                     <span class="font-semibold">{{ pendingChange()?.prev }}</span>
                     à
                     <span class="font-semibold">{{ pendingChange()?.next }}</span> ?
                 </p>
-                <p class="mt-2 text-xs text-slate-500">
+                <p class="mt-2 text-[11px] text-slate-500 sm:text-xs">
                     Cette action notifiera le serveur et pourra impacter la suite du processus (emails, accès, etc.).
                 </p>
             </div>
-            <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+            <div class="flex flex-col-reverse items-stretch gap-2 border-t border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-end sm:px-5">
                 <button (click)="cancelStatusChange()"
-                        class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto sm:px-4 sm:text-sm">
                     Annuler
                 </button>
                 <button (click)="confirmStatusChange()"
-                        class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+                        class="w-full rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:opacity-90 sm:w-auto sm:px-4 sm:text-sm">
                     Confirmer
                 </button>
             </div>
@@ -629,35 +633,35 @@
 <!-- MODALE DE CONFIRMATION SUPPRESSION -->
 <div *ngIf="deleteOpen()" class="fixed inset-0 z-[70]">
     <div class="absolute inset-0 bg-black/40" (click)="cancelDelete()"></div>
-    <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-4" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-2 sm:px-4" role="dialog" aria-modal="true">
         <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div class="border-b border-slate-200 px-5 py-3">
-                <h3 class="text-base font-semibold text-slate-900">Supprimer cette demande ?</h3>
+            <div class="border-b border-slate-200 px-3 py-2 sm:px-5 sm:py-3">
+                <h3 class="text-sm font-semibold text-slate-900 sm:text-base">Supprimer cette demande ?</h3>
             </div>
 
-            <div class="px-5 py-4 space-y-2">
-                <p class="text-sm text-slate-700">
+            <div class="px-3 py-3 space-y-2 sm:px-5 sm:py-4">
+                <p class="text-xs text-slate-700 sm:text-sm">
                     Vous êtes sur le point de <strong>supprimer définitivement</strong> cette demande
                     <ng-container *ngIf="deleteTarget()?.label">&nbsp;(<span class="font-medium">{{ deleteTarget()?.label }}</span>)</ng-container>.
                 </p>
-                <p class="text-xs text-slate-500">
+                <p class="text-[11px] text-slate-500 sm:text-xs">
                     Cette action est irréversible. Les éléments liés (invités, tables, notification de paiement associée) pourront être supprimés.
                 </p>
 
-                <div *ngIf="deleteError()" class="mt-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                <div *ngIf="deleteError()" class="mt-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800 sm:text-sm">
                     ❌ {{ deleteError() }}
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+            <div class="flex flex-col-reverse items-stretch gap-2 border-t border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-end sm:px-5">
                 <button (click)="cancelDelete()"
                         [disabled]="deleting()"
-                        class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm">
                     Annuler
                 </button>
                 <button (click)="confirmDelete()"
                         [disabled]="deleting()"
-                        class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50">
+                        class="w-full rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm">
                     <span *ngIf="!deleting()">Supprimer</span>
                     <span *ngIf="deleting()">Suppression…</span>
                 </button>
