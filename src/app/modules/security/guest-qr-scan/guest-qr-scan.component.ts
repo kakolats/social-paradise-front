@@ -6,6 +6,7 @@ import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
 
 interface ApiResponse<T> {
     success: boolean;
+    reason: string;
     data: T;
     message: string;
     error: string;
@@ -19,7 +20,7 @@ interface ApiResponse<T> {
 })
 export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
     private guestService = inject(GuestService);
-    
+
     private html5QrCode: Html5Qrcode | null = null;
     private isScanning = false;
     private scannerElementId = 'html5qr-reader';
@@ -78,10 +79,10 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
 
         try {
             this.isScanning = true;
-            
+
             // Créer le scanner html5-qrcode
             this.html5QrCode = new Html5Qrcode(this.scannerElementId);
-            
+
             const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
@@ -106,7 +107,7 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
             const errorMsg = err?.message || 'Impossible de démarrer le scanner.';
             this.error.set(`Erreur du scanner : ${errorMsg}`);
             console.error('Erreur lors du démarrage du scanner QR:', err);
-            
+
             // Nettoyer l'élément en cas d'erreur
             const element = document.getElementById(this.scannerElementId);
             if (element) {
@@ -144,7 +145,7 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
             this.isScanning = false;
             if (clearCompletely) {
                 this.html5QrCode = null;
-                
+
                 // Nettoyer le contenu du conteneur pour html5-qrcode
                 const element = document.getElementById(this.scannerElementId);
                 if (element) {
@@ -174,7 +175,7 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
         this.pauseScanning();
         this.validateSlug(slug);
     }
-    
+
     private async pauseScanning(): Promise<void> {
         if (this.html5QrCode) {
             try {
@@ -227,6 +228,10 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
                     return;
                 }
 
+                if(resp.reason === 'ALREADY_USED') {
+                    this.error.set('Ce ticket a déjà été utilisé.');
+                }
+
                 this.guest.set(resp.data);
             },
             error: (err) => {
@@ -248,7 +253,7 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
     async resetScan(): Promise<void> {
         // Arrêter complètement le scanner actuel (nettoyage complet)
         await this.stopScanning(true);
-        
+
         // Forcer le nettoyage si nécessaire
         if (this.html5QrCode || this.isScanning) {
             this.html5QrCode = null;
@@ -258,17 +263,17 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
                 element.innerHTML = '';
             }
         }
-        
+
         // Réinitialiser tous les états
         this.loading.set(false);
         this.error.set(null);
         this.guest.set(null);
         this.lastSlug.set(null);
         this.scanning.set(true);
-        
+
         // Attendre un peu pour que le nettoyage soit complètement terminé
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         // Redémarrer le scanner
         await this.startScanning();
     }
