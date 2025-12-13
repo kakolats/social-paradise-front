@@ -85,8 +85,8 @@ export class GuestQrScanComponent implements OnInit, AfterViewInit, OnDestroy {
 
             const config = {
                 fps: 10,
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 0.75,
+                qrbox: { width: 600, height: 600 },
+                aspectRatio: 2,
             };
 
             // Démarrer le scanner
