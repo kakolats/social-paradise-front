@@ -17,6 +17,20 @@ export const defaultNavigation: FuseNavigationItem[] = [
         link : '/events/event-list'
     },
     {
+        id   : 'user.create',
+        title: 'Créer un utilisateur',
+        type : 'basic',
+        icon : 'heroicons_outline:user-plus',
+        link : '/user-management/create-user'
+    },
+    {
+        id   : 'user.list',
+        title: 'Liste des utilisateurs',
+        type : 'basic',
+        icon : 'heroicons_outline:users',
+        link : '/user-management/list-user'
+    },
+    {
         id   : 'list.event',
         title: 'Deconnexion',
         type : 'basic',

@@ -8,6 +8,7 @@ import { GuestQrScanComponent } from './modules/security/guest-qr-scan/guest-qr-
 // @formatter:off
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+// @ts-ignore
 export const appRoutes: Route[] = [
 
     // Redirect empty path to '/example'
@@ -79,6 +80,7 @@ export const appRoutes: Route[] = [
         children: [
             // {path: 'example', loadChildren: () => import('app/modules/admin/example/example.routes')},
             {path: 'events', loadChildren: () => import('app/modules/admin/events/events.routes')},
+            {path: 'user-management', loadChildren: () => import('app/modules/admin/user-management/user-management.routes')},
             {path: 'security/guest', component : GuestQrScanComponent}
         ]
     }
