@@ -40,6 +40,7 @@
                 <!-- Basic -->
                 @if (item.type === 'basic') {
                     <fuse-vertical-navigation-basic-item
+                        *ngxPermissionsOnly="item.requiredPermissions"
                         [item]="item"
                         [name]="name"
                     ></fuse-vertical-navigation-basic-item>
@@ -48,6 +49,7 @@
                 <!-- Collapsable -->
                 @if (item.type === 'collapsable') {
                     <fuse-vertical-navigation-collapsable-item
+                        *ngxPermissionsOnly="item.requiredPermissions"
                         [item]="item"
                         [name]="name"
                         [autoCollapse]="autoCollapse"
@@ -65,6 +67,7 @@
                 <!-- Group -->
                 @if (item.type === 'group') {
                     <fuse-vertical-navigation-group-item
+                        *ngxPermissionsOnly="item.requiredPermissions"
                         [item]="item"
                         [name]="name"
                         [autoCollapse]="autoCollapse"

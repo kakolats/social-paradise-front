@@ -1,46 +1,46 @@
-<section class="mx-auto w-full px-6 py-8">
-    <div class="rounded-2xl bg-white/50 p-6 shadow-sm backdrop-blur">
-        <h2 class="mb-6 text-2xl font-bold text-slate-900">Liste des événements</h2>
+<section class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-8">
+    <div class="rounded-2xl bg-white/50 p-4 shadow-sm backdrop-blur sm:p-6">
+        <h2 class="mb-4 text-xl font-bold text-slate-900 sm:mb-6 sm:text-2xl">Liste des événements</h2>
 
-        <div *ngIf="loading" class="py-6 text-center text-slate-500">
+        <div *ngIf="loading" class="py-6 text-center text-sm text-slate-500 sm:text-base">
             Chargement des événements...
         </div>
 
-        <div *ngIf="error" class="rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">
+        <div *ngIf="error" class="rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700 sm:p-4">
             ❌ {{ error }}
         </div>
 
-        <div *ngIf="!loading && events.length === 0" class="py-6 text-center text-slate-500">
+        <div *ngIf="!loading && events.length === 0" class="py-6 text-center text-sm text-slate-500 sm:text-base">
             Aucun événement trouvé.
         </div>
 
-        <div *ngIf="!loading && events.length > 0" class="overflow-hidden rounded-2xl border border-slate-200">
+        <div *ngIf="!loading && events.length > 0" class="overflow-x-auto rounded-2xl border border-slate-200">
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-white/50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-slate-700">Nom</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-slate-700">Date</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-slate-700">Slug</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-slate-700">Actions</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-700 sm:px-6 sm:py-3 sm:text-sm">ID</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-700 sm:px-6 sm:py-3 sm:text-sm">Nom</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-700 sm:px-6 sm:py-3 sm:text-sm">Date</th>
+                    <th class="hidden px-3 py-2 text-left text-xs font-semibold text-slate-700 sm:table-cell sm:px-6 sm:py-3 sm:text-sm">Slug</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-700 sm:px-6 sm:py-3 sm:text-sm">Actions</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white/50">
                 <tr *ngFor="let e of events; trackBy: trackById" class="hover:bg-slate-50">
-                    <td class="px-6 py-3 text-sm text-slate-700">{{ e.id }}</td>
-                    <td class="px-6 py-3 text-sm font-medium text-slate-900">{{ e.name }}</td>
-                    <td class="px-6 py-3 text-sm text-slate-700">{{ e.date | date:'mediumDate' }}</td>
-                    <td class="px-6 py-3 text-sm text-slate-700">{{ e.slug || '-' }}</td>
-                    <td class="px-6 py-3 text-sm text-slate-700">
-                        <div class="flex gap-2">
+                    <td class="px-3 py-2 text-xs text-slate-700 sm:px-6 sm:py-3 sm:text-sm">{{ e.id }}</td>
+                    <td class="px-3 py-2 text-xs font-medium text-slate-900 sm:px-6 sm:py-3 sm:text-sm">{{ e.name }}</td>
+                    <td class="px-3 py-2 text-xs text-slate-700 sm:px-6 sm:py-3 sm:text-sm">{{ e.date | date:'mediumDate' }}</td>
+                    <td class="hidden px-3 py-2 text-xs text-slate-700 sm:table-cell sm:px-6 sm:py-3 sm:text-sm">{{ e.slug || '-' }}</td>
+                    <td class="px-3 py-2 text-xs text-slate-700 sm:px-6 sm:py-3 sm:text-sm">
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
                             <button
                                 (click)="onDetails(e)"
-                                class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                                class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[10px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:px-3 sm:py-1.5 sm:text-xs">
                                 Détails
                             </button>
                             <button
                                 (click)="onEdit(e)"
-                                class="rounded-lg bg-[#d36b3d] px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90">
+                                class="rounded-lg bg-[#d36b3d] px-2 py-1 text-[10px] font-semibold text-white shadow-sm hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs">
                                 Modifier
                             </button>
                         </div>

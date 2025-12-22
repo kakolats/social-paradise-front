@@ -3,14 +3,24 @@ import { initialDataResolver } from 'app/app.resolvers';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { AuthGuard } from '../shared/guards/auth/auth.guard';
+import { GuestQrScanComponent } from './modules/security/guest-qr-scan/guest-qr-scan.component';
+import { RoleGuard } from '../shared/guards/role/role.guard';
+import { UnauthorizedComponent } from './modules/landing/unauthorized/unauthorized.component';
 
 // @formatter:off
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+// @ts-ignore
 export const appRoutes: Route[] = [
 
     // Redirect empty path to '/example'
-    {path: '', pathMatch : 'full', redirectTo: 'events/event-list'},
+    {path: '', pathMatch : 'full', redirectTo: 'security/guest'},
+
+    {
+        path : 'unauthorized',
+        pathMatch : 'full',
+        component : UnauthorizedComponent
+    },
 
     // Redirect signed-in user to the '/example'
     //
@@ -77,7 +87,16 @@ export const appRoutes: Route[] = [
         },
         children: [
             // {path: 'example', loadChildren: () => import('app/modules/admin/example/example.routes')},
-            {path: 'events', loadChildren: () => import('app/modules/admin/events/events.routes')},
+            {
+                path: 'events',
+                canActivate:[RoleGuard],
+                data : {
+                    roles: ['ADMIN']
+                },
+                loadChildren: () => import('app/modules/admin/events/events.routes')
+            },
+            {path: 'user-management', loadChildren: () => import('app/modules/admin/user-management/user-management.routes')},
+            {path: 'security/guest', component : GuestQrScanComponent}
         ]
     }
 ];

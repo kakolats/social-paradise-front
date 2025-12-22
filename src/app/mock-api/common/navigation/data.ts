@@ -7,14 +7,39 @@ export const defaultNavigation: FuseNavigationItem[] = [
         title: 'Créer un evenement',
         type : 'basic',
         icon : 'heroicons_outline:plus',
-        link : '/events/create-event'
+        link : '/events/create-event',
+        requiredPermissions : ['ADMIN']
     },
     {
         id   : 'list.event',
         title: 'Liste des évènements',
         type : 'basic',
         icon : 'heroicons_outline:list-bullet',
-        link : '/events/event-list'
+        link : '/events/event-list',
+        requiredPermissions : ['ADMIN']
+    },
+    {
+        id   : 'user.create',
+        title: 'Créer un utilisateur',
+        type : 'basic',
+        icon : 'heroicons_outline:user-plus',
+        link : '/user-management/create-user',
+        requiredPermissions : ['ADMIN']
+    },
+    {
+        id   : 'user.list',
+        title: 'Liste des utilisateurs',
+        type : 'basic',
+        icon : 'heroicons_outline:users',
+        link : '/user-management/list-user',
+        requiredPermissions : ['ADMIN']
+    },
+    {
+        id   : 'user.list',
+        title: 'Scanner un code QR',
+        type : 'basic',
+        icon : 'heroicons_outline:qr-code',
+        link : '/security/guest'
     },
     {
         id   : 'list.event',

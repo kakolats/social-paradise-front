@@ -1,19 +1,23 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { EventService } from 'shared/services/event/event.service';
 import {
     DemandService,
+    DemandStatsEntry,
     DemandSummary,
-    DemandStatsEntry
 } from 'shared/services/demand/demand.service';
 import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
 import { Event as FrontEvent } from 'shared/models/event';
 import { FormsModule } from '@angular/forms';
-import { PaymentCanal, PaymentPlace  } from 'shared/models/payment';
+import { PaymentCanal, PaymentPlace } from 'shared/models/payment';
 import { PaymentService } from 'shared/services/payment/payment.service';
 
-type PendingStatusChange = { slug: string; prev: DemandStatus; next: DemandStatus } | null;
+type PendingStatusChange = {
+    slug: string;
+    prev: DemandStatus;
+    next: DemandStatus;
+} | null;
 
 @Component({
     selector: 'app-event-detail',
@@ -97,14 +101,15 @@ export class EventDetailComponent implements OnInit {
         DemandStatus.VALIDEE,
         DemandStatus.REFUSEE,
         DemandStatus.PAIEMENT_NOTIFIE,
-        DemandStatus.PAYEE
+        DemandStatus.PAYEE,
+        DemandStatus.OFFERT
     ];
     allTypes: DemandType[] = [DemandType.UNIQUE, DemandType.GROUP];
 
     getAvailableStatuses(currentStatus: DemandStatus): DemandStatus[] {
         switch (currentStatus) {
             case DemandStatus.SOUMISE:
-                return [DemandStatus.VALIDEE, DemandStatus.REFUSEE];
+                return [DemandStatus.VALIDEE, DemandStatus.REFUSEE, DemandStatus.OFFERT];
             case DemandStatus.VALIDEE:
                 return [DemandStatus.REFUSEE];
             case DemandStatus.PAIEMENT_NOTIFIE:
@@ -112,7 +117,7 @@ export class EventDetailComponent implements OnInit {
             case DemandStatus.REFUSEE:
                 return [DemandStatus.VALIDEE];
             case DemandStatus.PAYEE:
-                return []; // Aucun changement possible
+                return [DemandStatus.OFFERT]; // Aucun changement possible
             default:
                 return [];
         }
@@ -559,6 +564,7 @@ export class EventDetailComponent implements OnInit {
             const haystacks = [
                 fullName,
                 g.email ?? '',
+                g.phoneNumber ?? ''
             ];
 
             return haystacks.some(h => this.normalize(h).includes(n));

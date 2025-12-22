@@ -1,12 +1,12 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 import { Demand, DemandStatus, DemandType } from '../../models/demand';
 import { Guest as FrontGuest } from '../../models/guest';
 import { Payment as FrontPayment } from '../../models/payment';
 import { Event as FrontEvent } from '../../models/event';
-import { TableItem, Table } from '../../models/table';
+import { Table, TableItem } from '../../models/table';
 import { environment } from '../../../environments/environment';
 
 const API_BASE_URL = environment.apiUrl;
@@ -151,6 +151,7 @@ export class DemandService {
                         DemandStatus.REFUSEE,
                         DemandStatus.PAIEMENT_NOTIFIE,
                         DemandStatus.PAYEE,
+                        DemandStatus.OFFERT
                     ];
 
                     const statsMap: Record<DemandStatus, DemandStatsEntry> = {} as any;

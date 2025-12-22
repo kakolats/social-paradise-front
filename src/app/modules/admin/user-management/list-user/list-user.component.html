@@ -1,0 +1,147 @@
+<section class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-8">
+    <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-lg backdrop-blur sm:p-6 md:p-8">
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl md:text-3xl">
+                Liste des utilisateurs
+            </h2>
+        </div>
+
+        <!-- Success message -->
+        <div *ngIf="successMessage()" class="mb-4 rounded-xl bg-green-50 border border-green-200 p-4 text-green-800">
+            {{ successMessage() }}
+        </div>
+
+        <!-- Error message -->
+        <div *ngIf="error()" class="mb-4 rounded-xl bg-red-50 border border-red-200 p-4 text-red-800">
+            {{ error() }}
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="loading()" class="py-8 text-center text-slate-500">
+            Chargement en cours...
+        </div>
+
+        <!-- Users table -->
+        <div *ngIf="!loading()" class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-xs sm:text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="hidden px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                            ID
+                        </th>
+                        <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                            E-mail
+                        </th>
+                        <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                            Rôle
+                        </th>
+                        <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    <tr *ngFor="let user of users(); trackBy: trackById">
+                        <td class="hidden px-2 py-2 sm:table-cell sm:px-4 sm:py-3">
+                            {{ user.id }}
+                        </td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3">
+                            {{ user.email }}
+                        </td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3">
+                            <!-- Display mode -->
+                            <div *ngIf="!isEditing(user.id)" class="flex items-center gap-2">
+                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
+                                    [ngClass]="{
+                                        'bg-purple-100 text-purple-800': user.role === 'ADMIN',
+                                        'bg-blue-100 text-blue-800': user.role === 'SECURITY'
+                                    }">
+                                    {{ user.role || 'Non défini' }}
+                                </span>
+                            </div>
+                            <!-- Edit mode -->
+                            <div *ngIf="isEditing(user.id)" class="flex items-center gap-2">
+                                <form [formGroup]="getRoleForm(user.id)!" class="flex items-center gap-2">
+                                    <select
+                                        formControlName="role"
+                                        class="rounded-lg border border-slate-300 px-2 py-1 text-xs shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:px-3 sm:text-sm"
+                                    >
+                                        <option [ngValue]="null" disabled>Sélectionnez un rôle</option>
+                                        <option value="ADMIN">Administrateur</option>
+                                        <option value="SECURITY">Sécurité</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </td>
+                        <td class="px-2 py-2 sm:px-4 sm:py-3">
+                            <div class="flex flex-col gap-1 sm:flex-row sm:gap-2">
+                                <!-- Edit mode actions -->
+                                <div *ngIf="isEditing(user.id)" class="flex gap-1">
+                                    <button
+                                        type="button"
+                                        (click)="saveRole(user.id)"
+                                        [disabled]="getRoleForm(user.id)?.invalid || loading()"
+                                        class="rounded-lg bg-green-600 px-2 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed sm:px-3"
+                                    >
+                                        Enregistrer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        (click)="cancelEdit()"
+                                        [disabled]="loading()"
+                                        class="rounded-lg bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-300 disabled:opacity-50 sm:px-3"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                                <!-- Delete confirmation mode -->
+                                <div *ngIf="isDeleting(user.id) && !isEditing(user.id)" class="flex gap-1">
+                                    <button
+                                        type="button"
+                                        (click)="deleteUser(user.id)"
+                                        [disabled]="loading()"
+                                        class="rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed sm:px-3"
+                                    >
+                                        Confirmer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        (click)="cancelDelete()"
+                                        [disabled]="loading()"
+                                        class="rounded-lg bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-300 disabled:opacity-50 sm:px-3"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                                <!-- Display mode actions -->
+                                <div *ngIf="!isEditing(user.id) && !isDeleting(user.id)" class="flex flex-col gap-1 sm:flex-row sm:gap-2">
+                                    <button
+                                        type="button"
+                                        (click)="startEdit(user.id)"
+                                        [disabled]="loading()"
+                                        class="rounded-lg bg-[#d36b3d] px-2 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50 sm:px-3"
+                                    >
+                                        Modifier le rôle
+                                    </button>
+                                    <button
+                                        type="button"
+                                        (click)="confirmDelete(user.id)"
+                                        [disabled]="loading()"
+                                        class="rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 sm:px-3"
+                                    >
+                                        Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="users().length === 0">
+                        <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500">
+                            Aucun utilisateur trouvé
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
