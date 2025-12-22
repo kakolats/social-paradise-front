@@ -55,6 +55,7 @@ import {
     Subscription,
     takeUntil,
 } from 'rxjs';
+import { NgxPermissionsModule } from 'ngx-permissions';
 
 @Component({
     selector: 'fuse-vertical-navigation',
@@ -73,6 +74,7 @@ import {
         FuseVerticalNavigationDividerItemComponent,
         FuseVerticalNavigationGroupItemComponent,
         FuseVerticalNavigationSpacerItemComponent,
+        NgxPermissionsModule
     ],
 })
 export class FuseVerticalNavigationComponent

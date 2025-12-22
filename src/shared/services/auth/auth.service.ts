@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { LoginResponse } from '../../models/loginResponse';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { AuthUtils } from '../../../app/core/auth/auth.utils';
 import { UserService } from '../user/user.service';
+import { NgxPermissionsService } from 'ngx-permissions';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,8 @@ export class AuthService {
     private tokenKey = "auth-token"
     private apiUrl = environment.apiUrl + "/auth"
     private _authenticated = false
+
+    permissionsService = inject(NgxPermissionsService);
 
   constructor(
       private http: HttpClient,
@@ -32,6 +35,7 @@ export class AuthService {
 
     removeTokens(): void {
         localStorage.removeItem(this.tokenKey)
+        localStorage.removeItem('user-role')
     }
 
     login(credentials: { email: string; password: string }): Observable<LoginResponse> {
@@ -42,6 +46,8 @@ export class AuthService {
         return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
             tap((response) => {
                 this.setToken(response.data.access_token)
+                localStorage.setItem('user-role', AuthUtils._decodeToken(response.data.access_token).role)
+                this.permissionsService.loadPermissions(localStorage.getItem('user-role') ? [localStorage.getItem('user-role')!] : []);
                 this._authenticated = true
                 this._userService.user = { email : credentials.email }
             }),
@@ -53,6 +59,7 @@ export class AuthService {
     }
 
     logout(): Observable<any> {
+        this.permissionsService.flushPermissions()
         this.clearAuthData()
         return of(true)
 
@@ -91,5 +98,20 @@ export class AuthService {
         // If the access token exists and it didn't expire, sign in using it
         this._authenticated = true
         return of(true)
+    }
+
+    async getUserRole(): Promise<string | null> {
+        const token = this.getToken();
+        if (token) {
+            try {
+                const decodedToken: any = AuthUtils._decodeToken(token);
+                console.log('decodedToken',decodedToken);
+                return decodedToken.role;
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                return null;
+            }
+        }
+        return null;
     }
 }

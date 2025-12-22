@@ -19,6 +19,7 @@ import { FuseVerticalNavigationDividerItemComponent } from '@fuse/components/nav
 import { FuseVerticalNavigationSpacerItemComponent } from '@fuse/components/navigation/vertical/components/spacer/spacer.component';
 import { FuseVerticalNavigationComponent } from '@fuse/components/navigation/vertical/vertical.component';
 import { Subject, takeUntil } from 'rxjs';
+import { NgxPermissionsModule } from 'ngx-permissions';
 
 @Component({
     selector: 'fuse-vertical-navigation-group-item',
@@ -33,6 +34,7 @@ import { Subject, takeUntil } from 'rxjs';
         FuseVerticalNavigationDividerItemComponent,
         forwardRef(() => FuseVerticalNavigationGroupItemComponent),
         FuseVerticalNavigationSpacerItemComponent,
+        NgxPermissionsModule
     ],
 })
 export class FuseVerticalNavigationGroupItemComponent

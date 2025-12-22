@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { APP_INITIALIZER, ApplicationConfig, inject } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, inject } from '@angular/core';
 import { LuxonDateAdapter } from '@angular/material-luxon-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -22,11 +22,14 @@ import {AuthGuard} from "../shared/guards/auth/auth.guard";
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { NgxPermissionsModule } from 'ngx-permissions';
+import { RoleGuard } from '../shared/guards/role/role.guard';
 
 registerLocaleData(localeFr);
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        importProvidersFrom(NgxPermissionsModule.forRoot()),
         provideAnimations(),
         provideHttpClient(),
         provideRouter(
@@ -39,7 +42,11 @@ export const appConfig: ApplicationConfig = {
             useFactory: (authService: AuthService, router: Router) => AuthGuard(authService, router),
             deps: [AuthService, Router]
         },
-
+        {
+            provide: RoleGuard,
+            useFactory: (authService: AuthService, router: Router) => RoleGuard(authService, router),
+            deps: [AuthService, Router]
+        },
         // Material Date Adapter
         {
             provide: DateAdapter,
