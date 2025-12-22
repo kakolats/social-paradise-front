@@ -383,7 +383,7 @@
                                 class="rounded-lg bg-[#d36b3d] px-2 py-1 text-[9px] font-semibold text-white shadow-sm hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs">
                             Voir détails
                         </button>
-                        <button *ngIf="d.status!=DemandStatus.PAYEE && d.status!=DemandStatus.OFFERT" (click)="openDeleteModal(d)"
+                        <button (click)="openDeleteModal(d)"
                                 class="rounded-lg bg-red-500 px-2 py-1 text-[9px] font-semibold text-white shadow-sm hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs">
                             Supprimer
                         </button>
