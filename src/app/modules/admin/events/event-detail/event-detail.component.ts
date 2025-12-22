@@ -564,6 +564,7 @@ export class EventDetailComponent implements OnInit {
             const haystacks = [
                 fullName,
                 g.email ?? '',
+                g.phoneNumber ?? ''
             ];
 
             return haystacks.some(h => this.normalize(h).includes(n));

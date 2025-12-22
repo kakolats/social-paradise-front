@@ -3,6 +3,7 @@ import { GuestService, GuestValidationData } from '../../../../shared/services/g
 import { Guest } from '../../../../shared/models/guest';
 import { NgIf } from '@angular/common';
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
+import { MatIconModule } from '@angular/material/icon';
 
 interface ApiResponse<T> {
     success: boolean;
@@ -14,7 +15,7 @@ interface ApiResponse<T> {
 @Component({
     selector: 'app-guest-qr-scan',
     standalone: true,
-    imports: [NgIf],
+    imports: [NgIf, MatIconModule],
     templateUrl: './guest-qr-scan.component.html',
     styleUrl: './guest-qr-scan.component.scss',
 })

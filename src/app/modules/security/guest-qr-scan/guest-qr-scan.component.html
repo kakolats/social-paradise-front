@@ -23,31 +23,40 @@
         Validation du ticket en cours…
     </div>
 
-    <!-- Erreur -->
+    <!-- Erreur avec icône de croix -->
     <div
         *ngIf="error()"
-        class="mb-3 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+        class="mb-3 flex flex-col items-center justify-center rounded-xl border border-rose-300 bg-rose-50 px-4 py-6"
     >
-        ❌ {{ error() }}
+        <mat-icon 
+            [svgIcon]="'heroicons_solid:x-circle'"
+            class="!w-20 !h-20 text-red-500 mb-3"
+        ></mat-icon>
+        <div class="text-center text-sm font-semibold text-rose-800">
+            {{ error() }}
+        </div>
     </div>
 
-    <!-- Résultat -->
+    <!-- Résultat avec icône de check -->
     <div
         *ngIf="guest() as g"
         class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
     >
-        <div class="flex items-center justify-between mb-2">
-            <div>
-                <div class="text-xs font-medium text-emerald-700 uppercase">
-                    Ticket valide
-                </div>
-                <div class="text-lg font-semibold text-slate-900">
-                    {{ guestFullName() }}
-                </div>
+        <div class="flex items-center justify-center mb-4">
+            <mat-icon 
+                [svgIcon]="'heroicons_solid:check-circle'"
+                class="!w-20 !h-20 text-green-500"
+            ></mat-icon>
+        </div>
+        <div class="text-center mb-3">
+            <div class="text-xs font-medium text-emerald-700 uppercase">
+                Ticket valide
             </div>
-            <div class="text-xs text-slate-500">
-                Slug :
-                <span class="font-mono">{{ g.slug }}</span>
+            <div class="text-lg font-semibold text-slate-900 mt-1">
+                {{ guestFullName() }}
+            </div>
+            <div class="text-xs text-slate-500 mt-1">
+                Slug : <span class="font-mono">{{ g.slug }}</span>
             </div>
         </div>
 
