@@ -1,4 +1,3 @@
-<!-- guest-qr-scanner.component.html -->
 <section class="w-full max-w-xl mx-auto p-4">
     <h1 class="text-xl font-semibold text-slate-900 mb-3">
         Scan du ticket (QR Code)
@@ -10,49 +9,69 @@
             *ngIf="scanning()"
             id="html5qr-reader"
             class="block w-full aspect-[3/4] bg-black rounded-xl overflow-hidden"
-        >
-        </div>
+        ></div>
 
         <div *ngIf="!scanning()" class="text-sm text-slate-500">
             Scanner en pause.
         </div>
     </div>
 
-    <!-- Etat chargement -->
-    <div *ngIf="loading()" class="mb-3 text-sm text-slate-600">
-        Validation du ticket en cours…
-    </div>
-
-    <!-- Erreur avec icône de croix -->
+    <!-- Bloc STATUT (icône + texte) -->
     <div
-        *ngIf="error()"
-        class="mb-3 flex flex-col items-center justify-center rounded-xl border border-rose-300 bg-rose-50 px-4 py-6"
+        *ngIf="status() !== 'SCANNING' && status() !== 'IDLE'"
+        class="mb-3 flex flex-col items-center justify-center rounded-2xl border px-4 py-6 text-center"
+        [ngClass]="{
+      'border-slate-200 bg-white': status() === 'LOADING',
+      'border-rose-300 bg-rose-50': status() === 'INVALID',
+      'border-emerald-300 bg-emerald-50': status() === 'VALID',
+      'border-red-300 bg-red-50': status() === 'ALREADY_USED'
+    }"
     >
-        <mat-icon 
+        <!-- Icônes -->
+        <mat-icon
+            *ngIf="status() === 'VALID'"
+            [svgIcon]="'heroicons_solid:check-circle'"
+            class="!w-20 !h-20 text-green-500 mb-3"
+        ></mat-icon>
+
+        <mat-icon
+            *ngIf="status() === 'INVALID' || status() === 'ALREADY_USED'"
             [svgIcon]="'heroicons_solid:x-circle'"
             class="!w-20 !h-20 text-red-500 mb-3"
         ></mat-icon>
-        <div class="text-center text-sm font-semibold text-rose-800">
-            {{ error() }}
+
+        <mat-icon
+            *ngIf="status() === 'LOADING'"
+            [svgIcon]="'heroicons_solid:arrow-path'"
+            class="!w-20 !h-20 text-slate-500 mb-3 animate-spin"
+        ></mat-icon>
+
+        <!-- Texte -->
+        <div
+            class="text-base font-semibold"
+            [ngClass]="{
+        'text-slate-800': status() === 'LOADING',
+        'text-rose-800': status() === 'INVALID',
+        'text-emerald-800': status() === 'VALID',
+        'text-red-800': status() === 'ALREADY_USED'
+      }"
+        >
+            {{ statusMessage() }}
         </div>
     </div>
 
-    <!-- Résultat avec icône de check -->
+    <!-- Bloc INFOS (uniquement si guest existe) -->
     <div
         *ngIf="guest() as g"
-        class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
+        class="mb-4 rounded-2xl border p-4"
+        [ngClass]="{
+      'border-emerald-300 bg-emerald-50': status() === 'VALID',
+      'border-red-300 bg-red-50': status() === 'ALREADY_USED',
+      'border-slate-200 bg-white': status() !== 'VALID' && status() !== 'ALREADY_USED'
+    }"
     >
-        <div class="flex items-center justify-center mb-4">
-            <mat-icon 
-                [svgIcon]="'heroicons_solid:check-circle'"
-                class="!w-20 !h-20 text-green-500"
-            ></mat-icon>
-        </div>
         <div class="text-center mb-3">
-            <div class="text-xs font-medium text-emerald-700 uppercase">
-                Ticket valide
-            </div>
-            <div class="text-lg font-semibold text-slate-900 mt-1">
+            <div class="text-lg font-semibold text-slate-900">
                 {{ guestFullName() }}
             </div>
             <div class="text-xs text-slate-500 mt-1">
@@ -62,12 +81,14 @@
 
         <div class="grid gap-2 text-sm text-slate-700">
             <div><span class="font-medium">Email :</span> {{ g.email }}</div>
+
             <div *ngIf="g.phoneNumber">
                 <span class="font-medium">Téléphone :</span> {{ g.phoneNumber }}
             </div>
+
             <div *ngIf="g.age">
-                <span class="font-medium">Âge :</span> {{ g.age }}</div
-            >
+                <span class="font-medium">Âge :</span> {{ g.age }}
+            </div>
         </div>
     </div>
 
