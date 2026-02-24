@@ -6,6 +6,7 @@ import { AuthGuard } from '../shared/guards/auth/auth.guard';
 import { GuestQrScanComponent } from './modules/security/guest-qr-scan/guest-qr-scan.component';
 import { RoleGuard } from '../shared/guards/role/role.guard';
 import { UnauthorizedComponent } from './modules/landing/unauthorized/unauthorized.component';
+import { ReviewFormComponent } from './modules/landing/review-form/review-form.component';
 
 // @formatter:off
 /* eslint-disable max-len */
@@ -43,7 +44,8 @@ export const appRoutes: Route[] = [
             {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.routes')},
             {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/sign-in/sign-in.routes')},
-            {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
+            {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')},
+            {path: 'paradise-til-sunrise-review-form', component: ReviewFormComponent},
         ]
     },
 
