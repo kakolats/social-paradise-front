@@ -1,5 +1,18 @@
 import { Price } from './price';
 import { Table } from './table';
+import { PaymentCanal } from './payment';
+
+export interface EventPaymentMethod {
+    name: string;
+    phoneNumber: string;
+    canal?: PaymentCanal | string;
+}
+
+export interface EventCashPlace {
+    name: string;
+    address: string;
+    mapUrl?: string;
+}
 
 export interface Event {
     id?: number;
@@ -11,4 +24,7 @@ export interface Event {
     slug?: string;
     prices?: Price[];
     tables?: Table[];
+    paymentMethods?: EventPaymentMethod[];
+    allowCash?: boolean;
+    cashPlacesConfig?: EventCashPlace[];
 }

@@ -1,4 +1,4 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { QuillModule } from 'ngx-quill';
 import {
     Component,
@@ -20,8 +20,9 @@ import {
     Validators,
 } from '@angular/forms';
 import { EventService } from '../../../../../shared/services/event/event.service';
-import { Event } from '../../../../../shared/models/event';
+import { Event, EventCashPlace, EventPaymentMethod } from '../../../../../shared/models/event';
 import { Price } from '../../../../../shared/models/price';
+import { PaymentCanal, PaymentPlace } from '../../../../../shared/models/payment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FileUploadService } from 'shared/services/file-upload.service';
 
@@ -39,6 +40,18 @@ type TableFG = FormGroup<{
     capacity: FormControl<number | null>;
 }>;
 
+type PaymentMethodFG = FormGroup<{
+    name: FormControl<string | null>;
+    phoneNumber: FormControl<string | null>;
+    canal: FormControl<PaymentCanal | string | null>;
+}>;
+
+type CashPlaceFG = FormGroup<{
+    name: FormControl<string | null>;
+    address: FormControl<string | null>;
+    mapUrl: FormControl<string | null>;
+}>;
+
 type EventFG = FormGroup<{
     name: FormControl<string | null>;
     date: FormControl<string | null>; // yyyy-MM-dd
@@ -47,12 +60,15 @@ type EventFG = FormGroup<{
     coverImage: FormControl<string | null>; // will hold URL, not File
     prices: FormArray<PriceFG>;
     tables: FormArray<TableFG>;
+    paymentMethods: FormArray<PaymentMethodFG>;
+    allowCash: FormControl<boolean | null>;
+    cashPlacesConfig: FormArray<CashPlaceFG>;
 }>;
 
 @Component({
     selector: 'app-create-event',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, NgOptimizedImage, QuillModule],
+    imports: [CommonModule, ReactiveFormsModule, QuillModule],
     templateUrl: './create-event.component.html',
     styleUrl: './create-event.component.scss',
 })
@@ -88,6 +104,9 @@ export class CreateEventComponent implements OnInit, OnChanges {
         coverImage: this.fb.control<string | null>(null), // we'll set URL here
         prices: this.fb.array<PriceFG>([]),
         tables: this.fb.array<TableFG>([]),
+    paymentMethods: this.fb.array<PaymentMethodFG>([]),
+    allowCash: this.fb.control<boolean | null>(true),
+    cashPlacesConfig: this.fb.array<CashPlaceFG>([]),
     });
 
     createdMessage = computed(() => this._createdMessage);
@@ -137,8 +156,53 @@ export class CreateEventComponent implements OnInit, OnChanges {
     tables(): FormArray<TableFG> {
         return this.form.controls.tables;
     }
+  paymentMethods(): FormArray<PaymentMethodFG> {
+    return this.form.controls.paymentMethods;
+  }
+  cashPlacesConfig(): FormArray<CashPlaceFG> {
+    return this.form.controls.cashPlacesConfig;
+  }
 
     trackByIndex = (i: number) => i;
+
+    readonly allPaymentCanals: { key: PaymentCanal; label: string }[] = [
+        { key: PaymentCanal.WAVE,          label: 'Wave' },
+        { key: PaymentCanal.ORANGE_MONEY,  label: 'Orange Money' },
+        { key: PaymentCanal.CASH,          label: 'Cash' },
+    ];
+
+    readonly allCashPlaces: { key: PaymentPlace; label: string }[] = [
+        { key: PaymentPlace.FITLAB,       label: 'Fitlab' },
+        { key: PaymentPlace.HEMISPHERE,   label: 'Hémisphère Voyages' },
+        { key: PaymentPlace.GROOV,        label: 'Groov' },
+        { key: PaymentPlace.IROKO_BEACH,  label: 'Iroko Beach Saly' },
+    ];
+
+  private makePaymentMethod(initial?: Partial<EventPaymentMethod>): PaymentMethodFG {
+    return this.fb.group({
+      name: this.fb.control<string | null>(initial?.name ?? null, {
+        validators: [Validators.required],
+      }),
+      phoneNumber: this.fb.control<string | null>(initial?.phoneNumber ?? null, {
+        validators: [Validators.required],
+      }),
+      canal: this.fb.control<PaymentCanal | string | null>(
+        (initial?.canal as PaymentCanal | string) ?? null
+      ),
+    });
+  }
+
+  private makeCashPlace(initial?: Partial<EventCashPlace>): CashPlaceFG {
+    return this.fb.group({
+      name: this.fb.control<string | null>(initial?.name ?? null, {
+        validators: [Validators.required],
+      }),
+      address: this.fb.control<string | null>(initial?.address ?? null, {
+        validators: [Validators.required],
+      }),
+      mapUrl: this.fb.control<string | null>(initial?.mapUrl ?? null),
+    });
+  }
 
     private makePrice(): PriceFG {
         return this.fb.group({
@@ -184,6 +248,20 @@ export class CreateEventComponent implements OnInit, OnChanges {
     removeTable(i: number) {
         this.tables().removeAt(i);
     }
+
+  addPaymentMethod() {
+    this.paymentMethods().push(this.makePaymentMethod());
+  }
+  removePaymentMethod(i: number) {
+    this.paymentMethods().removeAt(i);
+  }
+
+  addCashPlace() {
+    this.cashPlacesConfig().push(this.makeCashPlace());
+  }
+  removeCashPlace(i: number) {
+    this.cashPlacesConfig().removeAt(i);
+  }
 
     invalid(ctrl: keyof EventFG['controls']): boolean {
         const c = this.form.controls[ctrl] as FormControl | FormArray;
@@ -247,6 +325,8 @@ export class CreateEventComponent implements OnInit, OnChanges {
         this.form.reset();
         this.prices().clear();
         this.tables().clear();
+        this.paymentMethods().clear();
+        this.cashPlacesConfig().clear();
 
         this.form.patchValue({
             name: evt.name ?? null,
@@ -254,6 +334,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
             location: (evt as any).location ?? null,
             description: (evt as any).description ?? null,
             coverImage: (evt as any).coverImage ?? null,
+            allowCash: (evt as any).allowCash ?? true,
         });
 
         (evt.prices ?? []).forEach((p: Price) => {
@@ -277,6 +358,16 @@ export class CreateEventComponent implements OnInit, OnChanges {
             this.tables().push(tg);
         });
 
+        // Payment methods
+        (evt.paymentMethods ?? []).forEach((pm) => {
+            this.paymentMethods().push(this.makePaymentMethod(pm));
+        });
+
+        // Cash places config
+        (evt.cashPlacesConfig ?? []).forEach((cp) => {
+            this.cashPlacesConfig().push(this.makeCashPlace(cp));
+        });
+
         // no selectedFile initially when editing existing
         this.selectedFile = null;
     }
@@ -289,6 +380,11 @@ export class CreateEventComponent implements OnInit, OnChanges {
             this.form.reset();
             this.prices().clear();
             this.tables().clear();
+            this.paymentMethods().clear();
+            this.cashPlacesConfig().clear();
+            this.form.patchValue({
+                allowCash: true,
+            });
             this.selectedFile = null;
         }
         this._createdMessage = '';
@@ -315,6 +411,17 @@ export class CreateEventComponent implements OnInit, OnChanges {
                 name: t!.name!,
                 amount: Number(t!.amount),
                 capacity: Number(t!.capacity),
+            })),
+            paymentMethods: (f.paymentMethods ?? []).map((pm) => ({
+                name: pm!.name!,
+                phoneNumber: pm!.phoneNumber!,
+                canal: pm!.canal ?? undefined,
+            })),
+            allowCash: f.allowCash ?? true,
+            cashPlacesConfig: (f.cashPlacesConfig ?? []).map((cp) => ({
+                name: cp!.name!,
+                address: cp!.address!,
+                mapUrl: cp!.mapUrl ?? undefined,
             })),
         };
     }

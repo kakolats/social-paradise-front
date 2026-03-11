@@ -6,7 +6,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DemandService } from 'shared/services/demand/demand.service';
 import { PaymentService } from 'shared/services/payment/payment.service'; // service minimal ci-dessous
 import { Demand, DemandStatus, DemandType } from 'shared/models/demand';
-import { Event as FrontEvent } from 'shared/models/event';
+import { Event as FrontEvent, EventPaymentMethod, EventCashPlace } from 'shared/models/event';
 import { Price as FrontPrice } from 'shared/models/price';
 import { EventService } from '../../../../../shared/services/event/event.service';
 import { PaymentCanal, PaymentPlace } from '../../../../../shared/models/payment';
@@ -16,7 +16,7 @@ type PlaceInfo = {
     key?: PaymentPlace;
     name: string;
     address: string;
-    mapUrl: string;
+    mapUrl?: string;
 };
 
 @Component({
@@ -28,7 +28,7 @@ type PlaceInfo = {
 })
 export class PublicEventDetailComponent implements OnInit {
 
-    readonly cashPlaces: PlaceInfo[] = [
+    private readonly baseCashPlaces: PlaceInfo[] = [
         {
             key: PaymentPlace.FITLAB,
             name: 'Fitlab',
@@ -55,6 +55,25 @@ export class PublicEventDetailComponent implements OnInit {
         },
     ];
 
+    visibleCashPlaces = computed<PlaceInfo[]>(() => {
+        const ev = this.event() as FrontEvent | null;
+        const cfg = ev?.cashPlacesConfig as EventCashPlace[] | undefined;
+        if (cfg && cfg.length) {
+            return cfg.map(c => ({
+                name: c.name,
+                address: c.address,
+                mapUrl: c.mapUrl,
+            }));
+        }
+        // fallback: ancienne logique avec la liste en dur
+        return this.baseCashPlaces;
+    });
+
+    paymentMethods = computed<EventPaymentMethod[]>(() => {
+        const ev = this.event() as FrontEvent | null;
+        return (ev?.paymentMethods ?? []) as EventPaymentMethod[];
+    });
+
     mainGuestLabel = computed(() => {
         const d = this.demand();
         const main = d?.guests?.find(g => g.isMainGuest) ?? d?.guests?.[0];
@@ -64,7 +83,7 @@ export class PublicEventDetailComponent implements OnInit {
     });
 
     readonly orangeMoneyNumber = environment.orangeMoneyNumber ?? '';
-    readonly orangeMoneyQrUrl= environment.orangeMoneyQrUrl; // facultatif si tu préfères l’injecter depuis le parent
+    readonly orangeMoneyQrUrl= environment.orangeMoneyQrUrl; // peut être utilisé en plus des numéros par event
 
     // ✅ 2) Lien Wave (montant dynamique)
     wavePayUrl() {
@@ -74,7 +93,26 @@ export class PublicEventDetailComponent implements OnInit {
     }
 
     showOrangeMoneyBlock() {
-        return !!this.orangeMoneyNumber && (this.totalAmount() || 0) > 0;
+        const ev = this.event() as FrontEvent | null;
+        const methods = (ev?.paymentMethods ?? []) as EventPaymentMethod[];
+        const hasOmMethod = methods.some(m =>
+            m.canal === PaymentCanal.ORANGE_MONEY ||
+            m.canal === 'ORANGE_MONEY' ||
+            m.canal === 'Orange Money'
+        );
+        return hasOmMethod && (this.totalAmount() || 0) > 0;
+    }
+
+    canUseWave() {
+        const ev = this.event() as FrontEvent | null;
+        const methods = (ev?.paymentMethods ?? []) as EventPaymentMethod[];
+        return methods.some(m => m.canal === PaymentCanal.WAVE || m.canal === 'WAVE');
+    }
+
+    canUseCash() {
+        const ev = this.event() as FrontEvent | null;
+        const allowCashFlag = (ev as any)?.allowCash;
+        return allowCashFlag !== false;
     }
 
     private route = inject(ActivatedRoute);
@@ -101,7 +139,7 @@ export class PublicEventDetailComponent implements OnInit {
         amount: [{ value: 0, disabled: false }, [Validators.required, Validators.min(0)]],
         phoneNumber: ['', [Validators.required]],
         paymentCanal: ['WAVE', [Validators.required]],
-        paymentPlace: [null as PaymentPlace | null]  //
+        paymentPlace: [null as PaymentPlace | null]
     });
 
     ngOnInit() {

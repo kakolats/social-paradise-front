@@ -33,10 +33,10 @@ export class EventService {
     private serializeEvent(evt: Partial<Event>): any {
         return {
             name: evt.name,
-            date: evt.date instanceof Date ? evt.date.toISOString().slice(0,10) : evt.date, // "YYYY-MM-DD"
+            date: evt.date instanceof Date ? evt.date.toISOString().slice(0,10) : evt.date,
             location: evt.location,
             description: evt.description,
-            coverImage: evt.coverImage, // <-- new
+            coverImage: evt.coverImage,
             prices: (evt.prices ?? []).map(p => ({
                 id: p.id,
                 name: p.name,
@@ -54,6 +54,9 @@ export class EventService {
                 amount: t.amount,
                 capacity: t.capacity,
             })),
+            paymentMethods: evt.paymentMethods,
+            allowCash: evt.allowCash,
+            cashPlacesConfig: evt.cashPlacesConfig,
         };
     }
 
@@ -79,6 +82,9 @@ export class EventService {
                 amount: t.amount,
                 capacity: t.capacity,
             })),
+            paymentMethods: raw.paymentMethods ?? undefined,
+            allowCash: raw.allowCash ?? true,
+            cashPlacesConfig: raw.cashPlacesConfig ?? undefined,
         };
     }
 
