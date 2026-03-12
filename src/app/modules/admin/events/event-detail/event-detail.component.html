@@ -179,7 +179,33 @@
     </div>
 
 
-    <!-- Filters -->
+    <!-- Tabs -->
+    <div class="mx-auto px-2 sm:px-4 md:px-6 mt-4 sm:mt-6">
+        <div class="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs sm:text-sm">
+            <button
+                type="button"
+                (click)="activeTab.set('demands')"
+                class="px-3 py-1.5 rounded-lg font-semibold"
+                [ngClass]="activeTab() === 'demands'
+                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-900/10'
+                    : 'text-slate-500 hover:text-slate-900'">
+                Demandes
+            </button>
+            <button
+                type="button"
+                (click)="activeTab.set('guests')"
+                class="px-3 py-1.5 rounded-lg font-semibold"
+                [ngClass]="activeTab() === 'guests'
+                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-900/10'
+                    : 'text-slate-500 hover:text-slate-900'">
+                Invités (toutes demandes)
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Onglet DEMANDES : filtres + liste/pagination -->
+    <div *ngIf="activeTab() === 'demands'">
     <div class="mx-auto px-2 sm:px-4 md:px-6">
         <div class="mt-4 grid gap-2 items-end sm:mt-6 sm:gap-3 sm:grid-cols-4 lg:grid-cols-6">
             <!-- Statut -->
@@ -415,6 +441,106 @@
                 </ng-container>
 
                 <button (click)="nextPage()" [disabled]="page() === totalPages()"
+                        class="rounded-xl border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm">
+                    Suivant
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Onglet INVITÉS : liste de tous les guests de l'évènement -->
+    <div *ngIf="activeTab() === 'guests'" class="mx-auto px-4 sm:px-6">
+        <div class="mt-4 flex flex-wrap items-end gap-3 sm:mt-6">
+            <div>
+                <label class="mb-1 block text-xs font-medium text-slate-900">Taille de page</label>
+                <select
+                    [ngModel]="guestsPageSize()"
+                    (ngModelChange)="changeGuestsPageSize($event)"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:w-auto"
+                >
+                    <option *ngFor="let s of guestsPageSizeOptions" [ngValue]="s">{{ s }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Nom
+                    </th>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Email
+                    </th>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Téléphone
+                    </th>
+                    <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 md:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        Âge
+                    </th>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Demande
+                    </th>
+                    <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        Type
+                    </th>
+                    <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        Statut
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                <tr *ngFor="let g of pagedGuests()" class="hover:bg-slate-50">
+                    <td class="px-3 py-2 text-[11px] font-medium text-slate-900 sm:px-4 sm:py-3 sm:text-sm">
+                        {{ g.firstName }} {{ g.lastName }}
+                        <span *ngIf="g.isMainGuest" class="ml-1 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            Principal
+                        </span>
+                    </td>
+                    <td class="px-3 py-2 text-[11px] text-slate-600 sm:px-4 sm:py-3 sm:text-xs">
+                        {{ g.email }}
+                    </td>
+                    <td class="px-3 py-2 text-[11px] text-slate-600 sm:px-4 sm:py-3 sm:text-xs">
+                        {{ g.phoneNumber }}
+                    </td>
+                    <td class="hidden px-3 py-2 text-[11px] text-slate-600 md:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        {{ g.age ?? '—' }}
+                    </td>
+                    <td class="px-3 py-2 text-[11px] text-slate-600 sm:px-4 sm:py-3 sm:text-xs">
+                        <span class="font-mono text-[11px]">{{ g.demandSlug | slice:0:8 }}…</span>
+                        <div class="text-[10px] text-slate-400">
+                            {{ g.createdAt | date:'mediumDate' }}
+                        </div>
+                    </td>
+                    <td class="hidden px-3 py-2 text-[11px] text-slate-600 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        {{ g.demandType === DemandType.GROUP ? 'Groupe' : 'Individuelle' }}
+                    </td>
+                    <td class="hidden px-3 py-2 text-[11px] text-slate-600 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        {{ g.demandStatus }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="allGuests().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+            Aucun invité trouvé pour cet évènement.
+        </div>
+
+        <!-- Pagination invités -->
+        <div *ngIf="allGuests().length > 0 && guestsTotalPages() > 1"
+             class="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-xs text-slate-600 sm:text-sm">
+                Page <span class="font-semibold text-slate-900">{{ guestsPage() }}</span> / {{ guestsTotalPages() }}
+                · {{ guestsTotal() }} invité(s)
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                <button (click)="prevGuestsPage()" [disabled]="guestsPage() === 1"
+                        class="rounded-xl border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm">
+                    Précédent
+                </button>
+
+                <button (click)="nextGuestsPage()" [disabled]="guestsPage() === guestsTotalPages()"
                         class="rounded-xl border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm">
                     Suivant
                 </button>

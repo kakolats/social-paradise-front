@@ -19,6 +19,19 @@ type PendingStatusChange = {
     next: DemandStatus;
 } | null;
 
+type EventGuestRow = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  age: number | null;
+  isMainGuest: boolean;
+  demandSlug: string;
+  demandStatus: DemandStatus;
+  demandType: DemandType;
+  createdAt: Date | string;
+};
+
 @Component({
     selector: 'app-event-detail',
     standalone: true,
@@ -54,6 +67,11 @@ export class EventDetailComponent implements OnInit {
     pageSize = signal<number>(6);
     pageSizeOptions = [6, 12, 24, 50, 100];
 
+    // pagination invités
+    guestsPage = signal<number>(1);
+    guestsPageSize = signal<number>(25);
+    guestsPageSizeOptions = [10, 25, 50, 100, 200];
+
     // modal details
     isModalOpen = signal<boolean>(false);
     modalLoading = signal<boolean>(false);
@@ -85,6 +103,9 @@ export class EventDetailComponent implements OnInit {
     viewMode = signal<'cards' | 'list'>('list');
 
     searchQuery = signal<string>('');
+
+  // Onglets: demandes vs invités
+  activeTab = signal<'demands' | 'guests'>('demands');
 
     DemandType = DemandType;
     PaymentCanal = PaymentCanal;
@@ -230,6 +251,58 @@ export class EventDetailComponent implements OnInit {
     changePageSize(size: number) {
         this.pageSize.set(size);
         this.page.set(1);
+    }
+
+    // --- guests agrégés (toutes demandes confondues)
+    allGuests = computed<EventGuestRow[]>(() => {
+        const rows: EventGuestRow[] = [];
+        for (const d of this.demandsRaw()) {
+            if (!d.guests || d.guests.length === 0) continue;
+            for (const g of d.guests) {
+                rows.push({
+                    firstName: g.firstName ?? '',
+                    lastName: g.lastName ?? '',
+                    email: g.email ?? '',
+                    phoneNumber: g.phoneNumber ?? '',
+                    age: typeof g.age === 'number' ? g.age : null,
+                    isMainGuest: !!g.isMainGuest,
+                    demandSlug: d.slug,
+                    demandStatus: d.status,
+                    demandType: d.type,
+                    createdAt: d.createdAt,
+                });
+            }
+        }
+        return rows;
+    });
+
+    guestsTotal = computed(() => this.allGuests().length);
+
+    guestsTotalPages = computed(() =>
+        Math.max(1, Math.ceil(this.guestsTotal() / this.guestsPageSize()))
+    );
+
+    pagedGuests = computed(() => {
+        const p = this.guestsPage();
+        const size = this.guestsPageSize();
+        const start = (p - 1) * size;
+        return this.allGuests().slice(start, start + size);
+    });
+
+    // pagination actions pour invités
+    goToGuestsPage(p: number) {
+        this.guestsPage.set(Math.min(Math.max(1, p), this.guestsTotalPages()));
+    }
+    prevGuestsPage() {
+        this.goToGuestsPage(this.guestsPage() - 1);
+    }
+    nextGuestsPage() {
+        this.goToGuestsPage(this.guestsPage() + 1);
+    }
+
+    changeGuestsPageSize(size: number) {
+        this.guestsPageSize.set(size);
+        this.guestsPage.set(1);
     }
 
     // --- filters actions
