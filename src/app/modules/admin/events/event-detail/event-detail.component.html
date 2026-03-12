@@ -200,6 +200,24 @@
                     : 'text-slate-500 hover:text-slate-900'">
                 Invités (toutes demandes)
             </button>
+            <button
+                type="button"
+                (click)="activeTab.set('expenses')"
+                class="px-3 py-1.5 rounded-lg font-semibold"
+                [ngClass]="activeTab() === 'expenses'
+                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-900/10'
+                    : 'text-slate-500 hover:text-slate-900'">
+                Dépenses
+            </button>
+            <button
+                type="button"
+                (click)="activeTab.set('incomes')"
+                class="px-3 py-1.5 rounded-lg font-semibold"
+                [ngClass]="activeTab() === 'incomes'
+                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-900/10'
+                    : 'text-slate-500 hover:text-slate-900'">
+                Entrées d'argent
+            </button>
         </div>
     </div>
 
@@ -548,8 +566,305 @@
         </div>
     </div>
 
+    <!-- Onglet DÉPENSES -->
+    <div *ngIf="activeTab() === 'expenses'" class="mx-auto px-2 sm:px-4 md:px-6">
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-6">
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Comptabilité évènement
+                </div>
+                <div class="mt-1 text-lg font-bold text-slate-900">
+                    Solde actuel :
+                    <span *ngIf="accounting(); else noAcc">
+                        {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
+                    </span>
+                    <ng-template #noAcc>
+                        <span class="text-slate-400">—</span>
+                    </ng-template>
+                </div>
+                <div *ngIf="accounting()" class="mt-1 text-xs text-slate-500 space-x-2">
+                    <span>Solde initial : <strong>{{ accounting()?.initialBalance | number:'1.0-0' }}</strong></span>
+                    <span>Demandes payées : <strong>{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }}</strong></span>
+                    <span>Entrées manuelles : <strong>{{ accounting()?.totalIncomesManual | number:'1.0-0' }}</strong></span>
+                    <span>Dépenses : <strong>-{{ accounting()?.totalExpenses | number:'1.0-0' }}</strong></span>
+                </div>
+            </div>
+            <button
+                type="button"
+                (click)="openExpenseModal()"
+                class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-700 sm:text-sm"
+            >
+                + Ajouter une dépense
+            </button>
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Date
+                    </th>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Libellé
+                    </th>
+                    <th class="px-3 py-2 text-right text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Montant
+                    </th>
+                    <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        Note
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                <tr *ngFor="let e of accounting()?.expenses ?? []">
+                    <td class="whitespace-nowrap px-3 py-2 text-[11px] text-slate-600 sm:px-4 sm:py-3 sm:text-xs">
+                        {{ e.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800 sm:px-4 sm:py-3 sm:text-xs">
+                        {{ e.label }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-2 text-right text-[11px] font-semibold text-rose-600 sm:px-4 sm:py-3 sm:text-xs">
+                        -{{ e.amount | number:'1.0-0' }} FCFA
+                    </td>
+                    <td class="hidden max-w-xs px-3 py-2 text-[11px] text-slate-500 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        {{ e.note || '—' }}
+                    </td>
+                </tr>
+                <tr *ngIf="(accounting()?.expenses?.length || 0) === 0">
+                    <td colspan="4" class="px-3 py-6 text-center text-xs text-slate-400 sm:px-4">
+                        Aucune dépense enregistrée pour le moment.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Onglet ENTRÉES D'ARGENT -->
+    <div *ngIf="activeTab() === 'incomes'" class="mx-auto px-2 sm:px-4 md:px-6">
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-6">
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Comptabilité évènement
+                </div>
+                <div class="mt-1 text-lg font-bold text-slate-900">
+                    Solde actuel :
+                    <span *ngIf="accounting(); else noAcc2">
+                        {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
+                    </span>
+                    <ng-template #noAcc2>
+                        <span class="text-slate-400">—</span>
+                    </ng-template>
+                </div>
+            </div>
+            <button
+                type="button"
+                (click)="openIncomeModal()"
+                class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 sm:text-sm"
+            >
+                + Ajouter une entrée
+            </button>
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Date
+                    </th>
+                    <th class="px-3 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Libellé
+                    </th>
+                    <th class="px-3 py-2 text-right text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Montant
+                    </th>
+                    <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        Note
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                <tr *ngFor="let i of accounting()?.incomes ?? []">
+                    <td class="whitespace-nowrap px-3 py-2 text-[11px] text-slate-600 sm:px-4 sm:py-3 sm:text-xs">
+                        {{ i.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-2 text-[11px] text-slate-800 sm:px-4 sm:py-3 sm:text-xs">
+                        {{ i.label }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-2 text-right text-[11px] font-semibold text-emerald-600 sm:px-4 sm:py-3 sm:text-xs">
+                        +{{ i.amount | number:'1.0-0' }} FCFA
+                    </td>
+                    <td class="hidden max-w-xs px-3 py-2 text-[11px] text-slate-500 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
+                        {{ i.note || '—' }}
+                    </td>
+                </tr>
+                <tr *ngIf="(accounting()?.incomes?.length || 0) === 0">
+                    <td colspan="4" class="px-3 py-6 text-center text-xs text-slate-400 sm:px-4">
+                        Aucune entrée manuelle enregistrée pour le moment.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL AJOUT DÉPENSE -->
+    <div
+        *ngIf="expenseModalOpen()"
+        class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/30 px-4 sm:px-6"
+    >
+        <div class="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-6">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-900">Nouvelle dépense</h2>
+                    <p class="mt-1 text-xs text-slate-500">
+                        Enregistre une dépense liée à cet évènement. Elle viendra diminuer le solde.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    (click)="closeExpenseModal()"
+                    class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    aria-label="Fermer"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-900">Libellé</label>
+                    <input
+                        type="text"
+                        [ngModel]="expenseLabel()"
+                        (ngModelChange)="expenseLabel.set($event)"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                        placeholder="Ex: Décoration, DJ, Communication..."
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-900">Montant (FCFA)</label>
+                    <input
+                        type="number"
+                        min="0"
+                        [ngModel]="expenseAmount()"
+                        (ngModelChange)="expenseAmount.set($event)"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-900">Note (optionnel)</label>
+                    <textarea
+                        rows="2"
+                        [ngModel]="expenseNote()"
+                        (ngModelChange)="expenseNote.set($event)"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                        placeholder="Détails complémentaires, fournisseur, etc."
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <button
+                    type="button"
+                    (click)="closeExpenseModal()"
+                    class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:text-sm"
+                    [disabled]="accountingSaving()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    (click)="submitExpense()"
+                    class="rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-rose-700 disabled:opacity-60 sm:text-sm"
+                    [disabled]="accountingSaving()"
+                >
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AJOUT ENTRÉE D'ARGENT -->
+    <div
+        *ngIf="incomeModalOpen()"
+        class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/30 px-4 sm:px-6"
+    >
+        <div class="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-6">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-900">Nouvelle entrée d'argent</h2>
+                    <p class="mt-1 text-xs text-slate-500">
+                        Enregistre une entrée d'argent manuelle (ex: sponsoring, caisse, autres revenus).
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    (click)="closeIncomeModal()"
+                    class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    aria-label="Fermer"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-900">Libellé</label>
+                    <input
+                        type="text"
+                        [ngModel]="incomeLabel()"
+                        (ngModelChange)="incomeLabel.set($event)"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                        placeholder="Ex: Sponsoring marque X, caisse jour 1..."
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-900">Montant (FCFA)</label>
+                    <input
+                        type="number"
+                        min="0"
+                        [ngModel]="incomeAmount()"
+                        (ngModelChange)="incomeAmount.set($event)"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-900">Note (optionnel)</label>
+                    <textarea
+                        rows="2"
+                        [ngModel]="incomeNote()"
+                        (ngModelChange)="incomeNote.set($event)"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                        placeholder="Détails complémentaires, origine des fonds, etc."
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <button
+                    type="button"
+                    (click)="closeIncomeModal()"
+                    class="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:text-sm"
+                    [disabled]="accountingSaving()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    (click)="submitIncome()"
+                    class="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60 sm:text-sm"
+                    [disabled]="accountingSaving()"
+                >
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL détails + mini-form paiement (inchangée) -->
-    <!-- ... (garde ton bloc modal tel quel ; il reste identique à ce que tu m'as donné) ... -->
     <div *ngIf="isModalOpen()" class="fixed inset-0 z-50">
         <div class="absolute inset-0 bg-black/40" (click)="closeModal()" aria-hidden="true"></div>
         <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-3xl items-center justify-center px-2 sm:px-4" role="dialog" aria-modal="true">

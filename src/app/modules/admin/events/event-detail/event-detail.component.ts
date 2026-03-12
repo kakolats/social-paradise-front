@@ -12,6 +12,7 @@ import { Event as FrontEvent } from 'shared/models/event';
 import { FormsModule } from '@angular/forms';
 import { PaymentCanal, PaymentPlace } from 'shared/models/payment';
 import { PaymentService } from 'shared/services/payment/payment.service';
+import { EventAccounting } from 'shared/models/event-accounting';
 
 type PendingStatusChange = {
     slug: string;
@@ -48,6 +49,7 @@ export class EventDetailComponent implements OnInit {
     // data
     event = signal<FrontEvent | null>(null);
     demandsRaw = signal<DemandSummary[]>([]);
+    accounting = signal<EventAccounting | null>(null);
 
     // stats par statut
     stats = signal<Record<DemandStatus, DemandStatsEntry> | null>(null);
@@ -87,6 +89,17 @@ export class EventDetailComponent implements OnInit {
     paymentError = signal<string | null>(null);
     paymentSuccess = signal<string | null>(null);
 
+    // modales comptables
+    expenseModalOpen = signal<boolean>(false);
+    expenseLabel = signal<string>('');
+    expenseAmount = signal<number>(0);
+    expenseNote = signal<string>('');
+    incomeModalOpen = signal<boolean>(false);
+    incomeLabel = signal<string>('');
+    incomeAmount = signal<number>(0);
+    incomeNote = signal<string>('');
+    accountingSaving = signal<boolean>(false);
+
     // confirm modal
     confirmOpen = signal<boolean>(false);
     pendingChange = signal<PendingStatusChange>(null);
@@ -104,8 +117,8 @@ export class EventDetailComponent implements OnInit {
 
     searchQuery = signal<string>('');
 
-  // Onglets: demandes vs invités
-  activeTab = signal<'demands' | 'guests'>('demands');
+  // Onglets: demandes, invités, dépenses, entrées
+  activeTab = signal<'demands' | 'guests' | 'expenses' | 'incomes'>('demands');
 
     DemandType = DemandType;
     PaymentCanal = PaymentCanal;
@@ -168,6 +181,9 @@ export class EventDetailComponent implements OnInit {
 
         // Charger les stats
         this.loadStats();
+
+        // Charger la comptabilité
+        this.loadAccounting();
     }
 
     /** Stats par statut pour l'évènement */
@@ -182,6 +198,18 @@ export class EventDetailComponent implements OnInit {
                 this.statsError.set(
                     err?.error?.message ?? 'Impossible de charger les statistiques.'
                 );
+            }
+        });
+    }
+
+    private loadAccounting(): void {
+        if (!this.eventSlug) return;
+        this.eventService.getAccounting(this.eventSlug).subscribe({
+            next: acc => {
+                this.accounting.set(acc);
+            },
+            error: () => {
+                this.accounting.set(null);
             }
         });
     }
@@ -324,6 +352,8 @@ export class EventDetailComponent implements OnInit {
     reload() {
         this.fetchDemands();
         this.loadStats();
+        this.loadAccounting();
+        this.loadAccounting();
     }
 
     // ➕ view switch
@@ -707,6 +737,71 @@ export class EventDetailComponent implements OnInit {
                 );
             }
         });
+    }
+
+    // --- comptabilité: modales dépenses / entrées
+    openExpenseModal() {
+        this.expenseLabel.set('');
+        this.expenseAmount.set(0);
+        this.expenseNote.set('');
+        this.accountingSaving.set(false);
+        this.expenseModalOpen.set(true);
+    }
+
+    closeExpenseModal() {
+        this.expenseModalOpen.set(false);
+    }
+
+    submitExpense() {
+        const label = (this.expenseLabel() || '').trim();
+        const amount = Number(this.expenseAmount());
+        if (!label || !amount || amount <= 0 || !this.eventSlug) {
+            return;
+        }
+        this.accountingSaving.set(true);
+        this.eventService.addExpense(this.eventSlug, { label, amount, note: this.expenseNote() || undefined })
+            .subscribe({
+                next: () => {
+                    this.accountingSaving.set(false);
+                    this.expenseModalOpen.set(false);
+                    this.loadAccounting();
+                },
+                error: () => {
+                    this.accountingSaving.set(false);
+                }
+            });
+    }
+
+    openIncomeModal() {
+        this.incomeLabel.set('');
+        this.incomeAmount.set(0);
+        this.incomeNote.set('');
+        this.accountingSaving.set(false);
+        this.incomeModalOpen.set(true);
+    }
+
+    closeIncomeModal() {
+        this.incomeModalOpen.set(false);
+    }
+
+    submitIncome() {
+        const label = (this.incomeLabel() || '').trim();
+        const amount = Number(this.incomeAmount());
+        if (!label || !amount || amount <= 0 || !this.eventSlug) {
+            return;
+        }
+        this.accountingSaving.set(true);
+        this.eventService.addIncome(this.eventSlug, { label, amount, note: this.incomeNote() || undefined })
+            .subscribe({
+                next: () => {
+                    this.accountingSaving.set(false);
+                    this.incomeModalOpen.set(false);
+                    this.loadAccounting();
+                },
+                error: () => {
+                    this.accountingSaving.set(false);
+                }
+            });
     }
 
 }

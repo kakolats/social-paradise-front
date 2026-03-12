@@ -27,4 +27,5 @@ export interface Event {
     paymentMethods?: EventPaymentMethod[];
     allowCash?: boolean;
     cashPlacesConfig?: EventCashPlace[];
+    initialBalance?: number;
 }

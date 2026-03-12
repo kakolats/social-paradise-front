@@ -5,6 +5,7 @@ import { Event } from '../../models/event';
 import { Price } from '../../models/price';
 import { map, Observable } from 'rxjs';
 import { Table } from 'shared/models/table';
+import { EventAccounting } from 'shared/models/event-accounting';
 
 const API_BASE_URL = environment.apiUrl;
 interface ApiResponse<T> {
@@ -57,6 +58,7 @@ export class EventService {
             paymentMethods: evt.paymentMethods,
             allowCash: evt.allowCash,
             cashPlacesConfig: evt.cashPlacesConfig,
+            initialBalance: evt.initialBalance,
         };
     }
 
@@ -85,6 +87,7 @@ export class EventService {
             paymentMethods: raw.paymentMethods ?? undefined,
             allowCash: raw.allowCash ?? true,
             cashPlacesConfig: raw.cashPlacesConfig ?? undefined,
+            initialBalance: raw.initialBalance ?? 0,
         };
     }
 
@@ -125,6 +128,49 @@ export class EventService {
         return this.http.delete<ApiResponse<null>>(`${this.base}/${id}`).pipe(
             map(() => void 0)
         );
+    }
+
+    getAccounting(slug: string): Observable<EventAccounting> {
+        return this.http
+            .get<ApiResponse<any>>(`${this.base}/${slug}/accounting`)
+            .pipe(
+                map(res => {
+                    const j = res.data;
+                    return {
+                        initialBalance: j.initialBalance ?? 0,
+                        totalExpenses: j.totalExpenses ?? 0,
+                        totalIncomesManual: j.totalIncomesManual ?? 0,
+                        totalPaidFromDemands: j.totalPaidFromDemands ?? 0,
+                        currentBalance: j.currentBalance ?? 0,
+                        expenses: (j.expenses ?? []).map((e: any) => ({
+                            id: e.id,
+                            label: e.label,
+                            amount: e.amount,
+                            createdAt: e.createdAt ? new Date(e.createdAt) : undefined,
+                            note: e.note,
+                        })),
+                        incomes: (j.incomes ?? []).map((i: any) => ({
+                            id: i.id,
+                            label: i.label,
+                            amount: i.amount,
+                            createdAt: i.createdAt ? new Date(i.createdAt) : undefined,
+                            note: i.note,
+                        })),
+                    } as EventAccounting;
+                })
+            );
+    }
+
+    addExpense(slug: string, payload: { label: string; amount: number; note?: string }): Observable<void> {
+        return this.http
+            .post<ApiResponse<any>>(`${this.base}/${slug}/expenses`, payload)
+            .pipe(map(() => void 0));
+    }
+
+    addIncome(slug: string, payload: { label: string; amount: number; note?: string }): Observable<void> {
+        return this.http
+            .post<ApiResponse<any>>(`${this.base}/${slug}/incomes`, payload)
+            .pipe(map(() => void 0));
     }
 
     // -------- Helpers métier
