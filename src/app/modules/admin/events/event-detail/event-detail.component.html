@@ -137,6 +137,53 @@
                 </div>
             </div>
 
+            <!-- Bloc COMPTA rapide -->
+            <div class="mt-4">
+                <div class="mb-2 text-sm font-semibold text-slate-900">Comptabilité</div>
+                <div
+                    *ngIf="accounting(); else accountingLoading"
+                    class="grid gap-2 text-[11px] text-slate-700 sm:grid-cols-2 lg:grid-cols-4"
+                >
+                    <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                        <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                            Solde actuel
+                        </div>
+                        <div class="mt-1 text-sm font-bold text-slate-900">
+                            {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                        <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                            Solde initial
+                        </div>
+                        <div class="mt-1 text-sm font-semibold text-slate-900">
+                            {{ accounting()?.initialBalance | number:'1.0-0' }} FCFA
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                        <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                            DemandES payées
+                        </div>
+                        <div class="mt-1 text-sm font-semibold text-emerald-700">
+                            +{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }} FCFA
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                        <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                            Dépenses
+                        </div>
+                        <div class="mt-1 text-sm font-semibold text-rose-700">
+                            -{{ accounting()?.totalExpenses | number:'1.0-0' }} FCFA
+                        </div>
+                    </div>
+                </div>
+                <ng-template #accountingLoading>
+                    <div class="text-[11px] text-slate-400">
+                        Chargement de la comptabilité…
+                    </div>
+                </ng-template>
+            </div>
+
             <!-- Tarifs de l'évènement -->
             <div class="mt-4">
                 <div class="mb-2 text-sm font-semibold text-slate-900">Tarifs</div>
@@ -941,12 +988,53 @@
                                         {{ getModalTablesTotal() | number }} FCFA
                                     </span>
                                 </div>
-                                <div class="flex items-center justify-between border-t border-slate-200 pt-2">
-                                    <span class="font-semibold text-slate-900">Prix total</span>
-                                    <span class="font-semibold text-slate-900">
-                                        {{ getModalTotalPrice() | number }} FCFA
+                                <div class="flex items-center justify-between" *ngIf="(discountEditing() || selectedDemand()?.discountAmount)">
+                                    <span class="text-slate-700">Remise</span>
+                                    <span class="font-semibold text-rose-600">
+                                        -{{ (discountEditing() || selectedDemand()?.discountAmount || 0) | number }} FCFA
                                     </span>
                                 </div>
+                                <div class="flex items-center justify-between border-t border-slate-200 pt-2">
+                                    <span class="font-semibold text-slate-900">Total après remise</span>
+                                    <span class="font-semibold text-slate-900">
+                                        {{ modalAutoAmount() | number }} FCFA
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Saisie de la remise -->
+                        <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4">
+                            <div class="mb-2 flex items-center justify-between gap-3">
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-900">Remise manuelle</div>
+                                    <p class="mt-0.5 text-xs text-slate-500">
+                                        Ajuste le prix payé par le client. Le solde de l’évènement utilisera le montant remisé.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex items-center gap-3">
+                                <div class="flex-1">
+                                    <label class="mb-1 block text-xs font-medium text-slate-700">Montant de la remise (FCFA)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        [ngModel]="discountEditing()"
+                                        (ngModelChange)="discountEditing.set($event)"
+                                        class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:text-sm"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    (click)="submitDiscount()"
+                                    class="mt-5 inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-60 sm:text-sm"
+                                    [disabled]="discountSaving()"
+                                >
+                                    Enregistrer la remise
+                                </button>
+                            </div>
+                            <div *ngIf="discountError()" class="mt-2 text-xs text-rose-600">
+                                {{ discountError() }}
                             </div>
                         </div>
 

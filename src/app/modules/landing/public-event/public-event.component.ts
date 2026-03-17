@@ -13,7 +13,7 @@ import { Table } from '../../../../shared/models/table';
 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
-import { QuillViewComponent, QuillViewHTMLComponent } from 'ngx-quill';
+import { QuillViewComponent } from 'ngx-quill';
 
 type ParticipantFG = FormGroup<{
     firstName: FormControl<string | null>;
@@ -49,7 +49,6 @@ type DemandFG = FormGroup<{
         CommonModule,
         ReactiveFormsModule,
         DatePipe,
-        QuillViewHTMLComponent,
         QuillViewComponent,
     ],
     templateUrl: './public-event.component.html',
@@ -68,6 +67,11 @@ export class PublicEventComponent implements OnInit {
     successMsg = signal<string | null>(null);
 
     placeholder =  '';
+
+    isEventActive = computed(() => {
+        const e = this.event();
+        return (e as any)?.isActive !== false;
+    });
 
     form: DemandFG = this.fb.group({
         mode: this.fb.control<'single' | 'group'>('single', {
@@ -368,6 +372,10 @@ export class PublicEventComponent implements OnInit {
 
     onSubmit() {
         if (!this.event()?.slug) return;
+        if (!this.isEventActive()) {
+            this.errorMsg.set('Les demandes sont fermées pour cet évènement.');
+            return;
+        }
         this.successMsg.set(null);
         this.errorMsg.set(null);
 

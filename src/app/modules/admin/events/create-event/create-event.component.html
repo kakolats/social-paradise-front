@@ -36,6 +36,20 @@
                         class="rounded-xl border border-slate-300 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                     ></quill-editor>
                 </div>
+
+                <div class="md:col-span-2">
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                        <input
+                            type="checkbox"
+                            class="h-4 w-4 rounded border-slate-300 text-[#d36b3d] focus:ring-[#d36b3d]"
+                            formControlName="isActive"
+                        />
+                        <span class="font-medium text-slate-900">Événement actif (demandes ouvertes)</span>
+                    </label>
+                    <p class="mt-1 text-xs text-slate-500">
+                        Si désactivé, la page publique affichera “Demandes fermées” et le formulaire ne sera pas disponible.
+                    </p>
+                </div>
             </div>
 
             <!-- Cover image -->

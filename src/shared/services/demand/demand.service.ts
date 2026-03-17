@@ -123,6 +123,15 @@ export class DemandService {
         );
     }
 
+    updateDiscount(slug: string, discountAmount: number): Observable<void> {
+        return this.http.patch<ApiResponse<unknown>>(
+            `${this.base}/${slug}/discount`,
+            { discountAmount }
+        ).pipe(
+            map(() => void 0)
+        );
+    }
+
     // ----------------- STATS
     /**
      * Récupère les stats par statut pour un event donné.
@@ -206,6 +215,7 @@ export class DemandService {
                 : [],
             event: json.event ? this.parseEvent(json.event) : undefined,
             eventSlug: json.event?.slug,
+            discountAmount: json.discountAmount ?? 0,
         };
     }
 

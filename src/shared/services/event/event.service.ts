@@ -38,6 +38,7 @@ export class EventService {
             location: evt.location,
             description: evt.description,
             coverImage: evt.coverImage,
+            isActive: evt.isActive,
             prices: (evt.prices ?? []).map(p => ({
                 id: p.id,
                 name: p.name,
@@ -71,6 +72,7 @@ export class EventService {
             location: raw.location,
             description: raw.description,
             coverImage: raw.coverImage,
+            isActive: raw.isActive ?? true,
             prices: (raw.prices ?? []).map((p: any): Price => ({
                 id: p.id,
                 name: p.name,

@@ -89,6 +89,11 @@ export class EventDetailComponent implements OnInit {
     paymentError = signal<string | null>(null);
     paymentSuccess = signal<string | null>(null);
 
+    // discount
+    discountEditing = signal<number>(0);
+    discountSaving = signal<boolean>(false);
+    discountError = signal<string | null>(null);
+
     // modales comptables
     expenseModalOpen = signal<boolean>(false);
     expenseLabel = signal<string>('');
@@ -353,7 +358,6 @@ export class EventDetailComponent implements OnInit {
         this.fetchDemands();
         this.loadStats();
         this.loadAccounting();
-        this.loadAccounting();
     }
 
     // ➕ view switch
@@ -422,8 +426,9 @@ export class EventDetailComponent implements OnInit {
                     newMap.delete(pc.slug);
                     return newMap;
                 });
-                // recharger aussi les stats (changement de statut impacte les stats)
+                // recharger stats + compta (si passage en PAYEE, le solde change)
                 this.loadStats();
+                this.loadAccounting();
             },
             error: err => {
                 // revert si échec
@@ -462,6 +467,7 @@ export class EventDetailComponent implements OnInit {
         this.demandService.getBySlug(slug).subscribe({
             next: d => {
                 this.selectedDemand.set(d);
+                this.discountEditing.set(d.discountAmount ?? 0);
                 // Pré-remplir le montant (tarif actif × nb participants)
                 this.payAmount.set(this.modalAutoAmount());
                 this.modalLoading.set(false);
@@ -488,6 +494,9 @@ export class EventDetailComponent implements OnInit {
         this.payCanal.set(PaymentCanal.WAVE);
         this.payPhone.set('');
         this.payAmount.set(0);
+        this.discountEditing.set(0);
+        this.discountError.set(null);
+        this.discountSaving.set(false);
     }
 
     // --- mini-form paiement helpers
@@ -547,6 +556,32 @@ export class EventDetailComponent implements OnInit {
             error: err => {
                 this.submittingPayment.set(false);
                 this.paymentError.set(err?.error?.message ?? 'Erreur lors de la notification de paiement.');
+            }
+        });
+    }
+
+    submitDiscount() {
+        const dd = this.selectedDemand();
+        if (!dd?.slug) return;
+        const value = Number(this.discountEditing() || 0);
+        if (value < 0) {
+            this.discountError.set('La remise ne peut pas être négative.');
+            return;
+        }
+        this.discountSaving.set(true);
+        this.discountError.set(null);
+        this.demandService.updateDiscount(dd.slug, value).subscribe({
+            next: () => {
+                this.discountSaving.set(false);
+                this.selectedDemand.update(prev => prev ? ({ ...prev, discountAmount: value }) : prev);
+                // mettre à jour aussi le montant auto du paiement
+                this.payAmount.set(this.modalAutoAmount());
+            },
+            error: err => {
+                this.discountSaving.set(false);
+                this.discountError.set(
+                    err?.error?.message ?? 'Erreur lors de l’enregistrement de la remise.'
+                );
             }
         });
     }
@@ -618,9 +653,10 @@ export class EventDetailComponent implements OnInit {
     }
 
     private modalAutoAmount(): number {
-        const p = this.modalActivePrice();
-        const participantsTotal = p ? p.amount * this.modalPeopleCount() : 0;
-        return participantsTotal + this.modalTablesTotal();
+        const base = this.getModalTotalPrice();
+        const discount = this.selectedDemand()?.discountAmount ?? this.discountEditing() ?? 0;
+        const v = base - discount;
+        return v > 0 ? v : 0;
     }
 
     // utils

@@ -21,6 +21,7 @@ export interface Event {
     location?: string;
     coverImage?: string;
     description?: string;
+    isActive?: boolean;
     slug?: string;
     prices?: Price[];
     tables?: Table[];

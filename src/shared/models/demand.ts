@@ -13,7 +13,8 @@ export interface Demand {
     guests?: Guest[];
     tableItems?: TableItem[];
     event?: Event
-    eventSlug?: string
+    eventSlug?: string;
+    discountAmount?: number;
 }
 
 

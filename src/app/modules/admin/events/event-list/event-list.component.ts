@@ -18,6 +18,7 @@ export class EventListComponent {
     events: Event[] = [];
     loading = false;
     error: string | null = null;
+    togglingSlug: string | null = null;
 
     ngOnInit() {
         this.fetchEvents();
@@ -42,11 +43,35 @@ export class EventListComponent {
         return e.id;
     }
 
+    isActive(event: Event): boolean {
+        return (event as any)?.isActive !== false;
+    }
+
     onDetails(event: Event) {
         this.router.navigate(['/events/event-detail', event.slug])
     }
 
     onEdit(event: Event) {
         this.router.navigate(['/events/update-event', event.slug])
+    }
+
+    toggleActive(event: Event) {
+        if (!event?.slug) return;
+        const next = this.isActive(event) ? false : true;
+        this.togglingSlug = event.slug;
+        this.eventService.update(event.slug, { isActive: next }).subscribe({
+            next: (updated) => {
+                this.events = this.events.map(e =>
+                    e.slug === event.slug
+                        ? { ...e, isActive: (updated as any).isActive ?? next }
+                        : e
+                );
+                this.togglingSlug = null;
+            },
+            error: (err) => {
+                this.error = err?.error?.message ?? 'Erreur lors du changement de statut.';
+                this.togglingSlug = null;
+            }
+        });
     }
 }

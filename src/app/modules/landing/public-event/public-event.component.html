@@ -113,7 +113,15 @@
 
     <!-- Demand form -->
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
-        <div class="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <!-- Notice si demandes fermées -->
+        <div *ngIf="event() && !isEventActive()" class="mt-10 rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm">
+            <div class="text-lg font-semibold">Demandes fermées</div>
+            <p class="mt-1 text-sm text-amber-800">
+                Les demandes sont actuellement fermées pour cet évènement. Merci de revenir plus tard.
+            </p>
+        </div>
+
+        <div *ngIf="!event() || isEventActive()" class="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="text-xl font-semibold text-slate-900">Demande de participation</h2>
             <p class="mt-1 text-sm text-slate-500">Inscrivez-vous seul(e) ou ajoutez une liste de participants.</p>
 
