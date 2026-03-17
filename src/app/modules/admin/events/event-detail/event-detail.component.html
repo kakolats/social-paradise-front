@@ -499,8 +499,10 @@
 
                 <ng-container *ngFor="let p of pageNumbers()">
                     <button (click)="goToPage(p)"
-                            [class.bg-slate-900]="p === page()" [class.text-white]="p === page()"
-                            class="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:px-3 sm:py-1.5 sm:text-sm">
+                            [ngClass]="p === page()
+                                ? 'bg-slate-900 text-white shadow-md ring-2 ring-slate-900/20 border-slate-900'
+                                : 'bg-white text-slate-700 hover:bg-slate-50'"
+                            class="inline-flex min-w-9 items-center justify-center rounded-md border border-slate-300 px-2.5 py-1 text-xs font-semibold shadow-sm sm:min-w-10 sm:px-3 sm:py-1.5 sm:text-sm">
                         {{ p }}
                     </button>
                 </ng-container>

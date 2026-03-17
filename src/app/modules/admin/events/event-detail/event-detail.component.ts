@@ -66,8 +66,8 @@ export class EventDetailComponent implements OnInit {
 
     // pagination
     page = signal<number>(1);
-    pageSize = signal<number>(6);
-    pageSizeOptions = [1,6, 12, 24, 50, 100];
+    pageSize = signal<number>(12);
+    pageSizeOptions = [12, 24, 50, 100];
 
     // pagination invités
     guestsPage = signal<number>(1);
@@ -551,7 +551,22 @@ export class EventDetailComponent implements OnInit {
             next: () => {
                 this.submittingPayment.set(false);
                 this.paymentSuccess.set('Notification enregistrée. Elle sera vérifiée par un administrateur.');
-                this.reload();
+                // Mettre à jour la liste en local pour éviter de casser la pagination
+                this.demandsRaw.update(arr =>
+                    arr.map(x =>
+                        x.slug === dd.slug
+                            ? { ...x, status: DemandStatus.PAIEMENT_NOTIFIE }
+                            : x
+                    )
+                );
+                this.selectedDemand.update(prev =>
+                    prev ? { ...prev, demandStatus: DemandStatus.PAIEMENT_NOTIFIE } : prev
+                );
+
+                // Ne pas recharger la liste (sinon pagination réinitialisée)
+                // On rafraîchit uniquement les infos nécessaires (stats + compta header/onglets).
+                this.loadStats();
+                this.loadAccounting();
             },
             error: err => {
                 this.submittingPayment.set(false);
