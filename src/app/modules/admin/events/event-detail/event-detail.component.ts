@@ -67,7 +67,7 @@ export class EventDetailComponent implements OnInit {
     // pagination
     page = signal<number>(1);
     pageSize = signal<number>(6);
-    pageSizeOptions = [6, 12, 24, 50, 100];
+    pageSizeOptions = [1,6, 12, 24, 50, 100];
 
     // pagination invités
     guestsPage = signal<number>(1);

@@ -32,35 +32,40 @@ export class EventService {
     }
 
     private serializeEvent(evt: Partial<Event>): any {
-        return {
+        const body: any = {
             name: evt.name,
-            date: evt.date instanceof Date ? evt.date.toISOString().slice(0,10) : evt.date,
+            date: evt.date instanceof Date ? evt.date.toISOString().slice(0, 10) : evt.date,
             location: evt.location,
             description: evt.description,
             coverImage: evt.coverImage,
             isActive: evt.isActive,
-            prices: (evt.prices ?? []).map(p => ({
-                id: p.id,
-                name: p.name,
-                amount: p.amount,
-                startDate: p.startDate instanceof Date
-                    ? p.startDate.toISOString().slice(0,10)
-                    : p.startDate,
-                endDate: p.endDate instanceof Date
-                    ? p.endDate.toISOString().slice(0,10)
-                    : p.endDate,
-            })),
-            tables: (evt.tables ?? []).map(t => ({
-                id: t.id,
-                name: t.name,
-                amount: t.amount,
-                capacity: t.capacity,
-            })),
             paymentMethods: evt.paymentMethods,
             allowCash: evt.allowCash,
             cashPlacesConfig: evt.cashPlacesConfig,
             initialBalance: evt.initialBalance,
         };
+
+        // IMPORTANT: ne pas envoyer [] par défaut sur update partiel,
+        // sinon le backend remplace et "efface" les listes.
+        if (Array.isArray(evt.prices)) {
+            body.prices = evt.prices.map(p => ({
+                id: p.id,
+                name: p.name,
+                amount: p.amount,
+                startDate: p.startDate instanceof Date ? p.startDate.toISOString().slice(0, 10) : p.startDate,
+                endDate: p.endDate instanceof Date ? p.endDate.toISOString().slice(0, 10) : p.endDate,
+            }));
+        }
+        if (Array.isArray(evt.tables)) {
+            body.tables = evt.tables.map(t => ({
+                id: t.id,
+                name: t.name,
+                amount: t.amount,
+                capacity: t.capacity,
+            }));
+        }
+
+        return body;
     }
 
     private parseEvent(raw: any): Event {
