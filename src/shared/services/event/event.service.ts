@@ -180,6 +180,18 @@ export class EventService {
             .pipe(map(() => void 0));
     }
 
+    deleteExpense(slug: string, id: number): Observable<void> {
+        return this.http
+            .delete<ApiResponse<any>>(`${this.base}/${slug}/expenses/${id}`)
+            .pipe(map(() => void 0));
+    }
+
+    deleteIncome(slug: string, id: number): Observable<void> {
+        return this.http
+            .delete<ApiResponse<any>>(`${this.base}/${slug}/incomes/${id}`)
+            .pipe(map(() => void 0));
+    }
+
     // -------- Helpers métier
     getActivePrice(e: Event, at: Date = new Date()): Price | null {
         if (!e?.prices?.length) return null;

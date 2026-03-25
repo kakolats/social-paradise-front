@@ -146,7 +146,7 @@
                 >
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            Solde actuel
+                            Solde général
                         </div>
                         <div class="mt-1 text-sm font-bold text-slate-900">
                             {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
@@ -154,15 +154,15 @@
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            Solde initial
+                            Total entrées
                         </div>
                         <div class="mt-1 text-sm font-semibold text-slate-900">
-                            {{ accounting()?.initialBalance | number:'1.0-0' }} FCFA
+                            {{ accounting()?.totalIncomesManual | number:'1.0-0' }} FCFA
                         </div>
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            DemandES payées
+                            Entrées tickets
                         </div>
                         <div class="mt-1 text-sm font-semibold text-emerald-700">
                             +{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }} FCFA
@@ -272,7 +272,7 @@
     <!-- Onglet DEMANDES : filtres + liste/pagination -->
     <div *ngIf="activeTab() === 'demands'">
     <div class="mx-auto px-2 sm:px-4 md:px-6">
-        <div class="mt-4 grid gap-2 items-end sm:mt-6 sm:gap-3 sm:grid-cols-4 lg:grid-cols-6">
+        <div class="mt-4 grid gap-2 items-end sm:mt-6 sm:gap-3 sm:grid-cols-2 lg:grid-cols-6">
             <!-- Statut -->
             <div>
                 <label class="mb-1 block text-xs font-medium text-slate-900">Statut</label>
@@ -297,6 +297,30 @@
                     <option [ngValue]="null">Tous</option>
                     <option *ngFor="let t of allTypes" [ngValue]="t">{{ t }}</option>
                 </select>
+            </div>
+
+            <!-- Filtre âge (au moins un invité) -->
+            <div class="sm:col-span-2 lg:col-span-2">
+                <label class="mb-1 block text-xs font-medium text-slate-900">Âge (au moins 1 invité)</label>
+                <div class="flex gap-2">
+                    <select
+                        [ngModel]="filterAgeOp()"
+                        (ngModelChange)="setFilterAgeOp($event)"
+                        class="w-40 rounded-xl border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    >
+                        <option [ngValue]="'>'">Supérieur à</option>
+                        <option [ngValue]="'<'">Inférieur à</option>
+                        <option [ngValue]="'='">Egal à</option>
+                    </select>
+                    <input
+                        type="number"
+                        min="0"
+                        [ngModel]="filterAgeValue()"
+                        (ngModelChange)="setFilterAgeValue($event)"
+                        placeholder="ex: 18"
+                        class="w-28 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    />
+                </div>
             </div>
 
             <!-- Taille de page -->
@@ -336,16 +360,16 @@
             </div>
 
             <!-- Actions -->
-            <div class="col-span-full sm:col-span-4 lg:col-span-2 flex flex-col gap-2 items-stretch sm:flex-row sm:items-end sm:justify-end">
+            <div class="col-span-full flex flex-col gap-2 items-stretch md:flex-row md:flex-wrap md:items-end md:justify-end">
                 <button
                     (click)="reload()"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:w-auto sm:px-4 sm:text-sm"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 md:w-auto md:px-4 md:text-sm"
                 >
                     Recharger
                 </button>
                 <button
                     (click)="resetFilters()"
-                    class="w-full rounded-xl bg-[#d36b3d] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 sm:w-auto sm:px-4 sm:text-sm"
+                    class="w-full rounded-xl bg-[#d36b3d] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 md:w-auto md:px-4 md:text-sm"
                 >
                     Réinitialiser les filtres
                 </button>
@@ -529,6 +553,14 @@
                     <option *ngFor="let s of guestsPageSizeOptions" [ngValue]="s">{{ s }}</option>
                 </select>
             </div>
+
+            <div class="text-xs text-slate-600 sm:text-sm">
+                <span class="font-semibold text-slate-900">{{ guestsTotal() }}</span> invité(s)
+                <ng-container *ngIf="guestsAvgAge() !== null">
+                    · Âge moyen :
+                    <span class="font-semibold text-slate-900">{{ guestsAvgAge() | number:'1.0-1' }}</span>
+                </ng-container>
+            </div>
         </div>
         <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
             <table class="min-w-full divide-y divide-slate-200">
@@ -623,7 +655,7 @@
                     Comptabilité évènement
                 </div>
                 <div class="mt-1 text-lg font-bold text-slate-900">
-                    Solde actuel :
+                    Solde général :
                     <span *ngIf="accounting(); else noAcc">
                         {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
                     </span>
@@ -633,7 +665,7 @@
                 </div>
                 <div *ngIf="accounting()" class="mt-1 text-xs text-slate-500 space-x-2">
                     <span>Solde initial : <strong>{{ accounting()?.initialBalance | number:'1.0-0' }}</strong></span>
-                    <span>Demandes payées : <strong>{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }}</strong></span>
+                    <span>Entrées tickets : <strong>{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }}</strong></span>
                     <span>Entrées manuelles : <strong>{{ accounting()?.totalIncomesManual | number:'1.0-0' }}</strong></span>
                     <span>Dépenses : <strong>-{{ accounting()?.totalExpenses | number:'1.0-0' }}</strong></span>
                 </div>
@@ -663,6 +695,9 @@
                     <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
                         Note
                     </th>
+                    <th class="px-3 py-2 text-right text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Actions
+                    </th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -679,9 +714,18 @@
                     <td class="hidden max-w-xs px-3 py-2 text-[11px] text-slate-500 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
                         {{ e.note || '—' }}
                     </td>
+                    <td class="whitespace-nowrap px-3 py-2 text-right sm:px-4 sm:py-3">
+                        <button
+                            type="button"
+                            (click)="openMoneyDelete('expense', e.id, e.label)"
+                            class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[10px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:text-xs"
+                        >
+                            Supprimer
+                        </button>
+                    </td>
                 </tr>
                 <tr *ngIf="(accounting()?.expenses?.length || 0) === 0">
-                    <td colspan="4" class="px-3 py-6 text-center text-xs text-slate-400 sm:px-4">
+                    <td colspan="5" class="px-3 py-6 text-center text-xs text-slate-400 sm:px-4">
                         Aucune dépense enregistrée pour le moment.
                     </td>
                 </tr>
@@ -698,7 +742,7 @@
                     Comptabilité évènement
                 </div>
                 <div class="mt-1 text-lg font-bold text-slate-900">
-                    Solde actuel :
+                    Solde général :
                     <span *ngIf="accounting(); else noAcc2">
                         {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
                     </span>
@@ -732,6 +776,9 @@
                     <th class="hidden px-3 py-2 text-left text-[10px] font-semibold text-slate-700 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
                         Note
                     </th>
+                    <th class="px-3 py-2 text-right text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+                        Actions
+                    </th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -748,9 +795,18 @@
                     <td class="hidden max-w-xs px-3 py-2 text-[11px] text-slate-500 lg:table-cell sm:px-4 sm:py-3 sm:text-xs">
                         {{ i.note || '—' }}
                     </td>
+                    <td class="whitespace-nowrap px-3 py-2 text-right sm:px-4 sm:py-3">
+                        <button
+                            type="button"
+                            (click)="openMoneyDelete('income', i.id, i.label)"
+                            class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[10px] font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:text-xs"
+                        >
+                            Supprimer
+                        </button>
+                    </td>
                 </tr>
                 <tr *ngIf="(accounting()?.incomes?.length || 0) === 0">
-                    <td colspan="4" class="px-3 py-6 text-center text-xs text-slate-400 sm:px-4">
+                    <td colspan="5" class="px-3 py-6 text-center text-xs text-slate-400 sm:px-4">
                         Aucune entrée manuelle enregistrée pour le moment.
                     </td>
                 </tr>
@@ -1005,8 +1061,9 @@
                             </div>
                         </div>
 
-                        <!-- Saisie de la remise -->
-                        <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4">
+                        <!-- Saisie de la remise (désactivée si déjà PAYÉE) -->
+                        <div *ngIf="dd.demandStatus !== DemandStatus.PAYEE; else discountLocked"
+                             class="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-4">
                             <div class="mb-2 flex items-center justify-between gap-3">
                                 <div>
                                     <div class="text-sm font-semibold text-slate-900">Remise manuelle</div>
@@ -1039,6 +1096,14 @@
                                 {{ discountError() }}
                             </div>
                         </div>
+                        <ng-template #discountLocked>
+                            <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <div class="text-sm font-semibold text-slate-900">Remise manuelle</div>
+                                <p class="mt-0.5 text-xs text-slate-500">
+                                    La demande est déjà <strong>PAYÉE</strong> : la remise ne peut plus être modifiée.
+                                </p>
+                            </div>
+                        </ng-template>
 
                         <div *ngIf="dd.payment" class="mt-4 rounded-xl border border-slate-200 p-3">
                             <div class="text-sm font-semibold text-slate-900">Notification de paiement</div>
@@ -1195,6 +1260,49 @@
                         class="w-full rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm">
                     <span *ngIf="!deleting()">Supprimer</span>
                     <span *ngIf="deleting()">Suppression…</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALE DE CONFIRMATION SUPPRESSION (dépense / entrée) -->
+<div *ngIf="moneyDeleteOpen()" class="fixed inset-0 z-[70]">
+    <div class="absolute inset-0 bg-black/40" (click)="cancelMoneyDelete()"></div>
+    <div class="absolute inset-0 m-auto flex max-h-[90vh] w-full max-w-md items-center justify-center px-2 sm:px-4" role="dialog" aria-modal="true">
+        <div class="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div class="border-b border-slate-200 px-3 py-2 sm:px-5 sm:py-3">
+                <h3 class="text-sm font-semibold text-slate-900 sm:text-base">
+                    Supprimer cette {{ moneyDeleteTarget()?.type === 'expense' ? 'dépense' : 'entrée' }} ?
+                </h3>
+            </div>
+
+            <div class="px-3 py-3 space-y-2 sm:px-5 sm:py-4">
+                <p class="text-xs text-slate-700 sm:text-sm">
+                    Vous êtes sur le point de <strong>supprimer définitivement</strong> cette
+                    {{ moneyDeleteTarget()?.type === 'expense' ? 'dépense' : 'entrée' }}
+                    <ng-container *ngIf="moneyDeleteTarget()?.label">&nbsp;(<span class="font-medium">{{ moneyDeleteTarget()?.label }}</span>)</ng-container>.
+                </p>
+                <p class="text-[11px] text-slate-500 sm:text-xs">
+                    Le solde de l’évènement sera automatiquement recalculé après suppression.
+                </p>
+
+                <div *ngIf="moneyDeleteError()" class="mt-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800 sm:text-sm">
+                    ❌ {{ moneyDeleteError() }}
+                </div>
+            </div>
+
+            <div class="flex flex-col-reverse items-stretch gap-2 border-t border-slate-200 px-3 py-3 sm:flex-row sm:items-center sm:justify-end sm:px-5">
+                <button (click)="cancelMoneyDelete()"
+                        [disabled]="moneyDeleting()"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm">
+                    Annuler
+                </button>
+                <button (click)="confirmMoneyDelete()"
+                        [disabled]="moneyDeleting()"
+                        class="w-full rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm">
+                    <span *ngIf="!moneyDeleting()">Supprimer</span>
+                    <span *ngIf="moneyDeleting()">Suppression…</span>
                 </button>
             </div>
         </div>

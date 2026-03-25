@@ -14,8 +14,8 @@ import { ReviewFormComponent } from './modules/landing/review-form/review-form.c
 // @ts-ignore
 export const appRoutes: Route[] = [
 
-    // Redirect empty path to '/example'
-    {path: '', pathMatch : 'full', redirectTo: 'security/guest'},
+    // Redirect empty path to homepage
+    {path: '', pathMatch : 'full', redirectTo: 'home'},
 
     {
         path : 'unauthorized',

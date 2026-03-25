@@ -63,6 +63,8 @@ export class EventDetailComponent implements OnInit {
     // filters (null = tous)
     filterStatus = signal<DemandStatus | null>(null);
     filterType = signal<DemandType | null>(null);
+    filterAgeOp = signal<'>' | '<' | '='>('>');
+    filterAgeValue = signal<number | null>(null);
 
     // pagination
     page = signal<number>(1);
@@ -104,6 +106,12 @@ export class EventDetailComponent implements OnInit {
     incomeAmount = signal<number>(0);
     incomeNote = signal<string>('');
     accountingSaving = signal<boolean>(false);
+
+    // suppression dépense / entrée
+    moneyDeleteOpen = signal<boolean>(false);
+    moneyDeleteTarget = signal<{ type: 'expense' | 'income'; id: number; label?: string } | null>(null);
+    moneyDeleting = signal<boolean>(false);
+    moneyDeleteError = signal<string | null>(null);
 
     // confirm modal
     confirmOpen = signal<boolean>(false);
@@ -250,8 +258,28 @@ export class EventDetailComponent implements OnInit {
     private searchedDemands = computed(() =>
         this.demandsRaw().filter(d => this.matchesSearch(d, this.searchQuery()))
     );
+
+    private ageFilteredDemands = computed(() => {
+        const age = this.filterAgeValue();
+        const op = this.filterAgeOp();
+        if (age === null || age === undefined || Number.isNaN(Number(age))) {
+            return this.searchedDemands();
+        }
+        const target = Number(age);
+        return this.searchedDemands().filter(d => {
+            const guests = (d as any)?.guests as any[] | undefined;
+            if (!Array.isArray(guests) || guests.length === 0) return false;
+            return guests.some(g => {
+                const a = g?.age;
+                if (typeof a !== 'number' || Number.isNaN(a)) return false;
+                if (op === '>') return a > target;
+                if (op === '<') return a < target;
+                return a === target;
+            });
+        });
+    });
     // --- computed pagination helpers
-    filteredCount = computed(() => this.searchedDemands().length);
+    filteredCount = computed(() => this.ageFilteredDemands().length);
 
     totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredCount() / this.pageSize()))
@@ -260,7 +288,7 @@ export class EventDetailComponent implements OnInit {
         const p = this.page();
         const size = this.pageSize();
         const start = (p - 1) * size;
-        return this.searchedDemands().slice(start, start + size);
+        return this.ageFilteredDemands().slice(start, start + size);
     });
     pageNumbers = computed(() => {
         const total = this.totalPages();
@@ -311,6 +339,15 @@ export class EventDetailComponent implements OnInit {
 
     guestsTotal = computed(() => this.allGuests().length);
 
+    guestsAvgAge = computed<number | null>(() => {
+        const ages = this.allGuests()
+            .map(g => g.age)
+            .filter((a): a is number => typeof a === 'number' && !Number.isNaN(a));
+        if (ages.length === 0) return null;
+        const sum = ages.reduce((acc, a) => acc + a, 0);
+        return sum / ages.length;
+    });
+
     guestsTotalPages = computed(() =>
         Math.max(1, Math.ceil(this.guestsTotal() / this.guestsPageSize()))
     );
@@ -347,9 +384,22 @@ export class EventDetailComponent implements OnInit {
         this.filterType.set(t);
         this.fetchDemands();
     }
+
+    setFilterAgeOp(op: '>' | '<' | '=') {
+        this.filterAgeOp.set(op);
+        this.page.set(1);
+    }
+
+    setFilterAgeValue(v: number | null) {
+        const n = v === null || v === undefined ? null : Number(v);
+        this.filterAgeValue.set(Number.isFinite(n as any) ? n : null);
+        this.page.set(1);
+    }
     resetFilters() {
         this.filterStatus.set(null);
         this.filterType.set(null);
+        this.filterAgeOp.set('>');
+        this.filterAgeValue.set(null);
         this.page.set(1);
         this.fetchDemands();
     }
@@ -578,6 +628,10 @@ export class EventDetailComponent implements OnInit {
     submitDiscount() {
         const dd = this.selectedDemand();
         if (!dd?.slug) return;
+        if (dd.demandStatus === DemandStatus.PAYEE) {
+            this.discountError.set('Impossible de modifier la remise : la demande est déjà PAYÉE.');
+            return;
+        }
         const value = Number(this.discountEditing() || 0);
         if (value < 0) {
             this.discountError.set('La remise ne peut pas être négative.');
@@ -853,6 +907,49 @@ export class EventDetailComponent implements OnInit {
                     this.accountingSaving.set(false);
                 }
             });
+    }
+
+    openMoneyDelete(type: 'expense' | 'income', id: number, label?: string) {
+        this.moneyDeleteError.set(null);
+        this.moneyDeleting.set(false);
+        this.moneyDeleteTarget.set({ type, id, label });
+        this.moneyDeleteOpen.set(true);
+    }
+
+    cancelMoneyDelete() {
+        this.moneyDeleteOpen.set(false);
+        this.moneyDeleteTarget.set(null);
+        this.moneyDeleteError.set(null);
+        this.moneyDeleting.set(false);
+    }
+
+    confirmMoneyDelete() {
+        const target = this.moneyDeleteTarget();
+        if (!target || !this.eventSlug) return;
+
+        this.moneyDeleting.set(true);
+        this.moneyDeleteError.set(null);
+
+        const req =
+            target.type === 'expense'
+                ? this.eventService.deleteExpense(this.eventSlug, target.id)
+                : this.eventService.deleteIncome(this.eventSlug, target.id);
+
+        req.subscribe({
+            next: () => {
+                this.moneyDeleting.set(false);
+                this.moneyDeleteOpen.set(false);
+                this.moneyDeleteTarget.set(null);
+                // recharger la compta (solde recalculé automatiquement)
+                this.loadAccounting();
+            },
+            error: err => {
+                this.moneyDeleting.set(false);
+                this.moneyDeleteError.set(
+                    err?.error?.message ?? 'Erreur lors de la suppression.'
+                );
+            }
+        });
     }
 
 }
