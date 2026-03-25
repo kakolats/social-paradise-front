@@ -82,6 +82,12 @@ export class EventDetailComponent implements OnInit {
     modalError = signal<string | null>(null);
     selectedDemand = signal<Demand | null>(null);
 
+    // suppression guest (demande group)
+    guestDeletingId = signal<string | null>(null);
+    guestDeleteError = signal<string | null>(null);
+    guestDeleteOpen = signal<boolean>(false);
+    guestDeleteTarget = signal<{ id: string; label?: string } | null>(null);
+
     // modal payment mini-form
     payAmount = signal<number>(0);
     payPhone = signal<string>('');
@@ -518,6 +524,8 @@ export class EventDetailComponent implements OnInit {
             next: d => {
                 this.selectedDemand.set(d);
                 this.discountEditing.set(d.discountAmount ?? 0);
+                this.guestDeletingId.set(null);
+                this.guestDeleteError.set(null);
                 // Pré-remplir le montant (tarif actif × nb participants)
                 this.payAmount.set(this.modalAutoAmount());
                 this.modalLoading.set(false);
@@ -547,6 +555,10 @@ export class EventDetailComponent implements OnInit {
         this.discountEditing.set(0);
         this.discountError.set(null);
         this.discountSaving.set(false);
+        this.guestDeletingId.set(null);
+        this.guestDeleteError.set(null);
+        this.guestDeleteOpen.set(false);
+        this.guestDeleteTarget.set(null);
     }
 
     // --- mini-form paiement helpers
@@ -650,6 +662,90 @@ export class EventDetailComponent implements OnInit {
                 this.discountSaving.set(false);
                 this.discountError.set(
                     err?.error?.message ?? 'Erreur lors de l’enregistrement de la remise.'
+                );
+            }
+        });
+    }
+
+    openGuestDeleteConfirm(guestId: string, label?: string) {
+        const dd = this.selectedDemand();
+        if (!dd?.slug) return;
+        if (dd.type !== DemandType.GROUP) return;
+        if (dd.demandStatus === DemandStatus.PAYEE || dd.demandStatus === DemandStatus.OFFERT) {
+            this.guestDeleteError.set("Impossible de supprimer un invité : la demande est déjà payée/offerte.");
+            return;
+        }
+        const gid = String(guestId);
+        const target = dd.guests?.find(g => String(g.id) === gid);
+        if (target?.isMainGuest) {
+            this.guestDeleteError.set("Impossible de supprimer l'invité principal.");
+            return;
+        }
+        this.guestDeleteError.set(null);
+        this.guestDeleteTarget.set({ id: gid, label });
+        this.guestDeleteOpen.set(true);
+    }
+
+    cancelGuestDelete() {
+        this.guestDeleteOpen.set(false);
+        this.guestDeleteTarget.set(null);
+    }
+
+    confirmGuestDelete() {
+        const t = this.guestDeleteTarget();
+        if (!t) return;
+        this.deleteGuestFromSelectedDemand(t.id, t.label);
+    }
+
+    private deleteGuestFromSelectedDemand(guestId: string, label?: string) {
+        const dd = this.selectedDemand();
+        if (!dd?.slug) return;
+        if (dd.type !== DemandType.GROUP) return;
+        if (dd.demandStatus === DemandStatus.PAYEE || dd.demandStatus === DemandStatus.OFFERT) {
+            this.guestDeleteError.set("Impossible de supprimer un invité : la demande est déjà payée/offerte.");
+            return;
+        }
+        const gid = String(guestId);
+        const target = dd.guests?.find(g => String(g.id) === gid);
+        if (target?.isMainGuest) {
+            this.guestDeleteError.set("Impossible de supprimer l'invité principal.");
+            return;
+        }
+
+        this.guestDeletingId.set(gid);
+        this.guestDeleteError.set(null);
+
+        this.demandService.deleteGuestFromGroupDemand(dd.slug, gid).subscribe({
+            next: () => {
+                this.guestDeletingId.set(null);
+                this.guestDeleteOpen.set(false);
+                this.guestDeleteTarget.set(null);
+                // update modal demand
+                this.selectedDemand.update(prev => {
+                    if (!prev) return prev;
+                    const nextGuests = (prev.guests ?? []).filter(g => String(g.id) !== gid);
+                    const nextType = nextGuests.length <= 1 ? DemandType.UNIQUE : prev.type;
+                    return { ...prev, guests: nextGuests, type: nextType };
+                });
+                // update list summary (guests + numberOfGuests)
+                this.demandsRaw.update(arr =>
+                    arr.map(x => {
+                        if (x.slug !== dd.slug) return x;
+                        const nextGuests = (x.guests ?? []).filter(g => String(g.id) !== gid);
+                        return {
+                            ...x,
+                            guests: nextGuests,
+                            numberOfGuests: nextGuests.length,
+                            type: nextGuests.length <= 1 ? DemandType.UNIQUE : x.type,
+                        };
+                    })
+                );
+            },
+            error: err => {
+                this.guestDeletingId.set(null);
+                this.guestDeleteError.set(
+                    err?.error?.message ??
+                    (label ? `Erreur lors de la suppression de ${label}.` : "Erreur lors de la suppression de l'invité.")
                 );
             }
         });

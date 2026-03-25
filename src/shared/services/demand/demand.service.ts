@@ -132,6 +132,14 @@ export class DemandService {
         );
     }
 
+    deleteGuestFromGroupDemand(demandSlug: string, guestId: string | number): Observable<void> {
+        return this.http.delete<ApiResponse<unknown>>(
+            `${this.base}/${demandSlug}/guests/${guestId}`
+        ).pipe(
+            map(() => void 0)
+        );
+    }
+
     // ----------------- STATS
     /**
      * Récupère les stats par statut pour un event donné.
