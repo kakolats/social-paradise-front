@@ -149,6 +149,14 @@ export class EventService {
                         totalIncomesManual: j.totalIncomesManual ?? 0,
                         totalPaidFromDemands: j.totalPaidFromDemands ?? 0,
                         currentBalance: j.currentBalance ?? 0,
+                        ticketsByPrice: (j.ticketsByPrice ?? []).map((t: any) => ({
+                            priceId: t.priceId,
+                            name: t.name ?? null,
+                            amount: t.amount ?? 0,
+                            startDate: t.startDate ? new Date(t.startDate) : undefined,
+                            endDate: t.endDate ? new Date(t.endDate) : undefined,
+                            ticketsSold: t.ticketsSold ?? 0,
+                        })),
                         expenses: (j.expenses ?? []).map((e: any) => ({
                             id: e.id,
                             label: e.label,

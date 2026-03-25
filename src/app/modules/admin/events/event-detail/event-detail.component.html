@@ -184,6 +184,30 @@
                 </ng-template>
             </div>
 
+            <!-- Tickets vendus par tarif -->
+            <div class="mt-4">
+                <div class="mb-2 text-sm font-semibold text-slate-900">Tickets vendus par tarif</div>
+                <div *ngIf="accounting(); else ticketsLoading" class="flex flex-wrap gap-2">
+                    <div
+                        *ngFor="let t of accounting()?.ticketsByPrice ?? []"
+                        class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 shadow-sm"
+                    >
+                        <span class="font-medium">{{ t.name || ('Tarif ' + (t.amount | number:'1.0-0')) }}</span>
+                        <span class="text-slate-400">&nbsp;•&nbsp;</span>
+                        <span class="font-semibold">{{ t.ticketsSold | number:'1.0-0' }}</span>
+                        <span class="text-slate-400">&nbsp;tickets</span>
+                    </div>
+                    <div *ngIf="(accounting()?.ticketsByPrice?.length || 0) === 0" class="text-xs text-slate-400">
+                        Aucun tarif défini.
+                    </div>
+                </div>
+                <ng-template #ticketsLoading>
+                    <div class="text-[11px] text-slate-400">
+                        Chargement des tickets…
+                    </div>
+                </ng-template>
+            </div>
+
             <!-- Tarifs de l'évènement -->
             <div class="mt-4">
                 <div class="mb-2 text-sm font-semibold text-slate-900">Tarifs</div>
