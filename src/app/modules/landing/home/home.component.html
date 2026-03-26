@@ -1,91 +1,91 @@
 <div class="min-h-screen w-full bg-transparent text-default">
-    <!-- Header (aligné backoffice) -->
-    
-
     <!-- Hero -->
-    <section class="relative w-full overflow-hidden min-h-[calc(100vh)]">
-        <!-- Background image -->
+    <section class="relative w-full h-screen overflow-hidden">
         <div class="absolute inset-0">
-            <img
-                src="images/bg/homepage-hero.jpg"
-                alt=""
-                class="h-full w-full object-cover"
-            />
-            <div class="absolute inset-0 bg-black/45"></div>
+            <img src="images/bg/homepage-hero.jpg" alt="" class="h-full w-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
+            <div class="absolute -left-28 top-24 h-72 w-72 rounded-full bg-[#d36b3d]/35 blur-3xl"></div>
+            <div class="absolute -right-24 bottom-16 h-80 w-80 rounded-full bg-white/15 blur-3xl"></div>
         </div>
 
-        <div class="relative mx-auto flex w-full max-w-6xl items-center px-6 py-14 sm:py-20 min-h-[calc(100vh-4rem)]">
-            <div class="flex w-full justify-center">
-                <div class="w-full max-w-3xl text-center text-white">
-                <div class="flex justify-center">
-                    <img
-                        src="images/logo/logo.svg"
-                        alt="Logo Social Paradise"
-                        class="w-150 drop-shadow-sm "
-                    />
+        <div class="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center px-6 py-14 sm:py-20">
+            <div class="mx-auto w-full max-w-3xl text-center text-white">
+                <div class="mx-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/90 backdrop-blur">
+                    <span class="h-2 w-2 rounded-full bg-[#d36b3d]"></span>
+                    Des expériences à vivre et à partager
                 </div>
 
-                
-                <h1 class="mt-5 text-4xl font-semibold leading-tight tracking-tight text-[#d36b3d] sm:text-5xl">
-                    Vivez les événements autrement avec Social Paradise
+                <div class="mt-7 flex justify-center">
+                    <img src="images/logo/logo.svg" alt="Logo Social Paradise" class="w-64 drop-shadow-sm sm:w-80 md:w-96" />
+                </div>
+
+                <h1 class="mt-6 text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">
+                    Vivez les événements autrement avec
+                    <span class="text-[#d36b3d]">Social Paradise</span>
                 </h1>
 
-                <p class="mt-4 text-lg leading-relaxed text-white/90">
+                <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-white/90">
                     Social Paradise imagine, organise et met en scène des événements autour d’univers forts, d’ambiances soignées et d’expériences mémorables. Découvrez les prochains rendez-vous et rejoignez l’aventure.
                 </p>
 
-            
-                <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <button mat-flat-button class="!bg-[#d36b3d] !text-white hover:!opacity-90" (click)="scrollToUpcoming()">
+                <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                    <button mat-flat-button class="!bg-[#d36b3d] !text-white hover:!opacity-90 sm:!px-7 sm:!py-3" (click)="scrollToUpcoming()">
                         Voir les événements à venir
+                        <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
                     </button>
-                    <a mat-stroked-button class="!text-white !border-[#d36b3d] hover:!border-[#d36b3d]" [href]="instagramUrl" target="_blank" rel="noopener noreferrer">
-                        Suivre Social Paradise sur Instagram
+                    <a mat-stroked-button class="!border-white/25 !text-white hover:!border-white/35 sm:!px-7 sm:!py-3" [href]="instagramUrl" target="_blank" rel="noopener noreferrer">
+                        Suivre sur Instagram
                     </a>
                 </div>
+
+                <div class="mt-10 hidden gap-3 sm:grid sm:grid-cols-3">
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-left backdrop-blur">
+                        <div class="text-sm font-semibold text-white">Univers forts</div>
+                        <div class="mt-1 text-sm text-white/80">Identité & direction artistique</div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-left backdrop-blur">
+                        <div class="text-sm font-semibold text-white">Ambiances soignées</div>
+                        <div class="mt-1 text-sm text-white/80">Décor, vibe, détails</div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-left backdrop-blur">
+                        <div class="text-sm font-semibold text-white">Moments mémorables</div>
+                        <div class="mt-1 text-sm text-white/80">Énergie & souvenirs</div>
+                    </div>
+                </div>
             </div>
-        </div>
         </div>
     </section>
 
     <!-- À propos -->
-    <section class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
-        <div class="grid gap-10 lg:grid-cols-12 lg:items-center">
-            <div class="lg:col-span-5">
-                <h2 class="text-3xl font-semibold tracking-tight text-[#d36b3d] sm:text-4xl">
-                    Bien plus qu’un organisateur, un créateur d’ambiances
-                </h2>
-                <p class="mt-4 text-base leading-relaxed text-slate-900 text-justify">
-                    Social Paradise est une marque événementielle portée par l’envie de créer des moments forts, fédérateurs et soigneusement pensés. À travers chaque événement, nous cherchons à proposer bien plus qu’un simple rendez-vous : une véritable expérience, avec son énergie, son identité et son atmosphère.   
-                </p>
-                <p class="mt-4 text-base leading-relaxed text-slate-900 text-justify">
-                    Nous accordons une attention particulière à l’univers visuel, à la qualité de l’organisation, au choix des concepts et à l’émotion ressentie par les participants. L’objectif est simple : faire de chaque événement un moment marquant, capable de rassembler, de surprendre et de laisser un souvenir durable.
-                </p>
-            </div>
-            <div class="lg:col-span-7">
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div class="bg-card rounded-2xl p-5 shadow">
-                        <div class="text-base font-semibold">Clarté</div>
-                        <div class="text-secondary mt-2 text-base">
-                            Les infos essentielles au même endroit : visuels, description, dates, tarifs.
-                        </div>
+    <section class="relative">
+        <div class="absolute inset-0 -z-10 bg-gradient-to-b from-white to-transparent"></div>
+        <div class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
+            <div class="grid gap-10 lg:grid-cols-12 lg:items-center">
+                <div class="lg:col-span-5">
+                    <div class="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                        À propos
                     </div>
-                    <div class="bg-card rounded-2xl p-5 shadow">
-                        <div class="text-base font-semibold">Rapidité</div>
-                        <div class="text-secondary mt-2 text-base">
-                            Un parcours en quelques clics pour rejoindre l’expérience.
-                        </div>
-                    </div>
-                    <div class="bg-card rounded-2xl p-5 shadow">
-                        <div class="text-base font-semibold">Flexibilité</div>
-                        <div class="text-secondary mt-2 text-base">
-                            Demande en solo ou en groupe selon l’événement.
-                        </div>
-                    </div>
-                    <div class="bg-card rounded-2xl p-5 shadow">
-                        <div class="text-base font-semibold">Univers</div>
-                        <div class="text-secondary mt-2 text-base">
-                            Une page publique dédiée qui met en scène l’événement.
+                    <h2 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                        Bien plus qu’un organisateur, un créateur d’ambiances
+                    </h2>
+                    <p class="mt-4 text-base leading-relaxed text-white/85 text-justify">
+                        Social Paradise est une marque événementielle portée par l’envie de créer des moments forts, fédérateurs et soigneusement pensés. À travers chaque événement, nous cherchons à proposer bien plus qu’un simple rendez-vous : une véritable expérience, avec son énergie, son identité et son atmosphère. 
+                    </p>
+                    <p class="mt-4 text-base leading-relaxed text-white/85 text-justify">
+                        Au cœur de notre vision, le mélange culturel occupe une place essentielle : nous aimons faire dialoguer les influences, croiser les univers et célébrer la diversité à travers des expériences uniques et enrichissantes.
+                        Nous accordons une attention particulière à l’univers visuel, à la qualité de l’organisation, au choix des concepts et à l’émotion ressentie par les participants. L’objectif est simple : faire de chaque événement un moment marquant, capable de rassembler, de surprendre et de laisser un souvenir durable. 
+                    </p>
+                </div>
+                <div class="lg:col-span-7">
+                    <div class="group overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_-35px_rgba(0,0,0,0.35)]">
+                        <div class="relative aspect-[16/9] w-full">
+                            <img
+                                src="images/bg/homepage-about.jpg"
+                                alt="Social Paradise"
+                                class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
+                                loading="lazy"
+                            />
+                            <div class="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-black/10"></div>
                         </div>
                     </div>
                 </div>
@@ -94,43 +94,71 @@
     </section>
 
     <!-- Comment ça fonctionne -->
-    <section>
+    <section class="relative">
+        <div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-white to-white"></div>
         <div class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
-            <h2 class="text-3xl font-semibold tracking-tight text-[#d36b3d] sm:text-4xl">
-                Un parcours simple pour rejoindre lʼexpérience
-            </h2>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <div class="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                        Comment ça fonctionne
+                    </div>
+                    <h2 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                        Un parcours simple pour rejoindre lʼexpérience
+                    </h2>
+                </div>
+            </div>
 
             <div class="mt-10 grid gap-4 md:grid-cols-2">
-                <div class="bg-card rounded-2xl p-5 shadow">
-                    <div class="flex items-center justify-between">
-                        <div class="text-base font-semibold">Étape 1 — Découvrez lʼévénement</div>
-                    </div>
-                    <div class="text-secondary mt-2 text-base">
-                        Parcourez les événements disponibles et consultez toutes les informations importantes.
-                    </div>
-                </div>
-                <div class="bg-card rounded-2xl p-5 shadow">
-                    <div class="flex items-center justify-between">
-                        <div class="text-base font-semibold">Étape 2 — Choisissez votre participation</div>
-                    </div>
-                    <div class="text-secondary mt-2 text-base">
-                        Selon lʼévénement, vous pouvez faire une demande seul ou en groupe.
+                <div class="bg-card rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d36b3d]/10 text-[#9f4b29]">
+                            1
+                        </div>
+                        <div>
+                            <div class="text-base font-semibold">Découvrez lʼévénement</div>
+                            <div class="text-secondary mt-2 text-base">
+                                Parcourez les événements disponibles et consultez toutes les informations importantes.
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-card rounded-2xl p-5 shadow">
-                    <div class="flex items-center justify-between">
-                        <div class="text-base font-semibold">Étape 3 — Remplissez le formulaire</div>
-                    </div>
-                    <div class="text-secondary mt-2 text-base">
-                        Envoyez votre demande directement depuis la page publique de lʼévénement.
+                <div class="bg-card rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d36b3d]/10 text-[#9f4b29]">
+                            2
+                        </div>
+                        <div>
+                            <div class="text-base font-semibold">Choisissez votre participation</div>
+                            <div class="text-secondary mt-2 text-base">
+                                Selon lʼévénement, vous pouvez faire une demande seul ou en groupe.
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-card rounded-2xl p-5 shadow">
-                    <div class="flex items-center justify-between">
-                        <div class="text-base font-semibold">Étape 4 — Préparez-vous à vivre le moment</div>
+                <div class="bg-card rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d36b3d]/10 text-[#9f4b29]">
+                            3
+                        </div>
+                        <div>
+                            <div class="text-base font-semibold">Remplissez le formulaire</div>
+                            <div class="text-secondary mt-2 text-base">
+                                Envoyez votre demande directement depuis la page publique de lʼévénement.
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-secondary mt-2 text-base">
-                        Il ne vous reste plus quʼà rejoindre lʼexpérience Social Paradise.
+                </div>
+                <div class="bg-card rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d36b3d]/10 text-[#9f4b29]">
+                            4
+                        </div>
+                        <div>
+                            <div class="text-base font-semibold">Préparez-vous à vivre le moment</div>
+                            <div class="text-secondary mt-2 text-base">
+                                Il ne vous reste plus quʼà rejoindre lʼexpérience Social Paradise.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,54 +166,61 @@
     </section>
 
     <!-- Événements à venir -->
-    <section id="upcoming-events" class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <h2 class="text-3xl font-semibold tracking-tight text-[#d36b3d] sm:text-4xl">
-                    Les événements à venir
-                </h2>
-                <p class="mt-2 max-w-2xl text-base leading-relaxed text-slate-900">
-                    Explorez les prochaines expériences signées Social Paradise, pensées pour rassembler, marquer les esprits et créer des souvenirs mémorables.
-                </p>
-            </div>
-        </div>
-
-        <div class="mt-10">
-            <div *ngIf="loadingEvents()" class="text-secondary text-base">
-                Chargement des événements…
-            </div>
-
-            <div *ngIf="!loadingEvents() && upcomingEvents().length === 0" class="bg-card rounded-2xl p-6 text-base shadow">
-                Aucun événement à venir n’est disponible pour le moment.
-            </div>
-
-            <div *ngIf="!loadingEvents() && upcomingEvents().length > 0" class="grid gap-4 md:grid-cols-3">
-                <div *ngFor="let e of upcomingEvents()" class="bg-card group overflow-hidden rounded-2xl shadow">
-                    <div class="relative h-40 bg-default">
-                        <img
-                            *ngIf="e.coverImage"
-                            class="h-full w-full object-cover transition group-hover:scale-[1.02]"
-                            [src]="e.coverImage"
-                            [alt]="e.name || 'Visuel événement'"
-                        />
-                        <div *ngIf="!e.coverImage" class="text-secondary flex h-full w-full items-center justify-center text-xs">
-                            Visuel à venir
-                        </div>
+    <section id="upcoming-events" class="relative">
+        <div class="absolute inset-0 -z-10 bg-gradient-to-b from-white to-transparent"></div>
+        <div class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <div class="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                        Événements
                     </div>
+                    <h2 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                        Les événements à venir
+                    </h2>
+                    <p class="mt-3 max-w-2xl text-base leading-relaxed text-white/85">
+                        Explorez les prochaines expériences signées Social Paradise, pensées pour rassembler, marquer les esprits et créer des souvenirs mémorables.
+                    </p>
+                </div>
+            </div>
 
-                    <div class="p-5">
-                        <div class="text-lg font-semibold leading-snug">
-                            {{ e.name }}
-                        </div>
-                        <div class="text-secondary mt-1 mb-3 text-base">
-                            <span *ngIf="e.date">{{ e.date | date: 'dd MMM yyyy' }}</span>
-                            <span *ngIf="e.location"> · {{ e.location }}</span>
+            <div class="mt-10">
+                <div *ngIf="loadingEvents()" class="text-secondary text-base">
+                    Chargement des événements…
+                </div>
+
+                <div *ngIf="!loadingEvents() && upcomingEvents().length === 0" class="bg-card rounded-2xl border border-black/5 p-6 text-base shadow-sm">
+                    Aucun événement à venir n’est disponible pour le moment.
+                </div>
+
+                <div *ngIf="!loadingEvents() && upcomingEvents().length > 0" class="grid gap-4 md:grid-cols-3">
+                    <div *ngFor="let e of upcomingEvents()" class="bg-card group overflow-hidden rounded-2xl shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                        <div class="relative h-44 bg-default">
+                            <img
+                                *ngIf="e.coverImage"
+                                class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                                [src]="e.coverImage"
+                                [alt]="e.name || 'Visuel événement'"
+                            />
+                            <div *ngIf="!e.coverImage" class="text-secondary flex h-full w-full items-center justify-center text-xs">
+                                Visuel à venir
+                            </div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition group-hover:opacity-100"></div>
                         </div>
 
-                        <a mat-flat-button class="w-full !bg-[#d36b3d] !text-white hover:!opacity-90" [routerLink]="['/public-event', e.slug]">
-                            Voir lʼévénement
-                            <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
-                        </a>
+                        <div class="p-5">
+                            <div class="text-lg font-semibold leading-snug">
+                                {{ e.name }}
+                            </div>
+                            <div class="text-secondary mt-1 mb-4 text-base">
+                                <span *ngIf="e.date">{{ e.date | date: 'dd MMM yyyy' }}</span>
+                                <span *ngIf="e.location"> · {{ e.location }}</span>
+                            </div>
+
+                            <a mat-flat-button class="w-full !bg-[#d36b3d] !text-white hover:!opacity-90" [routerLink]="['/public-event', e.slug]">
+                                Voir lʼévénement
+                                <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -193,14 +228,18 @@
     </section>
 
     <!-- Instagram -->
-    <section>
+    <section class="relative">
+        <div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-white to-transparent"></div>
         <div class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
             <div class="grid gap-8 lg:grid-cols-12 lg:items-center">
                 <div class="lg:col-span-7">
-                    <h2 class="text-3xl font-semibold tracking-tight text-[#d36b3d] sm:text-4xl">
+                    <div class="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                        Instagram
+                    </div>
+                    <h2 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                         Lʼunivers Social Paradise continue sur Instagram
                     </h2>
-                    <p class="mt-4 text-base leading-relaxed text-slate-900">
+                    <p class="mt-4 text-base leading-relaxed text-white/85">
                         Retrouvez nos temps forts, nos ambiances, nos annonces et les coulisses de nos événements sur Instagram. Une façon simple de rester connecté à lʼunivers Social Paradise et de ne rien manquer des prochaines expériences.
                     </p>
                 </div>
@@ -213,12 +252,13 @@
                         rel="noopener noreferrer"
                     >
                         Accéder à Instagram
+                        <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_mini:arrow-top-right-on-square'"></mat-icon>
                     </a>
                 </div>
             </div>
 
             <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <div *ngFor="let embedUrl of instagramEmbedUrls" class="bg-card overflow-hidden rounded-2xl shadow">
+                <div *ngFor="let embedUrl of instagramEmbedUrls" class="bg-card overflow-hidden rounded-2xl shadow-sm">
                     <iframe
                         class="h-[420px] w-full md:h-[440px]"
                         [src]="embedUrl"
@@ -233,10 +273,119 @@
         </div>
     </section>
 
+    <!-- Contact -->
+    <section id="contact" class="relative">
+        <div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-white to-white"></div>
+        <div class="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
+            <div class="grid gap-8 lg:grid-cols-12 lg:items-center">
+                <div class="lg:col-span-6">
+                    <div class="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                        Contact
+                    </div>
+                    <h2 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                        Parlons de votre prochaine expérience
+                    </h2>
+                    <p class="mt-4 text-base leading-relaxed text-white/85">
+                        Une question, une collaboration, un partenariat ou une demande d’information sur un événement ? Écrivez-nous — on vous répond au plus vite.
+                    </p>
+                    
+                </div>
+
+                <div class="lg:col-span-6">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <a
+                            class="bg-card group rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            [href]="instagramUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d36b3d]/20 text-white">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_mini:chat-bubble-left-right'"></mat-icon>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-base font-semibold text-slate-950">Instagram</div>
+                                    <div class="text-secondary mt-1 text-sm">
+                                        DM & actualités
+                                    </div>
+                                    <div class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#9f4b29]">
+                                        Ouvrir
+                                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a
+                            *ngIf="contactEmail"
+                            class="bg-card group rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            [href]="'mailto:' + contactEmail"
+                        >
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d36b3d]/20 text-slate-900">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_mini:envelope'"></mat-icon>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-base font-semibold text-slate-950">Email</div>
+                                    <div class="text-secondary mt-1 break-all text-sm">
+                                        {{ contactEmail }}
+                                    </div>
+                                    <div class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#9f4b29]">
+                                        Écrire
+                                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a
+                            *ngIf="contactPhone"
+                            class="bg-card group rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            [href]="'tel:' + contactPhone"
+                        >
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d36b3d]/20 text-slate-900">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_mini:phone'"></mat-icon>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-base font-semibold text-slate-950">Téléphone</div>
+                                    <div class="text-secondary mt-1 text-sm">
+                                        {{ contactPhone }}
+                                    </div>
+                                    <div class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#9f4b29]">
+                                        Appeler
+                                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <div class="bg-card rounded-2xl border border-black/5 p-6 shadow-sm">
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d36b3d]/20 text-slate-900">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_mini:briefcase'"></mat-icon>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-base font-semibold text-slate-950">Collabs & partenariats</div>
+                                    <div class="text-secondary mt-1 text-sm">
+                                        Marque, lieu, DJ, artistes, sponsors
+                                    </div>
+                                    <div class="mt-3 text-sm font-medium text-[#9f4b29]">
+                                        Écrivez-nous en DM
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer>
         <div class="mx-auto w-full max-w-6xl px-6 py-8">
-            <div class="text-slate-900 text-base">
+            <div class="text-base text-white/85">
                 Social Paradise — Des événements à vivre et à partager.
             </div>
         </div>
