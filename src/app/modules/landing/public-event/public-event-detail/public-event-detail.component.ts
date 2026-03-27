@@ -231,7 +231,7 @@ export class PublicEventDetailComponent implements OnInit {
 
     activePrice = computed<FrontPrice | null>(() => {
         const ev = this.event() as FrontEvent | undefined;
-        console.log("Calcul prix actif pour event", ev);
+        //console.log("Calcul prix actif pour event", ev);
         if (!ev?.prices?.length) return null;
         const today = this.dateOnly(new Date());
         return ev.prices.find(p => this.dateOnly(p.startDate) <= today && today <= this.dateOnly(p.endDate)) ?? null;

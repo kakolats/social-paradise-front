@@ -105,7 +105,7 @@ export class AuthService {
         if (token) {
             try {
                 const decodedToken: any = AuthUtils._decodeToken(token);
-                console.log('decodedToken',decodedToken);
+                //console.log('decodedToken',decodedToken);
                 return decodedToken.role;
             } catch (error) {
                 console.error('Error decoding token:', error);

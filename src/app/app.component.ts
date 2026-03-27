@@ -56,7 +56,7 @@ export class AppComponent implements OnInit {
             // Load permissions into ngx-permissions
             this.permissionsService.loadPermissions(permissionsToLoad)
 
-            console.log("Loaded permissions:", permissionsToLoad)
+            //console.log("Loaded permissions:", permissionsToLoad)
         } catch (error) {
             console.error("Error loading user permissions:", error)
             this.permissionsService.flushPermissions()
