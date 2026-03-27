@@ -22,9 +22,7 @@ export class PublicEventSuccessComponent {
 
 
   navigateToEvent(): void {
-    const link = this.eventLink();
-    if (!link.length || !this.eventSlug()) return;
-    void this.router.navigate(link);
+    void this.router.navigate(['/']);
   }
 
 }

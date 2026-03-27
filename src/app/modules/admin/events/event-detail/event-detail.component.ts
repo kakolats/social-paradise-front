@@ -287,6 +287,23 @@ export class EventDetailComponent implements OnInit {
     // --- computed pagination helpers
     filteredCount = computed(() => this.ageFilteredDemands().length);
 
+    /**
+     * Prix moyen du ticket basé sur:
+     * total tickets encaissés / nombre de demandes payées.
+     */
+    averageTicketPrice = computed<number | null>(() => {
+        const totalTicketsAmount = Number(this.accounting()?.totalPaidFromDemands ?? 0);
+        const paidDemandsCount = Number(
+            this.stats()?.[DemandStatus.PAYEE]?.totalDemands ?? 0
+        );
+
+        if (!paidDemandsCount || paidDemandsCount <= 0) {
+            return null;
+        }
+
+        return totalTicketsAmount / paidDemandsCount;
+    });
+
     totalPages = computed(() =>
         Math.max(1, Math.ceil(this.filteredCount() / this.pageSize()))
     );

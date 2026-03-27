@@ -146,15 +146,15 @@
                 >
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            Solde général
+                            Dépenses
                         </div>
-                        <div class="mt-1 text-sm font-bold text-slate-900">
-                            {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
+                        <div class="mt-1 text-sm font-semibold text-rose-700">
+                            -{{ accounting()?.totalExpenses | number:'1.0-0' }} FCFA
                         </div>
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            Total entrées
+                            Entrées
                         </div>
                         <div class="mt-1 text-sm font-semibold text-slate-900">
                             {{ accounting()?.totalIncomesManual | number:'1.0-0' }} FCFA
@@ -162,7 +162,7 @@
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            Entrées tickets
+                            Tickets
                         </div>
                         <div class="mt-1 text-sm font-semibold text-emerald-700">
                             +{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }} FCFA
@@ -170,10 +170,10 @@
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                            Dépenses
+                            Balance
                         </div>
-                        <div class="mt-1 text-sm font-semibold text-rose-700">
-                            -{{ accounting()?.totalExpenses | number:'1.0-0' }} FCFA
+                        <div class="mt-1 text-sm font-bold text-slate-900">
+                            {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
                         </div>
                     </div>
                 </div>
@@ -199,6 +199,18 @@
                     </div>
                     <div *ngIf="(accounting()?.ticketsByPrice?.length || 0) === 0" class="text-xs text-slate-400">
                         Aucun tarif défini.
+                    </div>
+                </div>
+                <div *ngIf="accounting()" class="mt-2">
+                    <div class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 shadow-sm">
+                        <span class="font-medium">Prix du ticket moyen</span>
+                        <span class="text-slate-400">&nbsp;•&nbsp;</span>
+                        <span *ngIf="averageTicketPrice() !== null; else noAvgTicketPrice" class="font-semibold">
+                            {{ averageTicketPrice() | number:'1.0-0' }} FCFA
+                        </span>
+                        <ng-template #noAvgTicketPrice>
+                            <span class="font-semibold">—</span>
+                        </ng-template>
                     </div>
                 </div>
                 <ng-template #ticketsLoading>

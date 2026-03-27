@@ -21,13 +21,14 @@ export class LandingHomeComponent {
     upcomingEvents = signal<FrontEvent[]>([]);
     loadingEvents = signal<boolean>(false);
 
-    instagramUrl = 'https://www.instagram.com/';
+    instagramUrl = 'https://www.instagram.com/socialparadisedkr/';
+    instagramDirectUrl = 'https://www.instagram.com/direct/t/17843327973154582/';
     /**
      * Renseigne ces champs quand tu as les coordonnées officielles.
      * Le bloc correspondant n'apparaît pas tant que la valeur est vide.
      */
     contactEmail = 'info@socialparadise.sn';
-    contactPhone = '+221 77 777 77 77';
+    contactPhone = '+221 78 663 91 28';
     instagramEmbedUrls: SafeResourceUrl[] = [
         this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/reel/DWGza2hDMJ8/embed/'),
         this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/reel/DShaIdXDMVz/embed/'),
