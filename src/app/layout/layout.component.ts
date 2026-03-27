@@ -25,6 +25,7 @@ import { CompactLayoutComponent } from './layouts/vertical/compact/compact.compo
 import { DenseLayoutComponent } from './layouts/vertical/dense/dense.component';
 import { FuturisticLayoutComponent } from './layouts/vertical/futuristic/futuristic.component';
 import { ThinLayoutComponent } from './layouts/vertical/thin/thin.component';
+import { SiteAudioPlayerComponent } from './common/site-audio-player/site-audio-player.component';
 
 @Component({
     selector: 'layout',
@@ -44,6 +45,7 @@ import { ThinLayoutComponent } from './layouts/vertical/thin/thin.component';
         DenseLayoutComponent,
         FuturisticLayoutComponent,
         ThinLayoutComponent,
+        SiteAudioPlayerComponent,
         SettingsComponent,
     ],
 })

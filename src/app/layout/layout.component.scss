@@ -6,7 +6,7 @@ layout {
     min-width: 0;
 
     /* Base styles for individual layouts */
-    > * {
+    > :not(site-audio-player) {
         position: relative;
         display: flex;
         flex: 1 1 auto;
