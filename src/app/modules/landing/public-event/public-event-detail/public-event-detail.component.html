@@ -60,7 +60,19 @@
                     </div>
                     <div class="mt-1 flex items-center justify-between">
                         <span>Total indicatif</span>
-                        <span class="font-semibold text-slate-900">{{ totalAmount() | number }} FCFA + 1% frais (Wave)</span>
+                        <span class="font-semibold text-slate-900">{{ totalAmount() | number }} FCFA</span>
+                    </div>
+
+                    <div class="mt-1 flex items-center justify-between" *ngIf="discountAmount() > 0">
+                        <span class="text-rose-700">Remise</span>
+                        <span class="font-semibold text-rose-700">-{{ discountAmount() | number }} FCFA</span>
+                    </div>
+
+                    <div class="mt-1 flex items-center justify-between" *ngIf="discountAmount() > 0">
+                        <span>Total après remise</span>
+                        <span class="font-semibold text-slate-900">
+                            {{ totalAfterDiscount() | number }} FCFA + 1% frais (Wave)
+                        </span>
                     </div>
                 </div>
                 <ng-template #noPrice>
@@ -153,7 +165,7 @@
                             </ng-container>
                         </div>
                         <div>
-                            Montant : <span class="font-medium text-slate-900">{{ totalAmount() | number }} FCFA</span>
+                            Montant : <span class="font-medium text-slate-900">{{ totalAfterDiscount() | number }} FCFA</span>
                         </div>
                     </div>
                 </div>
@@ -176,7 +188,7 @@
                             </ng-container>
                         </div>
                         <div>
-                            Montant : <span class="font-medium text-slate-900">{{ totalAmount() | number }} FCFA</span>
+                            Montant : <span class="font-medium text-slate-900">{{ totalAfterDiscount() | number }} FCFA</span>
                         </div>
                     </div>
                 </div>

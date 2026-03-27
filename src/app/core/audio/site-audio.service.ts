@@ -21,8 +21,8 @@ export class SiteAudioService implements OnDestroy {
 
     private audio: HTMLAudioElement | null = null;
     private saveTimer: number | null = null;
-    private firstVisitAutoPlayPending = false;
-    private firstVisitUnlockHandler: (() => void) | null = null;
+    private resumeOnInteractionPending = false;
+    private unlockHandler: (() => void) | null = null;
 
     isReady = signal(false);
     hasError = signal(false);
@@ -48,19 +48,29 @@ export class SiteAudioService implements OnDestroy {
         else this.pause();
     }
 
-    async play(): Promise<void> {
+    async play(options?: { fromAutoResume?: boolean }): Promise<void> {
         const a = this.ensureAudio();
         if (!a) return;
         this.persist({ paused: false });
         try {
             await a.play();
-            this.detachFirstVisitUnlockListeners();
+            this.resumeOnInteractionPending = false;
+            this.detachUnlockListeners();
         } catch {
-            // Autoplay bloqué : on laisse l'état en "paused" visuellement
-            this.persist({ paused: true });
             this.zone.run(() => {
                 this.isPlaying.set(false);
             });
+
+            // Cas typique au reload: autoplay bloqué. On garde l'intention "lecture"
+            // (paused=false) et on reprendra au prochain geste utilisateur.
+            if (options?.fromAutoResume) {
+                this.persist({ paused: false });
+                this.resumeOnInteractionPending = true;
+                this.attachUnlockListeners();
+            } else {
+                // Erreur non liée à l'autoplay (fichier manquant, etc.)
+                this.persist({ paused: true });
+            }
         }
     }
 
@@ -68,6 +78,8 @@ export class SiteAudioService implements OnDestroy {
         const a = this.ensureAudio();
         if (!a) return;
         a.pause();
+        this.resumeOnInteractionPending = false;
+        this.detachUnlockListeners();
         this.persist({ paused: true });
         this.zone.run(() => {
             this.isPlaying.set(false);
@@ -153,17 +165,14 @@ export class SiteAudioService implements OnDestroy {
                 }
             }
 
-            // 1) Première visite: tentative de lecture auto
-            if (!st) {
-                this.firstVisitAutoPlayPending = true;
-                void this.tryFirstVisitAutoplay();
-                return;
-            }
-
-            // 2) Visites suivantes: respecter le choix utilisateur
-            if (st.paused === false) {
-                void this.play();
+            // 1) Première visite: tentative auto
+            // 2) Visites suivantes: si l'utilisateur avait laissé en lecture, reprise auto
+            if (!st || st.paused === false) {
+                this.resumeOnInteractionPending = true;
+                void this.tryAutoplayOrWaitForGesture();
             } else {
+                this.resumeOnInteractionPending = false;
+                this.detachUnlockListeners();
                 this.zone.run(() => this.isPlaying.set(false));
             }
         });
@@ -244,55 +253,53 @@ export class SiteAudioService implements OnDestroy {
             }
             this.audio = null;
         }
-        this.detachFirstVisitUnlockListeners();
+        this.detachUnlockListeners();
     }
 
-    private async tryFirstVisitAutoplay(): Promise<void> {
+    private async tryAutoplayOrWaitForGesture(): Promise<void> {
         const a = this.audio;
-        if (!a || !this.firstVisitAutoPlayPending) return;
+        if (!a || !this.resumeOnInteractionPending) return;
 
-        await this.play();
-
-        if (this.isPlaying()) {
-            this.firstVisitAutoPlayPending = false;
-            return;
-        }
-
-        // Si le navigateur bloque l'autoplay sonore, reprendre au 1er geste utilisateur.
-        this.attachFirstVisitUnlockListeners();
+        await this.play({ fromAutoResume: true });
     }
 
-    private attachFirstVisitUnlockListeners(): void {
+    private attachUnlockListeners(): void {
         if (typeof window === 'undefined') return;
-        if (this.firstVisitUnlockHandler) return;
+        if (this.unlockHandler) return;
 
-        this.firstVisitUnlockHandler = () => {
-            if (!this.firstVisitAutoPlayPending) {
-                this.detachFirstVisitUnlockListeners();
+        this.unlockHandler = () => {
+            if (!this.resumeOnInteractionPending) {
+                this.detachUnlockListeners();
                 return;
             }
 
-            void this.play().finally(() => {
+            void this.play({ fromAutoResume: true }).finally(() => {
                 if (this.isPlaying()) {
-                    this.firstVisitAutoPlayPending = false;
-                    this.detachFirstVisitUnlockListeners();
+                    this.resumeOnInteractionPending = false;
+                    this.detachUnlockListeners();
                 }
             });
         };
 
-        window.addEventListener('pointerdown', this.firstVisitUnlockHandler, {
-            passive: true,
-        });
-        window.addEventListener('keydown', this.firstVisitUnlockHandler, {
-            passive: true,
-        });
+        const opts = { passive: true, capture: true } as AddEventListenerOptions;
+        window.addEventListener('pointerdown', this.unlockHandler, opts);
+        window.addEventListener('keydown', this.unlockHandler, opts);
+
+        // Le "scroll" simple ne débloque pas toujours l'autoplay audio.
+        // Ces events sont plus souvent considérés comme un geste utilisateur.
+        window.addEventListener('wheel', this.unlockHandler, opts);
+        window.addEventListener('touchstart', this.unlockHandler, opts);
+        window.addEventListener('touchend', this.unlockHandler, opts);
     }
 
-    private detachFirstVisitUnlockListeners(): void {
-        if (typeof window === 'undefined' || !this.firstVisitUnlockHandler) return;
-        window.removeEventListener('pointerdown', this.firstVisitUnlockHandler);
-        window.removeEventListener('keydown', this.firstVisitUnlockHandler);
-        this.firstVisitUnlockHandler = null;
+    private detachUnlockListeners(): void {
+        if (typeof window === 'undefined' || !this.unlockHandler) return;
+        window.removeEventListener('pointerdown', this.unlockHandler);
+        window.removeEventListener('keydown', this.unlockHandler);
+        window.removeEventListener('wheel', this.unlockHandler, true);
+        window.removeEventListener('touchstart', this.unlockHandler, true);
+        window.removeEventListener('touchend', this.unlockHandler, true);
+        this.unlockHandler = null;
     }
 }
 

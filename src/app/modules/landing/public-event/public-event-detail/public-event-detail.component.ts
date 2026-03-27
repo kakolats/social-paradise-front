@@ -87,7 +87,8 @@ export class PublicEventDetailComponent implements OnInit {
 
     // ✅ 2) Lien Wave (montant dynamique)
     wavePayUrl() {
-        const amt = Math.max(0, Math.round(this.totalAmount()+(this.totalAmount()*0.01) || 0));
+        const baseAmount = this.totalAfterDiscount();
+        const amt = Math.max(0, Math.round(baseAmount + baseAmount * 0.01 || 0));
         const base = 'https://pay.wave.com/m/M_sn_Sl2Ujzz-WzTu/c/sn/';
         return `${base}?amount=${amt}`;
     }
@@ -182,7 +183,7 @@ export class PublicEventDetailComponent implements OnInit {
                 this.eventService.getBySlug(d.event.slug).subscribe({
                     next: (e) => {
                         this.event.set(e);
-                        const amt = this.totalAmount();
+                        const amt = this.totalAfterDiscount();
                         this.form.controls.amount.setValue(amt);
                         this.loading.set(false);
                     }
@@ -245,11 +246,23 @@ export class PublicEventDetailComponent implements OnInit {
         }, 0);
     });
 
+    discountAmount = computed(() => {
+        const d: any = this.demand();
+        const raw = Number(d?.discountAmount ?? 0);
+        return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+    });
+
     totalAmount = computed(() => {
         const ap = this.activePrice();
         const n = this.peopleCount();
         const participantsTotal = ap ? ap.amount * n : 0;
         return participantsTotal + this.tablesTotal();
+    });
+
+    totalAfterDiscount = computed(() => {
+        const total = Number(this.totalAmount() ?? 0);
+        const discount = Number(this.discountAmount() ?? 0);
+        return Math.max(0, total - discount);
     });
 
     canNotify() {
@@ -258,7 +271,7 @@ export class PublicEventDetailComponent implements OnInit {
     }
 
     resetForm() {
-        this.form.reset({ amount: this.totalAmount(), phoneNumber: '', paymentCanal: 'WAVE' });
+        this.form.reset({ amount: this.totalAfterDiscount(), phoneNumber: '', paymentCanal: 'WAVE' });
         this.successMsg.set(null);
         this.errorMsg.set(null);
     }
@@ -268,7 +281,7 @@ export class PublicEventDetailComponent implements OnInit {
         this.successMsg.set(null);
         this.errorMsg.set(null);
 
-        const safeAmount = this.totalAmount();
+        const safeAmount = this.totalAfterDiscount();
         this.form.controls.amount.setValue(safeAmount);
 
         if (this.form.invalid || !this.canNotify()) {
