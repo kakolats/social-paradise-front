@@ -250,7 +250,7 @@
 
                 <div *ngIf="!loadingEvents() && upcomingEvents().length > 0" class="grid gap-4 md:grid-cols-3">
                     <div *ngFor="let e of upcomingEvents()" class="bg-card group overflow-hidden rounded-2xl shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                        <div class="relative h-44 bg-default">
+                        <div class="relative aspect-[3/4] w-full bg-default">
                             <img
                                 *ngIf="e.coverImage"
                                 class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
@@ -416,7 +416,12 @@
                             </div>
                         </a>
 
-                        <div class="bg-card rounded-2xl border border-black/5 p-6 shadow-sm">
+                        <a
+                            class="bg-card group rounded-2xl border border-black/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            [href]="instagramDirectUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <div class="flex items-start gap-3">
                                 <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d36b3d]/20 text-slate-900">
                                     <mat-icon class="icon-size-5" [svgIcon]="'heroicons_mini:briefcase'"></mat-icon>
@@ -426,12 +431,13 @@
                                     <div class="text-secondary mt-1 text-sm">
                                         Marque, lieu, DJ, artistes, sponsors
                                     </div>
-                                    <div class="mt-3 text-sm font-medium text-[#9f4b29]">
+                                    <div class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#9f4b29]">
                                         Écrivez-nous en DM
+                                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>

@@ -22,7 +22,7 @@ export class LandingHomeComponent {
     loadingEvents = signal<boolean>(false);
 
     instagramUrl = 'https://www.instagram.com/socialparadisedkr/';
-    instagramDirectUrl = 'https://www.instagram.com/direct/t/17843327973154582/';
+    instagramDirectUrl = 'https://ig.me/m/socialparadisedkr/';
     /**
      * Renseigne ces champs quand tu as les coordonnées officielles.
      * Le bloc correspondant n'apparaît pas tant que la valeur est vide.

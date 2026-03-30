@@ -147,27 +147,27 @@
                 <!-- SINGLE -->
                 <div *ngIf="form.controls['mode'].value === 'single'" class="grid gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">Prénom</label>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Prénom (*)</label>
                         <input type="text" formControlName="s_firstName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                         <p *ngIf="invalid('s_firstName')" class="mt-1 text-xs text-rose-600">Requis</p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">Nom</label>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Nom (*)</label>
                         <input type="text" formControlName="s_lastName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                         <p *ngIf="invalid('s_lastName')" class="mt-1 text-xs text-rose-600">Requis</p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Email (*)</label>
                         <input type="email" formControlName="s_email" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                         <p *ngIf="invalid('s_email')" class="mt-1 text-xs text-rose-600">Email valide requis</p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone (*)</label>
                         <input type="tel" formControlName="s_phoneNumber" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                         <p *ngIf="invalid('s_phoneNumber')" class="mt-1 text-xs text-rose-600">Requis</p>
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-slate-700">Âge</label>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Âge (*)</label>
                         <input type="number" min="0" formControlName="s_age" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                         <p *ngIf="invalid('s_age')" class="mt-1 text-xs text-rose-600">Requis</p>
                     </div>
@@ -188,7 +188,7 @@
                              class="rounded-2xl border border-slate-200 p-4">
                             <div class="grid gap-4 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-sm font-medium text-slate-700">Prénom</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Prénom (*)</label>
                                     <input type="text" formControlName="firstName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                                 </div>
                                 <div>
@@ -196,15 +196,15 @@
                                     <input type="text" formControlName="lastName" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Email (*)</label>
                                     <input type="email" formControlName="email" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Téléphone (*)</label>
                                     <input type="tel" formControlName="phoneNumber" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-sm font-medium text-slate-700">Âge</label>
+                                    <label class="mb-1 block text-sm font-medium text-slate-700">Âge (*)</label>
                                     <input type="number" min="0" formControlName="age" class="w-full rounded-xl border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
                                 </div>
                                 <div class="flex items-end justify-between gap-2">
