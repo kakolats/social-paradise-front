@@ -1,7 +1,7 @@
 <section class="w-full px-2 py-4 sm:mx-6 sm:py-6">
     <!-- Header / Hero -->
     <div class="mx-auto px-2 sm:px-4 md:px-6">
-        <div class="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm sm:p-6">
+        <div class="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">
@@ -311,7 +311,7 @@
         <div class="mt-4 grid gap-2 items-end sm:mt-6 sm:gap-3 sm:grid-cols-2 lg:grid-cols-6">
             <!-- Statut -->
             <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900">Statut</label>
+                <label class="mb-1 block text-xs font-medium text-white">Statut</label>
                 <select
                     [ngModel]="filterStatus()"
                     (ngModelChange)="setFilterStatus($event)"
@@ -324,7 +324,7 @@
 
             <!-- Type -->
             <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900">Type</label>
+                <label class="mb-1 block text-xs font-medium text-white">Type</label>
                 <select
                     [ngModel]="filterType()"
                     (ngModelChange)="setFilterType($event)"
@@ -337,7 +337,7 @@
 
             <!-- Filtre âge (au moins un invité) -->
             <div class="sm:col-span-2 lg:col-span-2">
-                <label class="mb-1 block text-xs font-medium text-slate-900">Âge (au moins 1 invité)</label>
+                <label class="mb-1 block text-xs font-medium text-white">Âge (au moins 1 invité)</label>
                 <div class="flex gap-2">
                     <select
                         [ngModel]="filterAgeOp()"
@@ -361,7 +361,7 @@
 
             <!-- Taille de page -->
             <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900">Taille de page</label>
+                <label class="mb-1 block text-xs font-medium text-white">Taille de page</label>
                 <select
                     [ngModel]="pageSize()"
                     (ngModelChange)="changePageSize($event)"
@@ -373,7 +373,7 @@
 
             <!-- Recherche (client-side only) -->
             <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900">Recherche</label>
+                <label class="mb-1 block text-xs font-medium text-white">Recherche</label>
                 <div class="relative">
                     <input
                         type="text"
@@ -418,7 +418,7 @@
     <div class="mx-auto px-4 sm:px-6">
         <div *ngIf="loading()" class="mt-6 text-center text-slate-500">Chargement…</div>
         <div *ngIf="error()" class="mt-6 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-700">❌ {{ error() }}</div>
-        <div *ngIf="!loading() && !error() && pagedDemands().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+        <div *ngIf="!loading() && !error() && pagedDemands().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-white">
             Aucune demande pour ces filtres.
         </div>
 
@@ -580,7 +580,7 @@
     <div *ngIf="activeTab() === 'guests'" class="mx-auto px-4 sm:px-6">
         <div class="mt-4 flex flex-wrap items-end gap-3 sm:mt-6">
             <div>
-                <label class="mb-1 block text-xs font-medium text-slate-900">Taille de page</label>
+                <label class="mb-1 block text-xs font-medium text-white">Taille de page</label>
                 <select
                     [ngModel]="guestsPageSize()"
                     (ngModelChange)="changeGuestsPageSize($event)"
@@ -590,11 +590,11 @@
                 </select>
             </div>
 
-            <div class="text-xs text-slate-600 sm:text-sm">
-                <span class="font-semibold text-slate-900">{{ guestsTotal() }}</span> invité(s)
+            <div class="text-xs text-white sm:text-sm">
+                <span class="font-semibold text-white">{{ guestsTotal() }}</span> invité(s)
                 <ng-container *ngIf="guestsAvgAge() !== null">
                     · Âge moyen :
-                    <span class="font-semibold text-slate-900">{{ guestsAvgAge() | number:'1.0-1' }}</span>
+                    <span class="font-semibold text-white">{{ guestsAvgAge() | number:'1.0-1' }}</span>
                 </ng-container>
             </div>
         </div>
@@ -658,15 +658,15 @@
                 </tbody>
             </table>
         </div>
-        <div *ngIf="allGuests().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+        <div *ngIf="allGuests().length === 0" class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-white">
             Aucun invité trouvé pour cet évènement.
         </div>
 
         <!-- Pagination invités -->
         <div *ngIf="allGuests().length > 0 && guestsTotalPages() > 1"
              class="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-xs text-slate-600 sm:text-sm">
-                Page <span class="font-semibold text-slate-900">{{ guestsPage() }}</span> / {{ guestsTotalPages() }}
+            <div class="text-xs text-white sm:text-sm">
+                Page <span class="font-semibold text-white">{{ guestsPage() }}</span> / {{ guestsTotalPages() }}
                 · {{ guestsTotal() }} invité(s)
             </div>
             <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
@@ -687,19 +687,19 @@
     <div *ngIf="activeTab() === 'expenses'" class="mx-auto px-2 sm:px-4 md:px-6">
         <div class="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-6">
             <div>
-                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <div class="text-xs font-semibold uppercase tracking-wide text-white">
                     Comptabilité évènement
                 </div>
-                <div class="mt-1 text-lg font-bold text-slate-900">
+                <div class="mt-1 text-lg font-bold text-white">
                     Solde général :
                     <span *ngIf="accounting(); else noAcc">
                         {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
                     </span>
                     <ng-template #noAcc>
-                        <span class="text-slate-400">—</span>
+                        <span class="text-white">—</span>
                     </ng-template>
                 </div>
-                <div *ngIf="accounting()" class="mt-1 text-xs text-slate-500 space-x-2">
+                <div *ngIf="accounting()" class="mt-1 text-xs text-white space-x-2">
                     <span>Solde initial : <strong>{{ accounting()?.initialBalance | number:'1.0-0' }}</strong></span>
                     <span>Entrées tickets : <strong>{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }}</strong></span>
                     <span>Entrées manuelles : <strong>{{ accounting()?.totalIncomesManual | number:'1.0-0' }}</strong></span>
@@ -774,16 +774,16 @@
     <div *ngIf="activeTab() === 'incomes'" class="mx-auto px-2 sm:px-4 md:px-6">
         <div class="mt-4 flex flex-wrap items-center justify-between gap-3 sm:mt-6">
             <div>
-                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <div class="text-xs font-semibold uppercase tracking-wide text-white">
                     Comptabilité évènement
                 </div>
-                <div class="mt-1 text-lg font-bold text-slate-900">
+                <div class="mt-1 text-lg font-bold text-white">
                     Solde général :
                     <span *ngIf="accounting(); else noAcc2">
                         {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
                     </span>
                     <ng-template #noAcc2>
-                        <span class="text-slate-400">—</span>
+                        <span class="text-white">—</span>
                     </ng-template>
                 </div>
             </div>
@@ -876,7 +876,7 @@
 
             <div class="mt-4 space-y-3">
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-900">Libellé</label>
+                    <label class="mb-1 block text-xs font-medium text-white">Libellé</label>
                     <input
                         type="text"
                         [ngModel]="expenseLabel()"
@@ -886,7 +886,7 @@
                     />
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-900">Montant (FCFA)</label>
+                    <label class="mb-1 block text-xs font-medium text-white">Montant (FCFA)</label>
                     <input
                         type="number"
                         min="0"
@@ -896,7 +896,7 @@
                     />
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-900">Note (optionnel)</label>
+                    <label class="mb-1 block text-xs font-medium text-white">Note (optionnel)</label>
                     <textarea
                         rows="2"
                         [ngModel]="expenseNote()"
@@ -953,7 +953,7 @@
 
             <div class="mt-4 space-y-3">
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-900">Libellé</label>
+                    <label class="mb-1 block text-xs font-medium text-white">Libellé</label>
                     <input
                         type="text"
                         [ngModel]="incomeLabel()"
@@ -963,7 +963,7 @@
                     />
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-900">Montant (FCFA)</label>
+                    <label class="mb-1 block text-xs font-medium text-white">Montant (FCFA)</label>
                     <input
                         type="number"
                         min="0"
@@ -973,7 +973,7 @@
                     />
                 </div>
                 <div>
-                    <label class="mb-1 block text-xs font-medium text-slate-900">Note (optionnel)</label>
+                    <label class="mb-1 block text-xs font-medium text-white">Note (optionnel)</label>
                     <textarea
                         rows="2"
                         [ngModel]="incomeNote()"
