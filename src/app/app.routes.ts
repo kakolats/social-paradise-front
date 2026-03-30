@@ -45,10 +45,10 @@ export const appRoutes: Route[] = [
             {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/sign-in/sign-in.routes')},
             {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')},
-            {path: 'paradise-til-sunrise-review-form', component: ReviewFormComponent},
+            
         ]
     },
-
+    {path: 'paradise-til-sunrise-review-form', component: ReviewFormComponent},
     // Auth routes for authenticated users
     {
         path: '',

@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
-import { AuthService } from 'app/core/auth/auth.service';
 import { of, switchMap } from 'rxjs';
+import { AuthService } from 'shared/services/auth/auth.service';
 
 export const NoAuthGuard: CanActivateFn | CanActivateChildFn = (
     route,
@@ -16,7 +16,14 @@ export const NoAuthGuard: CanActivateFn | CanActivateChildFn = (
             switchMap((authenticated) => {
                 // If the user is authenticated...
                 if (authenticated) {
-                    return of(router.parseUrl(''));
+                    const role = localStorage.getItem('user-role');
+
+                    if (role === 'SECURITY') {
+                        return of(router.parseUrl('/security/guest'));
+                    }
+
+                    // Default (ADMIN et autres rôles): liste des événements
+                    return of(router.parseUrl('/events/event-list'));
                 }
 
                 // Allow the access
