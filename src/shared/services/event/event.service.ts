@@ -31,10 +31,31 @@ export class EventService {
         return `${y}-${m}-${day}`;
     }
 
+    /**
+     * Parse une date "YYYY-MM-DD" en Date **à minuit local** (évite les décalages UTC de `new Date('YYYY-MM-DD')`).
+     * Si une Date est fournie, elle est normalisée en "date-only" locale (minuit).
+     */
+    private parseDateOnlyLocal(d?: Date | string | null): Date | undefined {
+        if (!d) return undefined;
+        if (d instanceof Date) {
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+        if (!m) {
+            const fallback = new Date(d);
+            if (Number.isNaN(fallback.getTime())) return undefined;
+            return new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate());
+        }
+        const y = Number(m[1]);
+        const mo = Number(m[2]) - 1;
+        const day = Number(m[3]);
+        return new Date(y, mo, day);
+    }
+
     private serializeEvent(evt: Partial<Event>): any {
         const body: any = {
             name: evt.name,
-            date: evt.date instanceof Date ? evt.date.toISOString().slice(0, 10) : evt.date,
+            date: evt.date instanceof Date ? this.toDateOnly(evt.date) : evt.date,
             location: evt.location,
             description: evt.description,
             coverImage: evt.coverImage,
@@ -52,8 +73,8 @@ export class EventService {
                 id: p.id,
                 name: p.name,
                 amount: p.amount,
-                startDate: p.startDate instanceof Date ? p.startDate.toISOString().slice(0, 10) : p.startDate,
-                endDate: p.endDate instanceof Date ? p.endDate.toISOString().slice(0, 10) : p.endDate,
+                startDate: p.startDate instanceof Date ? this.toDateOnly(p.startDate) : p.startDate,
+                endDate: p.endDate instanceof Date ? this.toDateOnly(p.endDate) : p.endDate,
             }));
         }
         if (Array.isArray(evt.tables)) {
@@ -72,7 +93,7 @@ export class EventService {
         return {
             id: raw.id,
             name: raw.name,
-            date: raw.date ? new Date(raw.date) : undefined,
+            date: this.parseDateOnlyLocal(raw.date),
             slug: raw.slug,
             location: raw.location,
             description: raw.description,
@@ -82,8 +103,8 @@ export class EventService {
                 id: p.id,
                 name: p.name,
                 amount: p.amount,
-                startDate: p.startDate ? new Date(p.startDate) : undefined,
-                endDate: p.endDate ? new Date(p.endDate) : undefined,
+                startDate: this.parseDateOnlyLocal(p.startDate),
+                endDate: this.parseDateOnlyLocal(p.endDate),
             })),
             tables: (raw.tables ?? []).map((t: any): Table => ({
                 id: t.id,
@@ -153,8 +174,8 @@ export class EventService {
                             priceId: t.priceId,
                             name: t.name ?? null,
                             amount: t.amount ?? 0,
-                            startDate: t.startDate ? new Date(t.startDate) : undefined,
-                            endDate: t.endDate ? new Date(t.endDate) : undefined,
+                            startDate: this.parseDateOnlyLocal(t.startDate),
+                            endDate: this.parseDateOnlyLocal(t.endDate),
                             ticketsSold: t.ticketsSold ?? 0,
                         })),
                         expenses: (j.expenses ?? []).map((e: any) => ({
@@ -203,11 +224,13 @@ export class EventService {
     // -------- Helpers métier
     getActivePrice(e: Event, at: Date = new Date()): Price | null {
         if (!e?.prices?.length) return null;
-        const t = new Date(this.toDateOnly(at));
+        const t = this.parseDateOnlyLocal(at);
+        if (!t) return null;
         return (
             e.prices.find(p => {
-                const from = new Date(this.toDateOnly(p.startDate));
-                const to = new Date(this.toDateOnly(p.endDate));
+                const from = this.parseDateOnlyLocal(p.startDate);
+                const to = this.parseDateOnlyLocal(p.endDate);
+                if (!from || !to) return false;
                 return t >= from && t <= to;
             }) ?? null
         );
