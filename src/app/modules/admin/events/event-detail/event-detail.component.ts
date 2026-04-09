@@ -289,19 +289,21 @@ export class EventDetailComponent implements OnInit {
 
     /**
      * Prix moyen du ticket basé sur:
-     * total tickets encaissés / nombre de demandes payées.
+     * total tickets encaissés / nombre total de tickets (guests) sur les demandes payées.
      */
     averageTicketPrice = computed<number | null>(() => {
         const totalTicketsAmount = Number(this.accounting()?.totalPaidFromDemands ?? 0);
-        const paidDemandsCount = Number(
-            this.stats()?.[DemandStatus.PAYEE]?.totalDemands ?? 0
+        const totalPaidTickets = Number(
+            (this.accounting()?.ticketsByPrice ?? []).reduce(
+                (acc, t) => acc + Number(t?.ticketsSold ?? 0),
+                0
+            )
         );
-
-        if (!paidDemandsCount || paidDemandsCount <= 0) {
+        if (!totalPaidTickets || totalPaidTickets <= 0) {
             return null;
         }
 
-        return totalTicketsAmount / paidDemandsCount;
+        return totalTicketsAmount / totalPaidTickets;
     });
 
     totalPages = computed(() =>

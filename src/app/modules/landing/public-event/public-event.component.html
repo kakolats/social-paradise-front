@@ -177,10 +177,6 @@
                 <div *ngIf="form.controls['mode'].value === 'group'">
                     <div class="mb-3 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-slate-900">Participants</h3>
-                        <div class="flex gap-2">
-                            <button type="button" (click)="addParticipant()" class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:opacity-90">+ Ajouter</button>
-                            <button type="button" (click)="addMany(2)" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">+2</button>
-                        </div>
                     </div>
 
                     <div formArrayName="participants" class="space-y-3">
@@ -222,6 +218,24 @@
                     <p class="mt-2 text-xs text-rose-600" *ngIf="!hasExactlyOneMainGuest() && participants().length > 0">
                         Il doit y avoir exactement <strong>un</strong> invité principal.
                     </p>
+
+                    <!-- Actions (bas du formulaire participants) -->
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            (click)="addMany(2)"
+                            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                            +2
+                        </button>
+                        <button
+                            type="button"
+                            (click)="addParticipant()"
+                            class="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
+                        >
+                            + Ajouter
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Footer -->

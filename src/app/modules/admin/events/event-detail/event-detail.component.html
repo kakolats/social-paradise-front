@@ -164,7 +164,7 @@
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
                             Tickets
                         </div>
-                        <div class="mt-1 text-sm font-semibold text-emerald-700">
+                        <div class="mt-1 text-sm font-semibold text-black">
                             +{{ accounting()?.totalPaidFromDemands | number:'1.0-0' }} FCFA
                         </div>
                     </div>
@@ -172,7 +172,10 @@
                         <div class="text-[10px] font-medium uppercase tracking-wide text-slate-500">
                             Balance
                         </div>
-                        <div class="mt-1 text-sm font-bold text-slate-900">
+                        <div
+                            class="mt-1 text-sm font-bold"
+                            [ngClass]="(accounting()?.currentBalance ?? 0) < 0 ? 'text-red-600' : 'text-emerald-600'"
+                        >
                             {{ accounting()?.currentBalance | number:'1.0-0' }} FCFA
                         </div>
                     </div>
