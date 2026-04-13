@@ -828,6 +828,15 @@ export class EventDetailComponent implements OnInit {
     }
 
     getModalPassTotal(): number {
+        const dd = this.selectedDemand();
+        const notified = dd?.payment?.amount;
+        if (notified != null && Number(notified) > 0) {
+            // Montant enregistré à la notification = pass + tables - remise
+            const tables = this.modalTablesTotal();
+            const discount =
+                dd?.discountAmount ?? this.discountEditing() ?? 0;
+            return Math.max(0, Number(notified) - tables + Number(discount));
+        }
         const p = this.modalActivePrice();
         return p ? p.amount * this.modalPeopleCount() : 0;
     }

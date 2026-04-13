@@ -53,6 +53,7 @@ export interface DemandSummary {
         phoneNumber: string;
         age: number;
     };
+    payment?: FrontPayment;
 }
 
 /** Stat d'un statut donné */
@@ -245,7 +246,8 @@ export class DemandService {
                 email: j.mainGuest?.email,
                 phoneNumber: j.mainGuest?.phoneNumber,
                 age: j.mainGuest?.age,
-            }
+            },
+            payment: j.payment ? this.parsePayment(j.payment) : undefined,
         };
     }
 
