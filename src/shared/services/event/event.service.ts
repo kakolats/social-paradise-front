@@ -99,13 +99,13 @@ export class EventService {
             description: raw.description,
             coverImage: raw.coverImage,
             isActive: raw.isActive ?? true,
-            prices: (raw.prices ?? []).map((p: any): Price => ({
+            prices: this.sortPrices((raw.prices ?? []).map((p: any): Price => ({
                 id: p.id,
                 name: p.name,
                 amount: p.amount,
                 startDate: this.parseDateOnlyLocal(p.startDate),
                 endDate: this.parseDateOnlyLocal(p.endDate),
-            })),
+            }))),
             tables: (raw.tables ?? []).map((t: any): Table => ({
                 id: t.id,
                 name: t.name,
@@ -234,5 +234,15 @@ export class EventService {
                 return t >= from && t <= to;
             }) ?? null
         );
+    }
+
+    private sortPrices(prices: Price[]): Price[] {
+        return [...prices].sort((a, b) => {
+            const start = a.startDate.getTime() - b.startDate.getTime();
+            if (start !== 0) return start;
+            const end = a.endDate.getTime() - b.endDate.getTime();
+            if (end !== 0) return end;
+            return Number(a.amount) - Number(b.amount) || (a.id ?? 0) - (b.id ?? 0);
+        });
     }
 }
