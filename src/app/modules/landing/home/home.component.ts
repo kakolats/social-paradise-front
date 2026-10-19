@@ -4,6 +4,7 @@ import {
     Component,
     ElementRef,
     OnDestroy,
+    OnInit,
     ViewChild,
     ViewEncapsulation,
     inject,
@@ -17,6 +18,7 @@ import { EventService } from 'shared/services/event/event.service';
 import { Event as FrontEvent } from 'shared/models/event';
 
 const LANDING_REVEAL_VISIBLE_CLASS = 'landing-reveal--visible';
+const LANDING_SMOOTH_SCROLL_CLASS = 'landing-smooth-scroll';
 
 type ContactCard = {
     icon: string;
@@ -37,11 +39,26 @@ type ContactCard = {
     imports: [CommonModule, DatePipe, MatButtonModule, RouterLink, MatIconModule],
     styles: [
         `
+            html.${LANDING_SMOOTH_SCROLL_CLASS} {
+                scroll-behavior: smooth;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                html.${LANDING_SMOOTH_SCROLL_CLASS} {
+                    scroll-behavior: auto;
+                }
+            }
+
             .landing-reveal {
                 --reveal-duration: 2.4s;
                 --reveal-stagger: 380ms;
                 --reveal-ease: cubic-bezier(0.19, 1, 0.22, 1);
                 --reveal-ease-fade: cubic-bezier(0.33, 1, 0.68, 1);
+            }
+
+            .landing-reveal--quick {
+                --reveal-duration: 1.75s;
+                --reveal-stagger: 260ms;
             }
 
             .landing-reveal__item {
@@ -109,12 +126,13 @@ type ContactCard = {
         `,
     ],
 })
-export class LandingHomeComponent implements AfterViewInit, OnDestroy {
+export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private eventService = inject(EventService);
     private sanitizer = inject(DomSanitizer);
 
     @ViewChild('pageRoot') private pageRoot?: ElementRef<HTMLElement>;
     private revealObserver?: IntersectionObserver;
+    private anchorClickHandler?: (event: MouseEvent) => void;
 
     upcomingEvents = signal<FrontEvent[]>([]);
     loadingEvents = signal<boolean>(false);
@@ -128,9 +146,9 @@ export class LandingHomeComponent implements AfterViewInit, OnDestroy {
     contactEmail = 'info@socialparadise.sn';
     contactPhone = '+221 78 663 91 28';
     instagramEmbedUrls: SafeResourceUrl[] = [
-        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/reel/DWGza2hDMJ8/embed/'),
-        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/reel/DShaIdXDMVz/embed/'),
-        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/reel/DTLXW2EDH9A/embed/'),
+        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DZm9l7KMyka/embed/'),
+        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DYhd7M9MKPi/embed/'),
+        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DXpUMenjK3c/embed/'),
     ];
 
     howItWorksSteps = [
@@ -219,9 +237,16 @@ export class LandingHomeComponent implements AfterViewInit, OnDestroy {
         return cards;
     }
 
+    ngOnInit(): void {
+        document.documentElement.classList.add(LANDING_SMOOTH_SCROLL_CLASS);
+    }
+
     ngAfterViewInit(): void {
         const root = this.pageRoot?.nativeElement;
         if (!root) return;
+
+        this.anchorClickHandler = (event: MouseEvent) => this.handleAnchorClick(event);
+        root.addEventListener('click', this.anchorClickHandler);
 
         this.revealObserver = new IntersectionObserver(
             (entries) => {
@@ -249,11 +274,41 @@ export class LandingHomeComponent implements AfterViewInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.revealObserver?.disconnect();
+
+        const root = this.pageRoot?.nativeElement;
+        if (root && this.anchorClickHandler) {
+            root.removeEventListener('click', this.anchorClickHandler);
+        }
+
+        document.documentElement.classList.remove(LANDING_SMOOTH_SCROLL_CLASS);
     }
 
     scrollToUpcoming(): void {
-        const el = document.getElementById('upcoming-events');
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.scrollToSection('upcoming-events');
+    }
+
+    scrollToSection(elementId: string): void {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        el.scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+            block: 'start',
+        });
+    }
+
+    private handleAnchorClick(event: MouseEvent): void {
+        const anchor = (event.target as HTMLElement | null)?.closest('a[href^="#"]');
+        if (!(anchor instanceof HTMLAnchorElement)) return;
+
+        const hash = anchor.getAttribute('href');
+        if (!hash || hash === '#') return;
+
+        const id = decodeURIComponent(hash.slice(1));
+        if (!document.getElementById(id)) return;
+
+        event.preventDefault();
+        this.scrollToSection(id);
     }
 
     private fetchUpcoming(): void {

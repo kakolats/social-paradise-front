@@ -1,5 +1,15 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    OnDestroy,
+    computed,
+    inject,
+    OnInit,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -11,6 +21,9 @@ import { Price as FrontPrice } from 'shared/models/price';
 import { EventService } from '../../../../../shared/services/event/event.service';
 import { PaymentCanal, PaymentPlace } from '../../../../../shared/models/payment';
 import { environment } from '../../../../../environments/environment';
+import { setupLandingReveal } from '../../shared/landing-reveal';
+import { Guest } from '../../../../../shared/models/guest';
+import { TableItem } from '../../../../../shared/models/table';
 
 type PlaceInfo = {
     key?: PaymentPlace;
@@ -26,7 +39,7 @@ type PlaceInfo = {
   templateUrl: './public-event-detail.component.html',
   styleUrl: './public-event-detail.component.scss'
 })
-export class PublicEventDetailComponent implements OnInit {
+export class PublicEventDetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private readonly baseCashPlaces: PlaceInfo[] = [
         {
@@ -122,6 +135,9 @@ export class PublicEventDetailComponent implements OnInit {
     private fb = new FormBuilder();
     private eventService = inject(EventService); // Juste pour le type Event
 
+    @ViewChild('pageRoot') private pageRoot?: ElementRef<HTMLElement>;
+    private revealObserver?: IntersectionObserver;
+
     // state
     loading = signal(false);
     submitting = signal(false);
@@ -169,6 +185,33 @@ export class PublicEventDetailComponent implements OnInit {
         this.fetch(slug);
     }
 
+    ngAfterViewInit(): void {
+        this.setupRevealAnimations();
+    }
+
+    ngOnDestroy(): void {
+        this.revealObserver?.disconnect();
+    }
+
+    trackGuest(_index: number, guest: Guest): string {
+        return String(guest.email ?? guest.id ?? _index);
+    }
+
+    trackTableItem(_index: number, item: TableItem): string {
+        return String(item.table?.id ?? item.table?.name ?? _index);
+    }
+
+    trackCashPlace(_index: number, place: PlaceInfo): string {
+        return place.name;
+    }
+
+    private setupRevealAnimations(): void {
+        const root = this.pageRoot?.nativeElement;
+        if (!root) return;
+
+        this.revealObserver = setupLandingReveal(root, this.revealObserver);
+    }
+
     isCashSelected() {
         return this.form.controls.paymentCanal.value === 'CASH';
     }
@@ -186,6 +229,7 @@ export class PublicEventDetailComponent implements OnInit {
                         const amt = this.totalAfterDiscount();
                         this.form.controls.amount.setValue(amt);
                         this.loading.set(false);
+                        window.setTimeout(() => this.setupRevealAnimations(), 0);
                     }
                 })
             },
@@ -223,6 +267,10 @@ export class PublicEventDetailComponent implements OnInit {
         return this.demand()?.demandStatus === DemandStatus.REFUSEE;
     }
 
+    isOffered() {
+        return this.demand()?.demandStatus === DemandStatus.OFFERT;
+    }
+
     peopleCount = computed(() => this.demand()?.guests?.length ?? 0);
 
     private dateOnly(d: Date | string) {
@@ -230,13 +278,64 @@ export class PublicEventDetailComponent implements OnInit {
         return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
     }
 
-    activePrice = computed<FrontPrice | null>(() => {
+    private pickedPriceId = signal<number | null>(null);
+
+    pricesToday = computed<FrontPrice[]>(() => {
         const ev = this.event() as FrontEvent | undefined;
-        //console.log("Calcul prix actif pour event", ev);
-        if (!ev?.prices?.length) return null;
+        if (!ev?.prices?.length) return [];
         const today = this.dateOnly(new Date());
-        return ev.prices.find(p => this.dateOnly(p.startDate) <= today && today <= this.dateOnly(p.endDate)) ?? null;
+        return ev.prices.filter(p => this.coversDay(p, today));
     });
+
+    needsPriceChoice = computed(() => {
+        const todayPrices = this.pricesToday();
+        if (todayPrices.length <= 1) return false;
+        const chosen = this.demand()?.price;
+        if (chosen && this.coversDay(chosen, this.dateOnly(new Date()))) return false;
+        if (chosen && todayPrices.some(p => this.sameTariffName(p.name, chosen.name))) return false;
+        return true;
+    });
+
+    activePrice = computed<FrontPrice | null>(() => this.resolvePriceForToday());
+
+    tariffUpdated = computed(() => {
+        const chosen = this.demand()?.price;
+        const current = this.activePrice();
+        return !!chosen && !!current && chosen.id !== current.id;
+    });
+
+    selectCurrentPrice(price: FrontPrice) {
+        if (price.id == null) return;
+        this.pickedPriceId.set(price.id);
+    }
+
+    private resolvePriceForToday(): FrontPrice | null {
+        const todayPrices = this.pricesToday();
+        const chosen = this.demand()?.price ?? null;
+        const today = this.dateOnly(new Date());
+        if (chosen && this.coversDay(chosen, today)) return chosen;
+
+        const pickedId = this.pickedPriceId();
+        if (pickedId != null) {
+            const picked = todayPrices.find(p => p.id === pickedId);
+            if (picked) return picked;
+        }
+
+        const byName = chosen
+            ? todayPrices.find(p => this.sameTariffName(p.name, chosen.name))
+            : undefined;
+        if (byName) return byName;
+        if (todayPrices.length === 1) return todayPrices[0];
+        return null;
+    }
+
+    private coversDay(price: FrontPrice, day: Date): boolean {
+        return this.dateOnly(price.startDate) <= day && day <= this.dateOnly(price.endDate);
+    }
+
+    private sameTariffName(a?: string | null, b?: string | null): boolean {
+        return (a ?? '').trim().toLowerCase() === (b ?? '').trim().toLowerCase() && !!(a ?? '').trim();
+    }
 
     tablesTotal = computed(() => {
         const d = this.demand();
@@ -255,7 +354,7 @@ export class PublicEventDetailComponent implements OnInit {
     totalAmount = computed(() => {
         const ap = this.activePrice();
         const n = this.peopleCount();
-        const participantsTotal = ap ? ap.amount * n : 0;
+        const participantsTotal = ap ? Number(ap.amount) * n : 0;
         return participantsTotal + this.tablesTotal();
     });
 
@@ -277,7 +376,7 @@ export class PublicEventDetailComponent implements OnInit {
     }
 
     onSubmit() {
-        if (!this.demand()?.slug) return;
+        if (!this.demand()?.slug || this.isOffered()) return;
         this.successMsg.set(null);
         this.errorMsg.set(null);
 
@@ -312,7 +411,8 @@ export class PublicEventDetailComponent implements OnInit {
         const payload: any = {
             demandSlug: this.demand()!.slug,
             amount: safeAmount,
-            paymentCanal: paymentC
+            paymentCanal: paymentC,
+            priceId: this.activePrice()?.id,
         };
         const phoneVal = this.form.controls.phoneNumber.value;
         if (phoneVal) {

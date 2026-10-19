@@ -35,6 +35,7 @@ export interface CreateDemandPayload {
     eventSlug: string;
     guests: CreateGuestPayload[];
     tableSelections?: TableSelection[];
+    priceId?: number;
 }
 
 /** Type de liste renvoyé par GET /demand/by-event/:slug (DemandWithMainGuestDto) */
@@ -225,6 +226,17 @@ export class DemandService {
             event: json.event ? this.parseEvent(json.event) : undefined,
             eventSlug: json.event?.slug,
             discountAmount: json.discountAmount ?? 0,
+            price: json.price
+                ? {
+                    id: json.price.id,
+                    name: json.price.name,
+                    amount: typeof json.price.amount === 'string'
+                        ? parseFloat(json.price.amount)
+                        : json.price.amount,
+                    startDate: new Date(json.price.startDate),
+                    endDate: new Date(json.price.endDate),
+                }
+                : undefined,
         };
     }
 

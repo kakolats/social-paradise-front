@@ -15,8 +15,9 @@ interface ApiResponse<T> {
 export interface PaymentNotifyPayload {
     demandSlug: string;
     amount: number;
-    phoneNumber: string;
+    phoneNumber?: string;
     paymentCanal: PaymentCanal;
+    priceId?: number;
 }
 
 @Injectable({

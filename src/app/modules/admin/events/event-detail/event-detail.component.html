@@ -1099,6 +1099,12 @@
                         <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                             <div class="mb-2 text-sm font-semibold text-slate-900">Récapitulatif</div>
                             <div class="space-y-2 text-sm">
+                                <div class="flex items-center justify-between" *ngIf="appliedModalPrice() as appliedPrice">
+                                    <span class="text-slate-700">Tarif en cours</span>
+                                    <span class="font-semibold text-slate-900">
+                                        {{ appliedPrice.name || 'Tarif' }} — {{ appliedPrice.amount | number }} FCFA
+                                    </span>
+                                </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-slate-700">Total Pass</span>
                                     <span class="font-semibold text-slate-900">

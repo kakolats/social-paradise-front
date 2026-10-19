@@ -1,5 +1,15 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    computed,
+    inject,
+    signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -9,11 +19,13 @@ import { DemandService, CreateDemandPayload } from '../../../../shared/services/
 import { Event as FrontEvent } from '../../../../shared/models/event';
 import { DemandStatus } from '../../../../shared/models/demand';
 import { Guest as FrontGuest } from '../../../../shared/models/guest';
+import { Price } from '../../../../shared/models/price';
 import { Table } from '../../../../shared/models/table';
 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
 import { QuillViewComponent } from 'ngx-quill';
+import { setupLandingReveal } from '../shared/landing-reveal';
 
 type ParticipantFG = FormGroup<{
     firstName: FormControl<string | null>;
@@ -31,6 +43,7 @@ type TableSelectionFG = FormGroup<{
 
 type DemandFG = FormGroup<{
     mode: FormControl<'single' | 'group'>;
+    priceId: FormControl<number | null>;
     // single
     s_firstName: FormControl<string | null>;
     s_lastName: FormControl<string | null>;
@@ -54,12 +67,15 @@ type DemandFG = FormGroup<{
     templateUrl: './public-event.component.html',
     styleUrl: './public-event.component.scss',
 })
-export class PublicEventComponent implements OnInit {
+export class PublicEventComponent implements OnInit, AfterViewInit, OnDestroy {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private eventService = inject(EventService);
     private demandService = inject(DemandService);
     private fb = new FormBuilder();
+
+    @ViewChild('pageRoot') private pageRoot?: ElementRef<HTMLElement>;
+    private revealObserver?: IntersectionObserver;
 
     event = signal<FrontEvent | null>(null);
     loading = signal<boolean>(false);
@@ -73,10 +89,13 @@ export class PublicEventComponent implements OnInit {
         return (e as any)?.isActive !== false;
     });
 
+    selectedPriceId = signal<number | null>(null);
+
     form: DemandFG = this.fb.group({
         mode: this.fb.control<'single' | 'group'>('single', {
             nonNullable: true,
         }),
+        priceId: this.fb.control<number | null>(null),
         s_firstName: this.fb.control<string | null>(null, [
             Validators.required,
         ]),
@@ -99,6 +118,10 @@ export class PublicEventComponent implements OnInit {
     ngOnInit() {
         const slug = this.route.snapshot.paramMap.get('slug');
         if (slug) this.fetchEvent(slug);
+
+        this.form.controls.priceId.valueChanges.subscribe((id) => {
+            this.selectedPriceId.set(id);
+        });
 
         this.form.controls.mode.valueChanges.subscribe((mode) => {
             if (mode === 'single') {
@@ -137,16 +160,41 @@ export class PublicEventComponent implements OnInit {
         });
     }
 
+    ngAfterViewInit(): void {
+        this.setupRevealAnimations();
+    }
+
+    ngOnDestroy(): void {
+        this.revealObserver?.disconnect();
+    }
+
+    trackPrice(_index: number, price: { id?: number; name?: string; startDate?: Date | string; amount?: number }): string {
+        return `${price.id ?? _index}-${price.name}-${price.startDate}-${price.amount}`;
+    }
+
+    trackTable(_index: number, table: Table): string {
+        return String(table.id ?? table.name);
+    }
+
+    private setupRevealAnimations(): void {
+        const root = this.pageRoot?.nativeElement;
+        if (!root) return;
+
+        this.revealObserver = setupLandingReveal(root, this.revealObserver);
+    }
+
     fetchEvent(slug: string) {
         this.loading.set(true);
         this.errorMsg.set(null);
         this.eventService.getBySlug(slug).subscribe({
             next: (evt) => {
                 this.event.set(evt);
+                this.syncDefaultPrice(evt);
                 this.loading.set(false);
                 if (evt.coverImage) {
                     this.placeholder = evt.coverImage;
                 }
+                window.setTimeout(() => this.setupRevealAnimations(), 0);
             },
             error: (err) => {
                 this.errorMsg.set(
@@ -157,29 +205,62 @@ export class PublicEventComponent implements OnInit {
         });
     }
 
-    activePrice = computed(() => {
+    activePrices = computed(() => {
         const e = this.event();
-        if (!e?.prices?.length) return null;
+        if (!e?.prices?.length) return [] as Price[];
         const today = this.dateOnly(new Date());
-        return (
-            e.prices.find(
-                (p) =>
-                    this.dateOnly(p.startDate) <= today &&
-                    today <= this.dateOnly(p.endDate)
-            ) || null
+        return e.prices.filter(
+            (p) =>
+                this.dateOnly(p.startDate) <= today &&
+                today <= this.dateOnly(p.endDate)
         );
     });
 
-    isActivePrice(p: any) {
-        const ap = this.activePrice();
-        if (!ap) return false;
+    selectedPrice = computed(() => {
+        const prices = this.activePrices();
+        const id = this.selectedPriceId();
+        if (id != null) {
+            return prices.find((p) => p.id === id) ?? null;
+        }
+        return prices.length === 1 ? prices[0] : null;
+    });
+
+    isActivePrice(p: Price) {
+        return this.activePrices().some((ap) => this.samePrice(ap, p));
+    }
+
+    isSelectedPrice(p: Price) {
+        const selected = this.selectedPrice();
+        return !!selected && this.samePrice(selected, p);
+    }
+
+    selectPrice(p: Price) {
+        if (!this.isActivePrice(p) || p.id == null) return;
+        this.form.controls.priceId.setValue(p.id);
+    }
+
+    private samePrice(a: Price, b: Price): boolean {
+        if (a.id != null && b.id != null) return a.id === b.id;
         return (
-            this.dateOnly(ap.startDate).getTime() ===
-                this.dateOnly(p.startDate).getTime() &&
-            this.dateOnly(ap.endDate).getTime() ===
-                this.dateOnly(p.endDate).getTime() &&
-            ap.amount === p.amount
+            a.name === b.name &&
+            Number(a.amount) === Number(b.amount) &&
+            this.dateOnly(a.startDate).getTime() ===
+                this.dateOnly(b.startDate).getTime() &&
+            this.dateOnly(a.endDate).getTime() ===
+                this.dateOnly(b.endDate).getTime()
         );
+    }
+
+    private syncDefaultPrice(evt: FrontEvent) {
+        const today = this.dateOnly(new Date());
+        const active = (evt.prices ?? []).filter(
+            (p) =>
+                this.dateOnly(p.startDate) <= today &&
+                today <= this.dateOnly(p.endDate)
+        );
+        const only = active.length === 1 ? active[0].id ?? null : null;
+        this.form.controls.priceId.setValue(only);
+        this.selectedPriceId.set(only);
     }
 
     private dateOnly(d: Date | string): Date {
@@ -329,9 +410,9 @@ export class PublicEventComponent implements OnInit {
     );
 
     totalIndicatif = computed(() => {
-        const ap = this.activePrice();
+        const ap = this.selectedPrice();
         const participantsTotal = ap
-            ? ap.amount * (this.peopleCount() ?? 1)
+            ? Number(ap.amount) * (this.peopleCount() ?? 1)
             : 0;
         const tables = this.tablesTotal() ?? 0;
         return participantsTotal + tables;
@@ -339,6 +420,7 @@ export class PublicEventComponent implements OnInit {
 
     submitDisabled(): boolean {
         if (!this.event()) return true;
+        if (this.activePrices().length > 0 && !this.selectedPrice()) return true;
         if (this.form.controls.mode.value === 'single') {
             return (
                 this.form.controls.s_firstName.invalid ||
@@ -366,6 +448,8 @@ export class PublicEventComponent implements OnInit {
         this.form.controls.mode.setValue('single');
         this.participants().clear();
         this.tableSelections().clear();
+        const current = this.event();
+        if (current) this.syncDefaultPrice(current);
         this.successMsg.set(null);
         this.errorMsg.set(null);
     }
@@ -374,6 +458,11 @@ export class PublicEventComponent implements OnInit {
         if (!this.event()?.slug) return;
         if (!this.isEventActive()) {
             this.errorMsg.set('Les demandes sont fermées pour cet évènement.');
+            return;
+        }
+        const chosenPrice = this.selectedPrice();
+        if (this.activePrices().length > 0 && !chosenPrice?.id) {
+            this.errorMsg.set('Veuillez choisir un tarif.');
             return;
         }
         this.successMsg.set(null);
@@ -389,7 +478,11 @@ export class PublicEventComponent implements OnInit {
                 age: Number(this.form.controls.s_age.value!),
                 isMainGuest: true,
             };
-            payload = { eventSlug: this.event()!.slug!, guests: [g] };
+            payload = {
+                eventSlug: this.event()!.slug!,
+                guests: [g],
+                priceId: chosenPrice?.id,
+            };
         } else {
             if (!this.hasExactlyOneMainGuest()) {
                 this.errorMsg.set(
@@ -405,7 +498,11 @@ export class PublicEventComponent implements OnInit {
                 age: Number(fg.controls.age.value!),
                 isMainGuest: !!fg.controls.isMainGuest.value,
             }));
-            payload = { eventSlug: this.event()!.slug!, guests };
+            payload = {
+                eventSlug: this.event()!.slug!,
+                guests,
+                priceId: chosenPrice?.id,
+            };
         }
 
         if (this.tableSelections().length > 0) {

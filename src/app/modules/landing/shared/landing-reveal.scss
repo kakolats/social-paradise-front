@@ -1,0 +1,40 @@
+.landing-reveal {
+    --reveal-duration: 2.4s;
+    --reveal-stagger: 380ms;
+    --reveal-ease: cubic-bezier(0.19, 1, 0.22, 1);
+    --reveal-ease-fade: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.landing-reveal--quick {
+    --reveal-duration: 1.75s;
+    --reveal-stagger: 260ms;
+}
+
+.landing-reveal__item {
+    opacity: 0;
+    transform: translate3d(0, 1.75rem, 0) scale(0.985);
+    filter: blur(6px);
+    transition:
+        opacity calc(var(--reveal-duration) * 0.65) var(--reveal-ease-fade),
+        transform var(--reveal-duration) var(--reveal-ease),
+        filter calc(var(--reveal-duration) * 0.8) var(--reveal-ease);
+    transition-delay: var(--reveal-delay, 0ms);
+    backface-visibility: hidden;
+    will-change: opacity, transform, filter;
+}
+
+.landing-reveal--visible .landing-reveal__item {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-reveal__item {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        transition: none;
+        will-change: auto;
+    }
+}

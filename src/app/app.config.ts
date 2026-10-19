@@ -35,7 +35,10 @@ export const appConfig: ApplicationConfig = {
         provideRouter(
             appRoutes,
             withPreloading(PreloadAllModules),
-            withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })
+            withInMemoryScrolling({
+                scrollPositionRestoration: 'enabled',
+                anchorScrolling: 'enabled',
+            })
         ),
         {
             provide: AuthGuard,

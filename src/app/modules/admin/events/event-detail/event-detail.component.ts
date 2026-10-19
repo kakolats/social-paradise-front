@@ -792,27 +792,45 @@ export class EventDetailComponent implements OnInit {
         return this.selectedDemand()?.guests?.length ?? 0;
     }
 
-    private modalActivePrice(): { amount: number } | null {
+    appliedModalPrice(): { amount: number; name?: string } | null {
+        return this.modalActivePrice();
+    }
+
+    private modalActivePrice(): { amount: number; name?: string } | null {
         const ev = this.event() as FrontEvent | undefined;
-        const prices = ev?.prices as
-            | Array<{
+        const prices = (ev?.prices ?? []) as Array<{
+            id?: number;
             amount: number;
+            name?: string;
             startDate: string | Date;
             endDate: string | Date;
-        }>
-            | undefined;
-        if (!prices?.length) return null;
+        }>;
         const today = this.dateOnlyLocal(new Date());
-        return (
-            prices.find(p => {
-                const s = this.dateOnlyLocal(p.startDate);
-                const e = this.dateOnlyLocal(p.endDate);
-                return (
-                    s.getTime() <= today.getTime() &&
-                    today.getTime() <= e.getTime()
-                );
-            }) ?? null
-        );
+        const active = prices.filter(p => {
+            const s = this.dateOnlyLocal(p.startDate);
+            const e = this.dateOnlyLocal(p.endDate);
+            return s.getTime() <= today.getTime() && today.getTime() <= e.getTime();
+        });
+        const chosen = this.selectedDemand()?.price;
+        if (chosen) {
+            const chosenStart = this.dateOnlyLocal(chosen.startDate);
+            const chosenEnd = this.dateOnlyLocal(chosen.endDate);
+            const stillCurrent =
+                chosenStart.getTime() <= today.getTime() &&
+                today.getTime() <= chosenEnd.getTime();
+            if (stillCurrent) {
+                return { amount: Number(chosen.amount), name: chosen.name };
+            }
+            const byName = active.find(
+                p => (p.name ?? '').trim().toLowerCase() === (chosen.name ?? '').trim().toLowerCase()
+                    && !!(chosen.name ?? '').trim()
+            );
+            if (byName) return { amount: Number(byName.amount), name: byName.name };
+        }
+        if (active.length === 1) {
+            return { amount: Number(active[0].amount), name: active[0].name };
+        }
+        return null;
     }
 
     private modalTablesTotal(): number {
@@ -838,7 +856,7 @@ export class EventDetailComponent implements OnInit {
             return Math.max(0, Number(notified) - tables + Number(discount));
         }
         const p = this.modalActivePrice();
-        return p ? p.amount * this.modalPeopleCount() : 0;
+        return p ? Number(p.amount) * this.modalPeopleCount() : 0;
     }
 
     getModalTotalPrice(): number {
