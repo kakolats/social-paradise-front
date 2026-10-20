@@ -802,17 +802,19 @@ export class EventDetailComponent implements OnInit {
             id?: number;
             amount: number;
             name?: string;
+            soldOut?: boolean;
             startDate: string | Date;
             endDate: string | Date;
         }>;
         const today = this.dateOnlyLocal(new Date());
         const active = prices.filter(p => {
+            if (p.soldOut) return false;
             const s = this.dateOnlyLocal(p.startDate);
             const e = this.dateOnlyLocal(p.endDate);
             return s.getTime() <= today.getTime() && today.getTime() <= e.getTime();
         });
         const chosen = this.selectedDemand()?.price;
-        if (chosen) {
+        if (chosen && !chosen.soldOut) {
             const chosenStart = this.dateOnlyLocal(chosen.startDate);
             const chosenEnd = this.dateOnlyLocal(chosen.endDate);
             const stillCurrent =

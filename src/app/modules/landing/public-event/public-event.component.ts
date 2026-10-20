@@ -211,6 +211,7 @@ export class PublicEventComponent implements OnInit, AfterViewInit, OnDestroy {
         const today = this.dateOnly(new Date());
         return e.prices.filter(
             (p) =>
+                !p.soldOut &&
                 this.dateOnly(p.startDate) <= today &&
                 today <= this.dateOnly(p.endDate)
         );
@@ -255,6 +256,7 @@ export class PublicEventComponent implements OnInit, AfterViewInit, OnDestroy {
         const today = this.dateOnly(new Date());
         const active = (evt.prices ?? []).filter(
             (p) =>
+                !p.soldOut &&
                 this.dateOnly(p.startDate) <= today &&
                 today <= this.dateOnly(p.endDate)
         );

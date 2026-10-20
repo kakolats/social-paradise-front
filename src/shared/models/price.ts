@@ -4,4 +4,5 @@ export interface Price {
     name: string;
     startDate: Date;
     endDate: Date;
+    soldOut?: boolean;
 }

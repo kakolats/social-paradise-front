@@ -33,6 +33,7 @@ type PriceFG = FormGroup<{
     amount: FormControl<number | null>;
     startDate: FormControl<string | null>;
     endDate: FormControl<string | null>;
+    soldOut: FormControl<boolean | null>;
 }>;
 
 type TableFG = FormGroup<{
@@ -222,6 +223,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
             endDate: this.fb.control<string | null>(null, {
                 validators: [Validators.required],
             }),
+            soldOut: this.fb.control<boolean | null>(false),
         });
     }
 
@@ -376,6 +378,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
                 amount: p.amount ?? null,
                 startDate: this.toDateInputValue(p.startDate as any),
                 endDate: this.toDateInputValue(p.endDate as any),
+                soldOut: !!p.soldOut,
             });
             this.prices().push(fg);
         });
@@ -440,6 +443,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
                 amount: Number(p!.amount),
                 startDate: new Date(p!.startDate!),
                 endDate: new Date(p!.endDate!),
+                soldOut: !!p!.soldOut,
             })),
             tables: (f.tables ?? []).map((t) => ({
                 name: t!.name!,

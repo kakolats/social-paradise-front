@@ -237,6 +237,7 @@
                         <span class="text-slate-400">
                         &nbsp;— {{ p.startDate | date:'dd MMM' }} → {{ p.endDate | date:'dd MMM' }}
                     </span>
+                        <span *ngIf="p.soldOut" class="ml-1 font-semibold uppercase text-slate-500">Sold out</span>
                     </div>
                 </div>
 

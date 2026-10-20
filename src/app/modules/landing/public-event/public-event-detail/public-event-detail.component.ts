@@ -330,6 +330,7 @@ export class PublicEventDetailComponent implements OnInit, AfterViewInit, OnDest
     }
 
     private coversDay(price: FrontPrice, day: Date): boolean {
+        if (price.soldOut) return false;
         return this.dateOnly(price.startDate) <= day && day <= this.dateOnly(price.endDate);
     }
 

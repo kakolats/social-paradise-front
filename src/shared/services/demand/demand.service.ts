@@ -235,6 +235,7 @@ export class DemandService {
                         : json.price.amount,
                     startDate: new Date(json.price.startDate),
                     endDate: new Date(json.price.endDate),
+                    soldOut: !!json.price.soldOut,
                 }
                 : undefined,
         };
@@ -302,6 +303,7 @@ export class DemandService {
                     amount: p.amount,
                     startDate: new Date(p.startDate),
                     endDate: new Date(p.endDate),
+                    soldOut: !!p.soldOut,
                 }))
                 : [],
         };

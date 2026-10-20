@@ -44,7 +44,8 @@
                 [style.--reveal-delay]="'calc(var(--reveal-stagger) * ' + (1 + i) + ')'"
                 [ngClass]="{
                     'ring-2 ring-black': isSelectedPrice(p),
-                    'cursor-pointer': isActivePrice(p)
+                    'cursor-pointer': isActivePrice(p),
+                    'pointer-events-none opacity-60 grayscale': p.soldOut
                 }"
                 (click)="selectPrice(p)"
             >
@@ -57,7 +58,10 @@
                 <p class="mt-2 text-sm text-slate-600">
                     Du {{ p.startDate | date:'mediumDate' }} au {{ p.endDate | date:'mediumDate' }}
                 </p>
-                <p *ngIf="isActivePrice(p)" class="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                <p *ngIf="p.soldOut" class="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Sold out
+                </p>
+                <p *ngIf="!p.soldOut && isActivePrice(p)" class="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
                     {{ isSelectedPrice(p) ? 'Tarif choisi' : 'Tarif en cours' }}
                 </p>
             </div>

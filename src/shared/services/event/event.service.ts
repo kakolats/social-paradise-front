@@ -75,6 +75,7 @@ export class EventService {
                 amount: p.amount,
                 startDate: p.startDate instanceof Date ? this.toDateOnly(p.startDate) : p.startDate,
                 endDate: p.endDate instanceof Date ? this.toDateOnly(p.endDate) : p.endDate,
+                soldOut: !!p.soldOut,
             }));
         }
         if (Array.isArray(evt.tables)) {
@@ -105,6 +106,7 @@ export class EventService {
                 amount: p.amount,
                 startDate: this.parseDateOnlyLocal(p.startDate),
                 endDate: this.parseDateOnlyLocal(p.endDate),
+                soldOut: !!p.soldOut,
             }))),
             tables: (raw.tables ?? []).map((t: any): Table => ({
                 id: t.id,

@@ -259,6 +259,7 @@
                             <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Montant (XOF)</th>
                             <th class="hidden px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:table-cell sm:px-4 sm:py-3 sm:text-xs">Début</th>
                             <th class="hidden px-2 py-2 text-left text-[10px] font-semibold text-slate-700 md:table-cell md:px-4 md:py-3 md:text-xs">Fin</th>
+                            <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Sold out</th>
                             <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">Actions</th>
                         </tr>
                         </thead>
@@ -296,6 +297,14 @@
                                 <p *ngIf="(p.controls.endDate.touched || p.touched) && endAfterEvent(i)" class="mt-1 text-[10px] text-red-600 sm:text-xs">
                                     La fin doit être ≤ la date de l'événement.
                                 </p>
+                            </td>
+
+                            <td class="px-2 py-2 sm:px-4 sm:py-3">
+                                <label class="inline-flex items-center gap-2 text-[11px] text-slate-700">
+                                    <input type="checkbox" formControlName="soldOut"
+                                           class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20" />
+                                    <span>Sold out</span>
+                                </label>
                             </td>
 
                             <td class="px-2 py-2 sm:px-4 sm:py-3">
