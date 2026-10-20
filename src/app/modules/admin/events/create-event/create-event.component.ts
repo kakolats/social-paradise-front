@@ -295,50 +295,11 @@ export class CreateEventComponent implements OnInit, OnChanges {
         return this.compareDates(end, eventDate) === 1;
     }
 
-    /**
-     * Deux tarifs peuvent partager exactement les mêmes dates.
-     * Une plage qui chevauche une autre période, différente, reste invalide.
-     */
-    overlapsAnotherPeriod(i: number): boolean {
-        const current = this.pricePeriod(i);
-        if (!current) return false;
-
-        for (let j = 0; j < this.prices().length; j++) {
-            if (j === i) continue;
-            const other = this.pricePeriod(j);
-            if (!other) continue;
-            if (this.samePeriod(current, other)) continue;
-            const overlaps =
-                this.compareDates(current.start, other.end) <= 0 &&
-                this.compareDates(other.start, current.end) <= 0;
-            if (overlaps) return true;
-        }
-        return false;
-    }
-
-    private pricePeriod(i: number): { start: Date; end: Date } | null {
-        const price = this.prices().at(i);
-        const start = this.parseLocalDateStr(price.controls.startDate.value);
-        const end = this.parseLocalDateStr(price.controls.endDate.value);
-        if (!start || !end) return null;
-        return { start, end };
-    }
-
-    private samePeriod(
-        a: { start: Date; end: Date },
-        b: { start: Date; end: Date },
-    ): boolean {
-        return (
-            this.compareDates(a.start, b.start) === 0 &&
-            this.compareDates(a.end, b.end) === 0
-        );
-    }
-
     allBusinessValid(): boolean {
         const len = this.prices().length;
         if (len === 0) return true;
         for (let i = 0; i < len; i++) {
-            if (this.endAfterEvent(i) || this.overlapsAnotherPeriod(i)) return false;
+            if (this.endAfterEvent(i)) return false;
         }
         return true;
     }
@@ -506,7 +467,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
                     'Chaque table doit avoir un nom et une capacité d’au moins 1.';
             } else {
                 this._errorMessage =
-                    'Vérifiez les dates des prix : la fin doit rester avant ou le jour de l’événement. Deux tarifs peuvent partager exactement les mêmes dates, mais deux périodes différentes ne doivent pas se chevaucher.';
+                    'Vérifiez les dates des prix : la fin doit rester avant ou le jour de l’événement.';
             }
             return;
         }
