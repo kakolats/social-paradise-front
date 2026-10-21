@@ -146,9 +146,9 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     contactEmail = 'info@socialparadise.sn';
     contactPhone = '+221 78 663 91 28';
     instagramEmbedUrls: SafeResourceUrl[] = [
-        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DZm9l7KMyka/embed/'),
-        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DYhd7M9MKPi/embed/'),
-        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DXpUMenjK3c/embed/'),
+        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DShaIdXDMVz/embed/'),
+        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DabKJC0O6hd/embed/'),
+        this.sanitizer.bypassSecurityTrustResourceUrl('https://www.instagram.com/p/DTLXW2EDH9A/embed/'),
     ];
 
     howItWorksSteps = [
