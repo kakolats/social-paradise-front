@@ -409,9 +409,9 @@ export class PublicEventDetailComponent implements OnInit, AfterViewInit, OnDest
             }
         }
 
+        // Le montant affiché est indicatif : l'API le recalcule elle-même
         const payload: any = {
             demandSlug: this.demand()!.slug,
-            amount: safeAmount,
             paymentCanal: paymentC,
             priceId: this.activePrice()?.id,
         };
