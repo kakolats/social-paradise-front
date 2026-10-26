@@ -235,12 +235,6 @@
                                 *ngIf="!e.comingSoon"
                                 class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition group-hover:opacity-100"
                             ></div>
-                            <div
-                                *ngIf="e.comingSoon"
-                                class="absolute inset-x-0 top-6 bg-[#d36b3d]/95 py-2.5 text-center text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-lg"
-                            >
-                                Coming soon
-                            </div>
                         </div>
 
                         <div class="p-5">
@@ -254,9 +248,9 @@
 
                             <div
                                 *ngIf="e.comingSoon"
-                                class="flex h-10 w-full items-center justify-center rounded-full border border-[#d36b3d]/40 text-sm font-medium text-[#d36b3d]"
+                                class="flex h-10 w-full items-center justify-center rounded-full border border-[#d36b3d]/40  font-medium text-[#d36b3d]"
                             >
-                                Bientôt disponible
+                                Coming soon
                             </div>
                             <a *ngIf="!e.comingSoon" mat-flat-button class="w-full !bg-[#d36b3d] !text-white hover:!opacity-90" [routerLink]="['/public-event', e.slug]">
                                 Voir lʼévénement
