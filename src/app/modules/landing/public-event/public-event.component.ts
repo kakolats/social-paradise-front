@@ -188,6 +188,11 @@ export class PublicEventComponent implements OnInit, AfterViewInit, OnDestroy {
         this.errorMsg.set(null);
         this.eventService.getBySlug(slug).subscribe({
             next: (evt) => {
+                // Un event "coming soon" n'a pas encore de page publique
+                if (evt.comingSoon) {
+                    this.router.navigateByUrl('/home', { replaceUrl: true });
+                    return;
+                }
                 this.event.set(evt);
                 this.syncDefaultPrice(evt);
                 this.loading.set(false);

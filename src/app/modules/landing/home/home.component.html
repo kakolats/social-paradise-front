@@ -216,20 +216,31 @@
                 <div *ngIf="!loadingEvents() && upcomingEvents().length > 0" class="grid gap-4 md:grid-cols-3">
                     <div
                         *ngFor="let e of upcomingEvents(); let i = index"
-                        class="landing-reveal__item bg-card group overflow-hidden rounded-2xl shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                        class="landing-reveal__item bg-card group overflow-hidden rounded-2xl shadow-sm transition"
+                        [ngClass]="{ 'hover:-translate-y-0.5 hover:shadow-md': !e.comingSoon }"
                         [style.--reveal-delay]="'calc(var(--reveal-stagger) * ' + (1 + i) + ')'"
                     >
-                        <div class="relative aspect-[3/4] w-full bg-default">
+                        <div class="relative aspect-[3/4] w-full overflow-hidden bg-default">
                             <img
                                 *ngIf="e.coverImage"
-                                class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                                class="h-full w-full object-cover transition duration-700"
+                                [ngClass]="{ 'group-hover:scale-[1.03]': !e.comingSoon }"
                                 [src]="e.coverImage"
                                 [alt]="e.name || 'Visuel événement'"
                             />
                             <div *ngIf="!e.coverImage" class="text-secondary flex h-full w-full items-center justify-center text-xs">
                                 Visuel à venir
                             </div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition group-hover:opacity-100"></div>
+                            <div
+                                *ngIf="!e.comingSoon"
+                                class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition group-hover:opacity-100"
+                            ></div>
+                            <div
+                                *ngIf="e.comingSoon"
+                                class="absolute inset-x-0 top-6 bg-[#d36b3d]/95 py-2.5 text-center text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-lg"
+                            >
+                                Coming soon
+                            </div>
                         </div>
 
                         <div class="p-5">
@@ -241,7 +252,13 @@
                                 <span *ngIf="e.location"> · {{ e.location }}</span>
                             </div>
 
-                            <a mat-flat-button class="w-full !bg-[#d36b3d] !text-white hover:!opacity-90" [routerLink]="['/public-event', e.slug]">
+                            <div
+                                *ngIf="e.comingSoon"
+                                class="flex h-10 w-full items-center justify-center rounded-full border border-[#d36b3d]/40 text-sm font-medium text-[#d36b3d]"
+                            >
+                                Bientôt disponible
+                            </div>
+                            <a *ngIf="!e.comingSoon" mat-flat-button class="w-full !bg-[#d36b3d] !text-white hover:!opacity-90" [routerLink]="['/public-event', e.slug]">
                                 Voir lʼévénement
                                 <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_mini:arrow-long-right'"></mat-icon>
                             </a>

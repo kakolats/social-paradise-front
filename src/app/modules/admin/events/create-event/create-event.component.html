@@ -50,6 +50,20 @@
                         Si désactivé, la page publique affichera “Demandes fermées” et le formulaire ne sera pas disponible.
                     </p>
                 </div>
+
+                <div class="md:col-span-2">
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                        <input
+                            type="checkbox"
+                            class="h-4 w-4 rounded border-slate-300 text-[#d36b3d] focus:ring-[#d36b3d]"
+                            formControlName="comingSoon"
+                        />
+                        <span class="font-medium text-slate-900">Coming soon</span>
+                    </label>
+                    <p class="mt-1 text-xs text-slate-500">
+                        L’événement apparaît sur la page d’accueil avec un bandeau “Coming soon”, sans lien. Sa page publique redirige vers l’accueil.
+                    </p>
+                </div>
             </div>
 
             <!-- Cover image -->

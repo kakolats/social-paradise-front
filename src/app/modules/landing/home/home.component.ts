@@ -315,16 +315,18 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadingEvents.set(true);
         this.eventService.list().subscribe({
             next: (events) => {
+                // Les dates d'event sont à minuit local : on compare au début de la journée
+                // pour garder l'event du jour affiché.
                 const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const upcoming = (events ?? [])
-                    .filter((e) => (e as any)?.isActive !== false)
-                    .filter((e) => !e.date || e.date >= now)
+                    .filter((e) => e.isActive !== false)
+                    .filter((e) => !e.date || e.date >= today)
                     .sort((a, b) => {
                         const ad = a.date?.getTime?.() ?? 0;
                         const bd = b.date?.getTime?.() ?? 0;
                         return ad - bd;
-                    })
-                    .slice(0, 3);
+                    });
 
                 this.upcomingEvents.set(upcoming);
                 this.loadingEvents.set(false);

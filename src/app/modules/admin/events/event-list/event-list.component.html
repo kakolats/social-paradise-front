@@ -40,6 +40,12 @@
                         >
                             {{ isActive(e) ? 'Actif' : 'Inactif' }}
                         </span>
+                        <span
+                            *ngIf="e.comingSoon"
+                            class="ml-1 inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-700 sm:text-xs"
+                        >
+                            Coming soon
+                        </span>
                     </td>
                     <td class="hidden px-3 py-2 text-xs text-slate-700 sm:table-cell sm:px-6 sm:py-3 sm:text-sm">{{ e.slug || '-' }}</td>
                     <td class="px-3 py-2 text-xs text-slate-700 sm:px-6 sm:py-3 sm:text-sm">

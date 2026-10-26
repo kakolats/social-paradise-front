@@ -22,6 +22,7 @@ export interface Event {
     coverImage?: string;
     description?: string;
     isActive?: boolean;
+    comingSoon?: boolean;
     slug?: string;
     prices?: Price[];
     tables?: Table[];

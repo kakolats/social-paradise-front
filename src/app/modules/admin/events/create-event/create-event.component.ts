@@ -61,6 +61,7 @@ type EventFG = FormGroup<{
     description: FormControl<string | null>;
     coverImage: FormControl<string | null>; // will hold URL, not File
     isActive: FormControl<boolean | null>;
+    comingSoon: FormControl<boolean | null>;
     prices: FormArray<PriceFG>;
     tables: FormArray<TableFG>;
     paymentMethods: FormArray<PaymentMethodFG>;
@@ -106,6 +107,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
         description: this.fb.control<string | null>(null),
         coverImage: this.fb.control<string | null>(null), // we'll set URL here
         isActive: this.fb.control<boolean | null>(true),
+        comingSoon: this.fb.control<boolean | null>(false),
         prices: this.fb.array<PriceFG>([]),
         tables: this.fb.array<TableFG>([]),
     paymentMethods: this.fb.array<PaymentMethodFG>([]),
@@ -329,6 +331,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
             coverImage: (evt as any).coverImage ?? null,
             allowCash: (evt as any).allowCash ?? true,
             isActive: (evt as any).isActive ?? true,
+            comingSoon: evt.comingSoon ?? false,
         });
 
         (evt.prices ?? []).forEach((p: Price) => {
@@ -398,6 +401,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
             description: f.description ?? '',
             coverImage: coverUrlOverride ?? f.coverImage ?? null,
             isActive: f.isActive ?? true,
+            comingSoon: f.comingSoon ?? false,
             prices: (f.prices ?? []).map((p) => ({
                 id: p!.id ?? undefined,
                 name: p!.name!,

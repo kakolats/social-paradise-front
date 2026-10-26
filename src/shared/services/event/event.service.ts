@@ -60,6 +60,7 @@ export class EventService {
             description: evt.description,
             coverImage: evt.coverImage,
             isActive: evt.isActive,
+            comingSoon: evt.comingSoon,
             paymentMethods: evt.paymentMethods,
             allowCash: evt.allowCash,
             cashPlacesConfig: evt.cashPlacesConfig,
@@ -100,6 +101,7 @@ export class EventService {
             description: raw.description,
             coverImage: raw.coverImage,
             isActive: raw.isActive ?? true,
+            comingSoon: raw.comingSoon ?? false,
             prices: this.sortPrices((raw.prices ?? []).map((p: any): Price => ({
                 id: p.id,
                 name: p.name,
