@@ -97,8 +97,22 @@ export const appRoutes: Route[] = [
                 },
                 loadChildren: () => import('app/modules/admin/events/events.routes')
             },
-            {path: 'user-management', loadChildren: () => import('app/modules/admin/user-management/user-management.routes')},
-            {path: 'security/guest', component : GuestQrScanComponent}
+            {
+                path: 'user-management',
+                canActivate: [RoleGuard],
+                data: {
+                    roles: ['ADMIN']
+                },
+                loadChildren: () => import('app/modules/admin/user-management/user-management.routes')
+            },
+            {
+                path: 'security/guest',
+                canActivate: [RoleGuard],
+                data: {
+                    roles: ['ADMIN', 'SECURITY']
+                },
+                component : GuestQrScanComponent
+            }
         ]
     }
 ];

@@ -17,13 +17,10 @@ import { provideIcons } from 'app/core/icons/icons.provider';
 import { mockApiServices } from 'app/mock-api';
 import { firstValueFrom } from 'rxjs';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
-import { AuthService } from '../shared/services/auth/auth.service';
-import {AuthGuard} from "../shared/guards/auth/auth.guard";
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { NgxPermissionsModule } from 'ngx-permissions';
-import { RoleGuard } from '../shared/guards/role/role.guard';
 
 registerLocaleData(localeFr);
 
@@ -40,16 +37,6 @@ export const appConfig: ApplicationConfig = {
                 anchorScrolling: 'enabled',
             })
         ),
-        {
-            provide: AuthGuard,
-            useFactory: (authService: AuthService, router: Router) => AuthGuard(authService, router),
-            deps: [AuthService, Router]
-        },
-        {
-            provide: RoleGuard,
-            useFactory: (authService: AuthService, router: Router) => RoleGuard(authService, router),
-            deps: [AuthService, Router]
-        },
         // Material Date Adapter
         {
             provide: DateAdapter,

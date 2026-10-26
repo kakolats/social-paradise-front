@@ -1,24 +1,19 @@
-import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 
-export function AuthGuard(authService: AuthService, router: Router): CanActivateFn {
-    return (route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> => {
-        const redirectUrl = state.url === "/sign-out" ? "/" : state.url
+export const AuthGuard: CanActivateFn = (route, state) => {
+    const authService = inject(AuthService)
+    const router = inject(Router)
+    const redirectUrl = state.url === "/sign-out" ? "/" : state.url
+    const signIn = router.createUrlTree(["sign-in"], { queryParams: { redirectURL: redirectUrl } })
 
-        return authService.check().pipe(
-            map((authenticated) => {
-                if (!authenticated) {
-                    router.navigate(["sign-in"], { queryParams: { redirectURL: redirectUrl } })
-                    return false
-                }
-                return true
-            }),
-            catchError((err) => {
-                console.error("Error checking authentication", err)
-                router.navigate(["sign-in"], { queryParams: { redirectURL: redirectUrl } })
-                return of(false)
-            }),
-        )
-    }
+    return authService.check().pipe(
+        map((authenticated) => authenticated ? true : signIn),
+        catchError((err) => {
+            console.error("Error checking authentication", err)
+            return of(signIn)
+        }),
+    )
 }
